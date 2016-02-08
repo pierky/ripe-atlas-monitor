@@ -1,0 +1,509 @@
+#!/usr/bin/env python
+
+import argparse
+from dateutil import parser
+import os
+import re
+import sys
+
+from pierky.ripeatlasmonitor.Config import Config
+from pierky.ripeatlasmonitor.Doc import build_monitor_cfg_tpl
+from pierky.ripeatlasmonitor.Helpers import LockFile, IPCache, IPCacheManager
+from pierky.ripeatlasmonitor.Logging import logger
+from pierky.ripeatlasmonitor.Monitor import Monitor
+from pierky.ripeatlasmonitor.Processes import RunMonitorProcess
+from pierky.ripeatlasmonitor.Errors import RIPEAtlasMonitorError, LockError, \
+                                           InvalidDateTimeError, ArgumentError
+from pierky.ripeatlasmonitor.version import __version__
+
+def validator_datetime(val):
+    try:
+        return parser.parse(val)
+    except:
+        raise InvalidDateTimeError(
+            "Times must be specified in ISO 8601 format, UTC. "
+            "Example: 2010-10-01T00:00:00 or 2010-10-01"
+        )
+
+def validator_monitorname(val):
+    pat = "[A-Za-z0-9_\-\.]"
+    if not re.match(r"^{}+$".format(pat), val):
+        raise ArgumentError(
+            "Invalid monitor name: {}. It must contain only {}.".format(
+                val, pat
+            )
+        )
+    else:
+        return val
+
+def init_monitor_cfg_file(monitor_name, force):
+    file_path = "{}/monitors/{}.yaml".format(
+        Config.get("var_dir"), monitor_name
+    )
+
+    if os.path.isfile(file_path) and not force:
+        raise ArgumentError(
+            "A monitor with name '{}' already exists. Use the "
+            "--force argument if you really want to erase its "
+            "configuration.".format(monitor_name)
+        )
+
+    answer = raw_input("Do you want help comments to be removed "
+                       "from the new monitor's config template? [yes/NO] ")
+
+    show_doc = answer.lower() != "yes"
+
+    tpl = build_monitor_cfg_tpl(show_doc=show_doc)
+
+    try:
+        with open(file_path, "w") as monitor_file:
+            monitor_file.write(tpl)
+    except Exception as e:
+        raise ProgramError(
+            "Can't write monitor file {}: {}".format(file_path, e)
+        )
+
+def edit_file(file_path, ask=None):
+    # return True if user tries to edit the file
+    if ask:
+        try:
+            answer = raw_input(ask)
+        except KeyboardInterrupt:
+            return False
+
+        if answer.lower() != "yes":
+            return False
+        
+    editor = os.environ.get("EDITOR", Config.get("misc.editor"))
+
+    res = os.system("{} {}".format(editor, file_path))
+
+    if res != 0:
+        print("Error executing the default editor ({})".format(editor))
+
+    return res == 0
+
+def edit_monitor(name, ask=True):
+    if ask:
+        ask = ("Do you want to open this monitor's config in the "
+               "default text editor [yes/NO]: ")
+    else:
+        ask=None
+
+    file_path = "{}/monitors/{}.yaml".format(
+        Config.get("var_dir"), name
+    )
+
+    return edit_file(file_path, ask)
+
+def check_monitor_cfg(name, verbose):
+    try:
+        monitor = Monitor(name)
+        if verbose:
+            monitor.display()
+        else:
+            print("OK")
+        return True
+    except RIPEAtlasMonitorError as e:
+        print("ERROR: {}".format(str(e)))
+        return False
+
+def check_monitor_cfg_loop(name, verbose):
+    while not check_monitor_cfg(name, verbose):
+        if not edit_monitor(name):
+            return False
+    return True
+
+def init_global_config(file_path):
+    print("Initializing {}".format(file_path))
+
+    if os.path.isfile(file_path):
+        edit_file(
+            file_path, ask="The global configuration file {} "
+                           "already exists. Do you want to edit it now? "
+                           "[yes/NO] ".format(file_path)
+        )
+        return
+
+    dir_name = os.path.dirname(file_path)
+
+    if not os.path.exists(dir_name):
+        try:
+            answer = raw_input(
+                "Directory {} does not exist. Do you want to "
+                "create it now? [yes/NO] ".format(dir_name)
+            )
+        except KeyboardInterrupt:
+            return
+
+        if answer.lower() != "yes":
+            return
+
+        try:
+            os.makedirs(dir_name)
+        except Exception as e:
+            raise GlobalConfigError(
+                "Error while creating the global config directory "
+                "{}: {}".format(dir_name, e)
+            )
+
+    try:
+        answer = raw_input(
+            "The global configuration file will be created in {}: "
+            "do you want to proceed? [yes/NO] ".format(file_path)
+        )
+    except KeyboardInterrupt:
+        return
+
+    if answer.lower() == "yes":
+        Config.init_file(file_path)
+
+        edit_file(file_path, ask="Global configuration file created. "
+                  "Do you want to edit it now? [yes/NO] ")
+
+def run_one(args):
+    ip_cache = IPCache()
+    ip_cache.setup(
+        _dir=Config.get("ip_cache.dir"),
+        lifetime=Config.get("ip_cache.lifetime"),
+        use_ixps_info=Config.get("ip_cache.use_ixps_info")
+    )
+
+    monitor = Monitor(
+        args.monitor_name,
+        ip_cache,
+        msm_id=args.measurement_id,
+        key=args.key
+    )
+
+    if args.stream:
+        monitor.stream = args.stream
+
+        if args.stream_timeout:
+            monitor.stream_timeout = args.stream_timeout
+
+    if monitor.stream:
+        if args.start_time or args.stop_time or args.latest_results:
+            raise ArgumentError(
+                "The --start-time, --stop-time and --latest-results "
+                "arguments can't be used for monitors which use "
+                "results streaming."
+            )
+
+    monitor.run(start=args.start_time, stop=args.stop_time,
+                latest_results=args.latest_results)
+
+    ip_cache.save()
+
+def run_multiple(args):
+
+    def join_processes(timeout=None):
+        someone_still_alive = False
+        for process in processes:
+            if process.is_alive():
+                someone_still_alive = True
+
+                if timeout:
+                    logger.info(
+                        "Waiting {} more seconds for process {} "
+                        "(PID {}) to terminate...".format(
+                            timeout, process.name, process.pid
+                        )
+                    )
+                    process.join(timeout=timeout)
+                else:
+                    # wait for a small amount of time (and not forever)
+                    # so that processes that completed their execution
+                    # can be joined even if the previous ones are still
+                    # running
+                    process.join(timeout=5)
+
+        return someone_still_alive
+
+    manager = IPCacheManager()
+    manager.start()
+    ip_cache = manager.IPCache()
+    ip_cache.setup(
+        _dir=Config.get("ip_cache.dir"),
+        lifetime=Config.get("ip_cache.lifetime"),
+        use_ixps_info=Config.get("ip_cache.use_ixps_info")
+    )
+
+    processes = []
+    for monitor_name in args.monitor_name:
+        process = RunMonitorProcess(monitor_name, ip_cache)
+        processes.append(process)
+        process.start()
+
+    try:
+        while join_processes():
+            pass
+    except KeyboardInterrupt:
+        try:
+            join_processes(timeout=10)
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
+    except Exception as e:
+        logger.error(str(e), exc_info=True)
+
+    logger.info("Main process completed.")
+
+def run(args):
+    logger.setup(args.verbose or Config.get("verbosity"))
+
+    if args.command == "run":
+        run_one(args)
+    else:
+        run_multiple(args)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="RIPE Atlas Monitor v{}: a tool to monitor results "
+                    "collected by RIPE Atlas probes and verify that "
+                    "they match against predefined "
+                    "expectations.".format(__version__),
+        epilog="Pier Carlo Chiodi - https://pierky.com")
+
+    parser.add_argument(
+        "--cfg",
+        help="Global configuration file.",
+        default=Config.get_default_path(),
+        metavar="cfg_file",
+        dest="cfg_file")
+
+    subparsers = parser.add_subparsers(
+        title="commands",
+        help="Run 'ripe-atlas-monitor <command> -h' for more details.",
+        dest="command")
+
+    # init-config
+
+    sub_parser = subparsers.add_parser(
+        "init-config",
+        help="Initialize a new global configuration file.")
+
+    # init-monitor command
+
+    sub_parser = subparsers.add_parser(
+        "init-monitor",
+        help="Initialize a new monitor configuration file.")
+
+    sub_parser.add_argument(
+        "-m", "--monitor",
+        required=True,
+        help="Monitor to be created.",
+        metavar="monitor_name",
+        dest="monitor_name")
+
+    sub_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite any existing monitor with the "
+             "brand new configuration template.",
+        dest="force")
+
+    # check-monitor command
+
+    sub_parser = subparsers.add_parser(
+        "check-monitor",
+        help="Verify a monitor configuration file.")
+
+    sub_parser.add_argument(
+        "-m", "--monitor",
+        required=True,
+        type=validator_monitorname,
+        help="Monitor to be verified.",
+        metavar="monitor_name",
+        dest="monitor_name")
+
+    sub_parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Display a description of rules and expected results.",
+        dest="verbose")
+
+    sub_parser.add_argument(
+        "--silent",
+        action="store_true",
+        help="Don't ask user but silently fails.",
+        dest="silent")
+
+    # edit-monitor command
+
+    sub_parser = subparsers.add_parser(
+        "edit-monitor",
+        help="Edit a monitor configuration file with the "
+             "default text editor.")
+
+    sub_parser.add_argument(
+        "-m", "--monitor",
+        required=True,
+        type=validator_monitorname,
+        help="Monitor to edit.",
+        metavar="monitor_name",
+        dest="monitor_name")
+
+    sub_parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Display a description of rules and expected results.",
+        dest="verbose")
+
+    # run command
+
+    sub_parser = subparsers.add_parser(
+        "run",
+        help="Run a monitor.")
+
+    sub_parser.add_argument(
+        "-m", "--monitor",
+        required=True,
+        type=validator_monitorname,
+        help="Monitor to be used.",
+        metavar="monitor_name",
+        dest="monitor_name")
+
+    sub_parser.add_argument(
+        "-v", "--verbose",
+        action="count",
+        help="Verbosity level; may be specified multiple times to "
+             "increase value.",
+        dest="verbose")
+
+    group = sub_parser.add_argument_group(
+        title="Monitor configuration override arguments",
+        description="The following arguments can be used "
+                    "to override the options specified in "
+                    "the monitor configuration file.")
+
+    group.add_argument(
+        "--measurement-id",
+        help="Measurement ID.",
+        type=int,
+        metavar="msm_id",
+        dest="measurement_id")
+
+    group.add_argument(
+        "--key",
+        help="RIPE Atlas API key.",
+        metavar="key",
+        dest="key")
+
+    group.add_argument(
+        "--stream",
+        help="Process measurement's results in real-time while they "
+             "are collected by probes. More info here: "
+             "https://atlas.ripe.net/docs/result-streaming/",
+        action="store_true",
+        dest="stream")
+
+    group.add_argument(
+        "--stream-timeout",
+        help="Stop execution if no results are received for "
+             "S seconds.",
+        type=int,
+        metavar="S",
+        dest="stream_timeout")
+
+    group = sub_parser.add_argument_group(
+        title="Results timeframe",
+        description="The following arguments can be used only when the "
+                    "results streaming is disabled.")
+
+    group.add_argument(
+        "--start-time",
+        help="Results are fetched starting by this date/time. "
+             "If omitted, results are fetched from the time of the "
+             "last processed result.",
+        type=validator_datetime,
+        metavar="YYYY-MM-DDThh:mm:ss",
+        dest="start_time")
+
+    group.add_argument(
+        "--stop-time",
+        help="Results are fetched up to this date/time.",
+        type=validator_datetime,
+        metavar="YYYY-MM-DDThh:mm:ss",
+        dest="stop_time")
+
+    group.add_argument(
+        "-l", "--latest-results",
+        action="store_true",
+        help="Retrieve only the latest results.",
+        dest="latest_results"
+    )
+
+    # daemonize command
+
+    sub_parser = subparsers.add_parser(
+        "daemonize",
+        help="Run one or more monitors and go to background.")
+
+    sub_parser.add_argument(
+        "-m", "--monitor",
+        action="append",
+        required=True,
+        type=validator_monitorname,
+        help="Monitor(s) to be used. Use multiple times to run more "
+             "than one monitor.",
+        metavar="monitor_name",
+        dest="monitor_name")
+
+    sub_parser.add_argument(
+        "-v", "--verbose",
+        action="count",
+        help="Verbosity level; may be specified multiple times to "
+             "increase value.",
+        dest="verbose")
+
+    args = parser.parse_args()
+
+    if args.command == "init-config":
+        init_global_config(args.cfg_file)
+        return
+
+    Config.load(args.cfg_file)
+    Config.verify_dirs()
+
+    if args.command == "init-monitor":
+        init_monitor_cfg_file(args.monitor_name, args.force)
+        print("Monitor configuration initialized.")
+
+        if edit_monitor(args.monitor_name):
+            check_monitor_cfg_loop(args.monitor_name, False)
+
+    elif args.command == "check-monitor":
+        if args.silent:
+            if check_monitor_cfg(args.monitor_name, args.verbose):
+                return 0
+            else:
+                return 1
+        else:
+            check_monitor_cfg_loop(args.monitor_name, args.verbose)
+
+    elif args.command == "edit-monitor":
+        edit_monitor(args.monitor_name, ask=False)
+        check_monitor_cfg_loop(args.monitor_name, args.verbose)
+
+    elif args.command in ["run", "daemonize"]:
+        lock_file_path = "{}/locks/main.lock".format(Config.get("var_dir"))
+
+        lock_file = LockFile()
+
+        if not lock_file.acquire(lock_file_path):
+            raise LockError(
+                "Another instance of this program is already running."
+            )
+
+        try:
+            run(args)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            lock_file.release()
+
+try:
+    sys.exit(main())
+except RIPEAtlasMonitorError as e:
+    logger.error(e)
+    sys.exit(1)

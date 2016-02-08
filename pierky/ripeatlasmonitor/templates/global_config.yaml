@@ -1,0 +1,100 @@
+# This is the directory where the program will save
+# monitors configuration files, running status and
+# cached information. Write permissions must be granted.
+# Some subdirectories will be created:
+# - locks
+# - monitors
+# - status
+# Example:
+#       var_dir: /path/to/ripe-atlas-monitor/var/dir
+var_dir:
+
+# Verbosity level:
+# - 0: only warnings and errors
+# - 1: processing results (corresponds to -v argument)
+# - 2: info messages (corresponds to -vv argument)
+# - 3: debug information (corresponds to -vvv argument)
+#verbosity: 0
+
+ip_cache:
+        # IP cache options:
+        # - directory where cache files will be stored;
+        # - expiry time
+        # - whether use IXPs information or not (currently based
+        #   on the PeeringDB beta API)
+
+        # If left blank, the var_dir will be used.
+        #dir: /path/to/ripe-atlas-monitor/ip_cache/dir
+        
+        # 604800 seconds = 1 week
+        #lifetime: 604800
+
+        #use_ixps_info: True
+
+logging:
+        # File where messages will be logged.
+        # File will grow up to <max_bytes> then will be
+        # rotated for <backup_cnt> times.
+      
+        #file_path: "/path/to/ripe-atlas-monitor/log.log"
+        #max_bytes: 10000000
+        #backup_cnt: 3
+
+default_smtp:
+        # Default SMTP server used by 'email' Actions.
+       
+        #smtp_host: ""
+        #smtp_port: 25
+        #from_addr: ""
+        #to_addr: ""
+        #subject: ""
+        #use_ssl: False
+        #username: ""
+        #password: ""
+        #timeout: 60
+
+default_syslog:
+        # Default syslog parameters used by 'syslog' Actions.
+    
+        # One of "tcp", "udp", "file"
+        #socket: ""
+
+        # Only meagniful if socket = "tcp" or "udp"
+        # Example:
+        #       host: "127.0.0.1"
+        #       port: 514
+        #host: ""
+        #port: 514
+        
+        # Only meagniful if socket = "file".
+        # Example:
+        #       file: "/dev/log"
+        #file: ""
+
+        # Syslog facility: one of "auth", "authpriv", "cron", "daemon", 
+        # "ftp", "kern", "lpr", "mail", "news", "syslog", "user", 
+        # "uucp", "local[0-7]".
+        # Example:
+        #       facility: "local7"
+        #facility: ""
+
+        # Syslog priority: one of "alert", "crit", "critical", "debug",
+        # "emerg", "panic", "err", "error", "info", "notice", "warn",
+        # "warning".
+        # Example:
+        #       priority: "error"
+        #priority: ""
+
+misc:
+        # Email address validation pattern
+        #email_addr_re: "<see Config.py>"
+       
+        # Prefix used to build environment variables for "run" Actions:
+        #env_prefix: "RIPE_ATLAS_MONITOR_"
+
+        # Limit for measurement results download when no starting date
+        # is given.
+        #msm_results_days_limit: 7
+
+        # Text editor
+        #editor: /usr/bin/vim
