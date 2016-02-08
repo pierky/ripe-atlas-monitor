@@ -4,7 +4,6 @@ RIPE Atlas Monitor
 
 A Python tool to monitor results collected by `RIPE Atlas`_ probes and verify they match against predefined expected values.
 
-**Full documentation**: https://ripe-atlas-monitor.readthedocs.org/
 
 How does it work?
 -----------------
@@ -38,6 +37,11 @@ On the basis of a `RIPE Atlas`_ measurement previously created, you define a *mo
     measurement-id: 123456789
 
 .. _RIPE Atlas: https://atlas.ripe.net
+
+Full documentation
+------------------
+
+A **quick start** guide, **commands** references, monitors' **configuration**, **syntax** and everything else can be found on *ReadTheDocs*: https://ripe-atlas-monitor.readthedocs.org/
 
 .. include:: TOC.rst
 
