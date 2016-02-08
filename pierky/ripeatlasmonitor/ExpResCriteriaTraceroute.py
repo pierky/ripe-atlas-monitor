@@ -158,9 +158,11 @@ class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
 
     An AS path is made of AS numbers separated by white spaces. It can
     contain two special tokens:
+
     - "S", that is expanded with the probe's source AS number;
+
     - "IX", that represents an Internet Exchange Point peering network for
-    those IXPs which don't announce their peering prefixes via BGP.
+      those IXPs which don't announce their peering prefixes via BGP.
 
     The "IX" token is meagniful only if the `ip_cache.use_ixps_info`
     global configuration parameter is True.

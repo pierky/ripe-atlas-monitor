@@ -22,8 +22,11 @@ class ExpResCriterion_DNSRecord(BasicConfigElement):
     `class` (optional): expected class for the record.
 
     Match when all the defined criteria are met:
+
     - record name must be within the list of given names (`name`);
+
     - record TTL must be >= `ttl_min` and <= `ttl_max`;
+
     - record class must be equal to `class`.
 
     On the basis of record's `type`, further parameters may be needed.

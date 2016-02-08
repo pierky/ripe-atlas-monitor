@@ -64,14 +64,18 @@ class Rule(BasicConfigElement):
     no `expected_results` are given, actions will be performed too.
 
     When a probe matches the current rule's criteria:
+
     - if `process_next` is True, the rule which follows the current one is
-    forcedly elaborated;
+      forcedly elaborated;
+
     - if `process_next` if False or missing, the rules processing is stopped.
 
     If a probe does not match the current rule's criteria:
+
     - if `process_next` is False, the rule processing is forcedly stopped;
+
     - if `process_next` is True or missing, the rule which follows the current
-    one is regularly processed.
+      one is regularly processed.
 
     Examples:
 
