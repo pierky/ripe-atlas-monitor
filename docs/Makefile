@@ -53,6 +53,7 @@ clean:
 
 .PHONY: html
 html:
+	python ../pierky/ripeatlasmonitor/Doc.py doc > SYNTAX.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
