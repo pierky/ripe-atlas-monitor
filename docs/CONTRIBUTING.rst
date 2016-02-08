@@ -10,7 +10,7 @@ Here a brief guide to contributing to this tool:
   .. code:: bash
 
       $ # pip "editable" installation
-      $ pip install -e git+https://github.com/YOUR_USERNAME/ripe-atlas-monitor.git
+      $ pip install -e git+https://github.com/YOUR_USERNAME/ripe-atlas-monitor.git#egg=ripe-atlas-monitor
       
       $ # manual cloning from GitHub (you have to care about dependencies)
       $ git clone https://github.com/YOUR_USERNAME/ripe-atlas-monitor.git

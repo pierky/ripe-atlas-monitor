@@ -6,17 +6,31 @@ Requirements
 
 This is a tool written in Python for Linux environments; currently, only Python 2.7 is supported but there are plans to have it working in version 3 too. Windows is not supported at all.
 
-It is based on two RIPE NCC packages: `RIPE Atlas Sagan <https://github.com/RIPE-NCC/ripe.atlas.sagan>`_ and `RIPE Atlas Cousteau <https://github.com/RIPE-NCC/ripe-atlas-cousteau>`_, both available on GitHub and PyPI. It also has some other dependencies, they are reported in the `setup.py` file and managed by the `pip` installer. Some libraries need to be compiled and they require a compiler and development libraries for Python. For example, on Debian/Ubuntu the following system packages need to be installed:
+It is based on two RIPE NCC packages: `RIPE Atlas Sagan <https://github.com/RIPE-NCC/ripe.atlas.sagan>`_ and `RIPE Atlas Cousteau <https://github.com/RIPE-NCC/ripe-atlas-cousteau>`_, both available on GitHub and PyPI. It also has some other dependencies, they are reported in the `setup.py` file and managed by the `pip` installer.
 
-.. code:: bash
+Some libraries need to be compiled and they require a compiler and development libraries for Python.
 
-    $ sudo apt-get install python-dev libffi-dev libssl-dev
+- On **Debian/Ubuntu** the following system packages need to be installed:
 
-Since ``pip`` and ``virtualenv`` are also strongly suggested, you may need to install them too:
+  .. code:: bash
 
-.. code:: bash
+      $ sudo apt-get install python-dev libffi-dev libssl-dev
 
-    $ sudo apt-get install python-virtualenv python-pip
+  Since ``pip`` and ``virtualenv`` are also strongly suggested, you may need to install them too:
+
+  .. code:: bash
+
+      $ sudo apt-get install python-virtualenv python-pip
+
+- On **CentOS**, the following packages are needed:
+
+  .. code:: bash
+
+      $ sudo yum install gcc libffi-devel openssl-devel
+
+      $ # for pip and virtualenv:
+      $ sudo yum install epel-release
+      $ sudo yum install python-pip python-virtualenv
 
 Installation
 ++++++++++++
@@ -24,6 +38,18 @@ Installation
 Even if you can manually install it and run it as a system package, ``pip`` installation and ``virtualenv`` use are strongly recommended to ease installation and dependencies management and to have it running within an isolated environment.
 
 More: `pip installation <https://pip.pypa.io/en/stable/installing/>`_, `virtualenv installation <https://virtualenv.pypa.io/en/latest/installation.html>`_.
+
+Setup a virtualenv
+------------------
+
+Virtualenv usage is `documented here <https://virtualenv.pypa.io/en/latest/userguide.html>`_, but the following should be enough in most cases:
+
+.. code:: bash
+
+    $ mkdir ripe-atlas-monitor
+    $ cd ripe-atlas-monitor
+    $ virtualenv venv
+    $ source venv/bin/activate
 
 Installation from PyPI
 ----------------------
