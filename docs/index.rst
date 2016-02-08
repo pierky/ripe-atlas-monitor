@@ -31,8 +31,8 @@ On the basis of a `RIPE Atlas`_ measurement previously created, you define a *mo
     actions:
       EMailToNOC:
         kind: email
-        to: noc@agreatcompany.org
-        subject: ripe-atlas-monitor: unexpected results
+        to_addr: noc@agreatcompany.org
+        subject: "ripe-atlas-monitor: unexpected results"
     measurement-id: 123456789
 
 .. _RIPE Atlas: https://atlas.ripe.net

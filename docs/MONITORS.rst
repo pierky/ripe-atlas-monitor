@@ -39,8 +39,8 @@ All this is written in YAML files, one for each monitor you want to configure:
     actions:
       EMailToNOC:
         kind: email
-        to: noc@agreatcompany.org
-        subject: ripe-atlas-monitor: unexpected results
+        to_addr: noc@agreatcompany.org
+        subject: "ripe-atlas-monitor: unexpected results"
     measurement-id: 123456789
 
 For the complete syntax of monitors' configuration file please refer to :doc:`SYNTAX`.
