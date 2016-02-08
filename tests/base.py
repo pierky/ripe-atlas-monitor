@@ -90,6 +90,16 @@ class TestBasicUnit(unittest.TestCase):
         ).start()
         self.mock_ip_cache_fetch_ixps.side_effect = ip_cache_fetch_ixps
 
+        def ip_cache_save(self):
+            return
+
+        self.mock_ip_cache_save = mock.patch.object(
+            IPCache,
+            "save",
+            autospec=True
+        ).start()
+        self.mock_ip_cache_save.side_effect = ip_cache_save
+
         self.ip_cache = IPCache()
         self.ip_cache.setup(
             IP_ADDRESSES_CACHE_FILE="tests/data/ip_addr.json",
