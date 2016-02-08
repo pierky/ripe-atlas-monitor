@@ -41,9 +41,7 @@ On the basis of a `RIPE Atlas`_ measurement previously created, you define a *mo
 Full documentation
 ------------------
 
-A **quick start** guide, **commands** references, monitors' **configuration**, **syntax** and everything else can be found on *ReadTheDocs*: https://ripe-atlas-monitor.readthedocs.org/
-
-.. include:: TOC.rst
+A `quick start <https://ripe-atlas-monitor.readthedocs.org/en/latest/QUICKSTART.html>`_ guide, **commands** references, monitors' **configuration**, **syntax** and everything else can be found on *ReadTheDocs*: https://ripe-atlas-monitor.readthedocs.org/
 
 Status
 ------
