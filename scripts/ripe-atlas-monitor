@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+# eval "$(register-python-argcomplete ripe-atlas-monitor)"
 
 import argparse
 from dateutil import parser
 import os
 import re
 import sys
+
+import argcomplete
+from argcomplete.completers import ChoicesCompleter
 
 from pierky.ripeatlasmonitor.Config import Config
 from pierky.ripeatlasmonitor.Doc import build_monitor_cfg_tpl
@@ -13,7 +18,8 @@ from pierky.ripeatlasmonitor.Logging import logger
 from pierky.ripeatlasmonitor.Monitor import Monitor
 from pierky.ripeatlasmonitor.Processes import RunMonitorProcess
 from pierky.ripeatlasmonitor.Errors import RIPEAtlasMonitorError, LockError, \
-                                           InvalidDateTimeError, ArgumentError
+                                           InvalidDateTimeError, \
+                                           ArgumentError, MissingFileError
 from pierky.ripeatlasmonitor.version import __version__
 
 def validator_datetime(val):
@@ -104,6 +110,8 @@ def check_monitor_cfg(name, verbose):
         else:
             print("OK")
         return True
+    except MissingFileError:
+        raise
     except RIPEAtlasMonitorError as e:
         print("ERROR: {}".format(str(e)))
         return False
@@ -256,7 +264,26 @@ def run(args):
     else:
         run_multiple(args)
 
+def monitor_list_for_autocomplete():
+    ret = []
+
+    try:
+        Config.load(Config.get_default_path())
+        var_dir = Config.get("var_dir")
+        files = os.listdir("{}/{}".format(var_dir, "monitors"))
+        for f in files:
+            if f.endswith(".yaml"):
+                try:
+                    ret.append(validator_monitorname(f[0:-5]))
+                except:
+                    pass
+        return ret
+    except:
+        return ()
+
 def main():
+    monitor_list = monitor_list_for_autocomplete()
+
     parser = argparse.ArgumentParser(
         description="RIPE Atlas Monitor v{}: a tool to monitor results "
                     "collected by RIPE Atlas probes and verify that "
@@ -314,7 +341,7 @@ def main():
         type=validator_monitorname,
         help="Monitor to be verified.",
         metavar="monitor_name",
-        dest="monitor_name")
+        dest="monitor_name").completer = ChoicesCompleter(monitor_list)
 
     sub_parser.add_argument(
         "-v", "--verbose",
@@ -341,7 +368,7 @@ def main():
         type=validator_monitorname,
         help="Monitor to edit.",
         metavar="monitor_name",
-        dest="monitor_name")
+        dest="monitor_name").completer = ChoicesCompleter(monitor_list)
 
     sub_parser.add_argument(
         "-v", "--verbose",
@@ -361,7 +388,7 @@ def main():
         type=validator_monitorname,
         help="Monitor to be used.",
         metavar="monitor_name",
-        dest="monitor_name")
+        dest="monitor_name").completer = ChoicesCompleter(monitor_list)
 
     sub_parser.add_argument(
         "-v", "--verbose",
@@ -447,7 +474,7 @@ def main():
         help="Monitor(s) to be used. Use multiple times to run more "
              "than one monitor.",
         metavar="monitor_name",
-        dest="monitor_name")
+        dest="monitor_name").completer = ChoicesCompleter(monitor_list)
 
     sub_parser.add_argument(
         "-v", "--verbose",
@@ -455,6 +482,8 @@ def main():
         help="Verbosity level; may be specified multiple times to "
              "increase value.",
         dest="verbose")
+
+    argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
 
