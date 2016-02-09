@@ -1,0 +1,47 @@
+# Based on the work of Stéphane Bortzmeyer,
+#      
+#       DNS Censorship (DNS Lies) As Seen By RIPE Atlas
+#
+# https://labs.ripe.net/Members/stephane_bortzmeyer/dns-censorship-dns-lies-seen-by-atlas-probes
+#
+# "The name etha.com.tr points to an organisation monitoring the recent
+# elections. 195.175.254.2 is the IAP Turk Telecom, 213.14.227.50 is TellCom,
+# 176.9.34.7 is the real address, as shown by another test, with probes in 
+# Germany, code DE"
+#
+# % python resolve-name.py -r 500 -c TR www.etha.com.tr 
+# Measurement #2905528 for www.etha.com.tr/A uses 32 probes
+# [213.14.227.50] : 5 occurrences 
+# [195.175.254.2] : 6 occurrences 
+# [176.9.34.7] : 20 occurrences 
+# Test done at 2015-11-03T08:47:09Z
+#
+# % python resolve-name.py -r 500 -c DE www.etha.com.tr
+# Measurement #2905529 for www.etha.com.tr/A uses 498 probes
+# [ERROR: REFUSED] : 3 occurrences 
+# [ERROR: SERVFAIL] : 3 occurrences 
+# [176.9.34.7] : 463 occurrences 
+# Test done at 2015-11-03T08:50:45Z
+#
+# - Copy this monitor into the var/monitors directory of your local
+#   ripe-atlas-monitor setup.
+#
+# - Run the following command to see which probes resolved the
+#   unexpected IP address:
+#
+#   ripe-atlas-monitor run -m etha.com -l -v --measurement-id 2905528
+#
+descr: www.etha.com.tr
+matching_rules:
+- descr: Any
+  expected_results: RealIPAddress
+  actions: Log
+expected_results:
+  RealIPAddress:
+    dns_answers:
+      answers:
+        - type: A
+          address: 176.9.34.7
+actions:
+  Log:
+    kind: log

@@ -65,6 +65,8 @@ QuickStart
 
   More: :doc:`how monitors work <MONITORS>` and :doc:`syntax <SYNTAX>`.
 
+  Alternatively, take a look at the sample monitors provided within the `examples <https://github.com/pierky/ripe-atlas-monitor/tree/master/examples>`_ directory.
+
 
 - Step 5: run the brand new monitor to process measurement's latest results.
 

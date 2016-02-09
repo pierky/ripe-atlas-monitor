@@ -1,0 +1,27 @@
+# Based on the measurement created by Max Maass,
+#
+#       [tor-talk] torproject.org censorship detection using RIPE atlas?
+#
+# https://lists.torproject.org/pipermail/tor-talk/2014-February/032173.html
+#
+# - Copy this monitor into the var/monitors directory of your local
+#   ripe-atlas-monitor setup.
+#
+# - Run the following command to see which probes received an unexpected
+#   SSL certificate:
+#
+#   ripe-atlas-monitor run -m torproject.org -l -v
+#
+measurement-id: 1443162
+matching_rules:
+- descr: Any probe
+  expected_results: ValidSSLCertificate
+  actions: Log
+expected_results:
+  ValidSSLCertificate:
+    cert_fp:
+    - 21:EB:37:AB:4C:F6:EF:89:65:EC:17:66:40:9C:A7:6B:8B:2E:03:F2:D1:A3:88:DF:73:42:08:E8:6D:EE:E6:79
+    - 36:13:D2:B2:2A:75:00:94:76:0C:41:AD:19:DB:52:A4:F0:5B:DE:A8:01:72:E2:57:87:61:AD:96:7F:7E:D9:AA
+actions:
+  Log:
+    kind: log
