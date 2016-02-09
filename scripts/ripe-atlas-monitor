@@ -193,7 +193,7 @@ def run_one(args):
     if monitor.stream:
         if args.start_time or args.stop_time or args.latest_results:
             raise ArgumentError(
-                "The --start-time, --stop-time and --latest-results "
+                "The --start-time, --stop-time and --latest "
                 "arguments can't be used for monitors which use "
                 "results streaming."
             )
@@ -454,7 +454,7 @@ def main():
         dest="stop_time")
 
     group.add_argument(
-        "-l", "--latest-results",
+        "-l", "--latest",
         action="store_true",
         help="Retrieve only the latest results.",
         dest="latest_results"
