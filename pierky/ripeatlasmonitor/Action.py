@@ -189,7 +189,7 @@ class Action(BasicConfigElement):
 
         for response in result.responses:
             if not response.abuf:
-                r += "Can't parte response's abuf\n"
+                r += "Can't parse response's abuf\n"
                 continue
 
             header_flags = []
