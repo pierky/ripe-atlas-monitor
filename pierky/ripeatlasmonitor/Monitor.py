@@ -497,6 +497,8 @@ class Monitor(BasicConfigElement):
         self.write_status()
 
     def process_results(self, results):
+        logger.info("Processing results...")
+
         # Be sure to have info for every probe in the resultset
         self.update_probes(results)
 
@@ -618,7 +620,7 @@ class Monitor(BasicConfigElement):
             self.exit_thread = True
             thread.join(timeout=10)
 
-    def download_and_process(self, start=None, stop=None, latest_results=None):
+    def download(self, start=None, stop=None, latest_results=None):
         atlas_params = {
             "msm_id": self.msm_id,
             "key": self.key
@@ -676,37 +678,39 @@ class Monitor(BasicConfigElement):
             atlas_request = atlas_class(**atlas_params)
 
             is_success, results = atlas_request.create()
-
-            if is_success:
-                logger.info("Processing results...")
-                self.process_results(results)
-            else:
-                err = str(results)
-                if isinstance(results, dict):
-                    if "detail" in results:
-                        err = results["detail"]
-                    elif "error" in results:
-                        if "detail" in results["error"]:
-                            err = results["error"]["detail"]
-                raise MeasurementProcessingError(str(err))
         except Exception as e:
             raise MeasurementProcessingError(
                 "Error while retrieving results: {}".format(str(e))
             )
 
+        if is_success:
+            return results
+        else:
+            err = str(results)
+            if isinstance(results, dict):
+                if "detail" in results:
+                    err = results["detail"]
+                elif "error" in results:
+                    if "detail" in results["error"]:
+                        err = results["error"]["detail"]
+            raise MeasurementProcessingError(str(err))
+
     def run_once(self, start=None, stop=None, latest_results=None):
-        self.download_and_process(start, stop, latest_results)
+        results = self.download(start=start, stop=stop,
+                                latest_results=latest_results)
+        self.process_results(results)
 
     def run_continously(self, start=None):
         try:
-            self.download_and_process(start=start)
+            while True:
+                self.run_once(start=start)
 
-            logger.info(
-                "Waiting {} seconds (measurement's interval) before "
-                "downloading new results...".format(self.msm_interval)
-            )
+                logger.info(
+                    "Waiting {} seconds (measurement's interval) before "
+                    "downloading new results...".format(self.msm_interval)
+                )
 
-            time.sleep(self.msm_interval)
+                time.sleep(self.msm_interval)
         except KeyboardInterrupt:
             pass
 
@@ -725,7 +729,7 @@ class Monitor(BasicConfigElement):
                 self.run_continously(start=start)
 
             else:
-                self.download_and_process(start=start, stop=stop,
-                                          latest_results=latest_results)
+                self.run_once(start=start, stop=stop,
+                              latest_results=latest_results)
         finally:
             self.release_lock()
