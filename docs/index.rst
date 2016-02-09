@@ -74,7 +74,7 @@ Pier Carlo Chiodi - https://pierky.com
 Blog: https://blog.pierky.com Twitter: `@pierky <https://twitter.com/pierky>`_
 
 .. |Documentation| image:: https://readthedocs.org/projects/ripe-atlas-monitor/badge/?version=latest
-    :target: http://ripe-atlas-monitor.readthedocs.org/en/latest/?badge=latest
+    :target: https://ripe-atlas-monitor.readthedocs.org/en/latest/?badge=latest
 .. |Build Status| image:: https://travis-ci.org/pierky/ripe-atlas-monitor.svg?branch=master
     :target: https://travis-ci.org/pierky/ripe-atlas-monitor
 .. |PYPI Version| image:: https://img.shields.io/pypi/v/ripe-atlas-monitor.svg
