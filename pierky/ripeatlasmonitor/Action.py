@@ -187,32 +187,53 @@ class Action(BasicConfigElement):
         if not result.responses:
             return "No response found"
 
+        response_idx = 0
+        indent = ""
+
         for response in result.responses:
+            response_idx += 1
+
+            if response_idx > 1:
+                r += "\n"
+
+            if len(result.responses) > 1:
+                r += "Response n. {}\n\n".format(response_idx)
+                indent = "  "
+
             if not response.abuf:
-                r += "Can't parse response's abuf\n"
+                r += indent + "Can't parse response's abuf\n"
                 continue
+
+            r += indent + "Header: {}, {}, id: {}\n".format(
+                response.abuf.header.opcode,
+                response.abuf.header.return_code,
+                response.abuf.header.id
+            )
 
             header_flags = []
             for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):
                 if getattr(response.abuf.header, flag):
                     header_flags.append(flag)
 
-            r += "Header flags: {}\n".format(", ".join(header_flags))
+            r += indent + "Header flags: {}\n".format(", ".join(header_flags))
 
             if response.abuf.edns0:
-                r += "EDNS: version {}, size {}{}\n".format(
+                r += indent + "EDNS: version {}, size {}{}\n".format(
                         response.abuf.edns0.version,
                         response.abuf.edns0.udp_size,
                         ", DO flag" if response.abuf.edns0.do else ""
                     )
 
             for section in ("answers", "authorities", "additionals"):
-                r += "Section: {}\n".format(section)
+                r += indent + "Section: {}\n".format(section)
 
                 section = getattr(response.abuf, section)
 
-                for record in section:
-                    r += "  " + str(record) + "\n"
+                if len(section) > 0:
+                    for record in section:
+                        r += indent + "  " + str(record) + "\n"
+                else:
+                    r += indent + "  " + "no records\n"
 
         return r
 
