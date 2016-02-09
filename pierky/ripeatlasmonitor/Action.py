@@ -257,8 +257,8 @@ class Action(BasicConfigElement):
         probe = self.monitor.get_probe(result)
 
         r = ("{monitor}\n\n"
+             "Received result from {probe} at {time}\n\n"
              "Expected result: {expres}\n\n"
-             "Received result for {probe} at {time}\n\n"
              "{result}").format(
                 monitor=self._capitalize_first(str(self.monitor)),
                 expres=str(expres) if expres else "none",
@@ -294,7 +294,7 @@ class ActionLog(Action):
     def perform(self, result, expres, result_matches):
         r = self.get_notification_text(result, expres)
 
-        logger.result(r)
+        logger.action_log(r)
 
 
 class ActionSysLog(Action):

@@ -24,9 +24,10 @@ There are some ways this tool can be executed, depending on how many concurrent 
 The ``-v`` argument is common to all the scenarios and allow to set the verbosity level:
 
 - 0: only warnings and errors are produced;
-- 1 (``-v``): messages for probes matching rules are produced;
-- 2 (``-vv``): information messages are logged too (internal decisions about rules and results processing);
-- 3 (``-vvv``): debug messages are logged too, useful to debug monitors' configurations.
+- 1 (``-v``): messages from logging actions are produced;
+- 2 (``-vv``): results from matching rules are produced too;
+- 3 (``-vvv``): information messages are logged (internal decisions about rules and results processing);
+- 4 (``-vvvv``): debug messages are logged too, useful to debug monitors' configurations.
 
 Single monitor: ``run`` command
 *******************************

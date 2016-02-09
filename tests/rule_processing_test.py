@@ -144,10 +144,10 @@ class TestRuleProcessing(TestResultsBasicUnit):
         self.cfg["expected_results"] = {}
         self.cfg["expected_results"]["ASPath_1267"] = {"as_path": "S 1267"}
 
-        # 18: 1st rule: 3 probes +
-        #     2nd rule: 5 probes * 2 (log line + result)
+        # 13: 1st rule: 3 probes +
+        #     2nd rule: 5 probes +
         #     3rd rule: 5 probes
-        self.assertTupleEqual(self.run_monitor(), (18,0,5))
+        self.assertTupleEqual(self.run_monitor(), (13,0,5))
         self.assertDictEqual(
             self.monitor.internal_labels["probes"],
             {

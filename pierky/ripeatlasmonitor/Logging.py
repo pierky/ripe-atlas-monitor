@@ -8,21 +8,26 @@ from Config import Config
 
 
 LOG_LVL_RESULT = 25
+LOG_LVL_LOG_ACTION = 27
 
 
 class CustomLogger(object):
     def __init__(self):
+        self.lvl = 0
+
         self.logger = logging.getLogger("RIPEAtlasMonitor")
 
         logging.addLevelName(LOG_LVL_RESULT, "RESULT")
+        logging.addLevelName(LOG_LVL_LOG_ACTION, "LOG-ACTION")
 
-        logging.basicConfig(
-            format="[%(processName)s] %(message)s",
-            stream=sys.stdout
-        )
-        logging.addLevelName(LOG_LVL_RESULT, "RESULT")
+        self.logger.propagate = False
+        self.logger.setLevel(logging.DEBUG)
 
-        self.logger.setLevel(logging.WARNING)
+        self.stream_hdlr = logging.StreamHandler(stream=sys.stdout)
+        fmt = logging.Formatter("[%(processName)s] %(message)s")
+        self.stream_hdlr.setFormatter(fmt)
+        self.stream_hdlr.setLevel(logging.WARNING)
+        self.logger.addHandler(self.stream_hdlr)
 
     def setup(self, verbosity_lvl):
         self.lvl = verbosity_lvl
@@ -30,13 +35,15 @@ class CustomLogger(object):
         if self.lvl == 0:
             logging_level = logging.WARNING
         elif self.lvl == 1:
-            logging_level = LOG_LVL_RESULT
+            logging_level = LOG_LVL_LOG_ACTION
         elif self.lvl == 2:
+            logging_level = LOG_LVL_RESULT
+        elif self.lvl == 3:
             logging_level = logging.INFO
-        elif self.lvl >= 3:
+        elif self.lvl >= 4:
             logging_level = logging.DEBUG
 
-        self.logger.setLevel(logging_level)
+        self.stream_hdlr.setLevel(logging_level)
 
         file_path = Config.get("logging.file_path")
         if file_path:
@@ -49,7 +56,10 @@ class CustomLogger(object):
                 "%(asctime)s [%(processName)s] %(levelname)s %(message)s"
             )
             hdlr.setFormatter(fmt)
-            hdlr.setLevel(logging_level)
+            if logging_level < LOG_LVL_LOG_ACTION:
+                hdlr.setLevel(logging_level)
+            else:
+                hdlr.setLevel(LOG_LVL_LOG_ACTION)
             self.logger.addHandler(hdlr)
 
     def log(self, lvl, msg, exc_info=False):
@@ -69,6 +79,9 @@ class CustomLogger(object):
 
     def result(self, msg):
         self.log(LOG_LVL_RESULT, msg)
+
+    def action_log(self, msg):
+        self.log(LOG_LVL_LOG_ACTION, msg)
 
 
 class CustomSysLogLogger(object):

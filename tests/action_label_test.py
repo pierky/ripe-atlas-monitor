@@ -53,17 +53,16 @@ class TestActionLabel(TestResultsBasicUnit):
         """Action label, result scope"""
         
         # probe 738, 713 match "ASPath_1267"
-        # 16 = 8 "result" lines for log +
-        #      2 "result" lines for "OK" +
-        #      6 "result" lines for "MISMATCH"
-        self.assertTupleEqual(self.run_monitor(), (16, 2, 6))
+        # 8 = 2 "result" lines for "OK" +
+        #     6 "result" lines for "MISMATCH"
+        self.assertTupleEqual(self.run_monitor(), (8, 2, 6))
         self.assertDictEqual(self.monitor.internal_labels["probes"], {})
 
     def test_action_label_probe(self):
         """Action label, probe scope"""
 
         self.cfg["matching_rules"][0]["actions"] = ["Label_Probe_Matching_via1267", "Log"]
-        self.assertTupleEqual(self.run_monitor(), (16, 2, 6))
+        self.assertTupleEqual(self.run_monitor(), (8, 2, 6))
         self.assertDictEqual(self.monitor.internal_labels["probes"], {
             "738": set(["via1267"]),
             "713": set(["via1267"]),
@@ -81,12 +80,10 @@ class TestActionLabel(TestResultsBasicUnit):
             "actions": "Log"
         })
 
-        # 20 = 8 "result" lines for 1st rule log +
-        #      2 1st rule "OK" +
+        # 10 = 2 1st rule "OK" +
         #      6 1st rule "MISMATCH" +
-        #      2 "result" lines for 2nd rule log +
         #      2 2nd rule "OK"
-        self.assertTupleEqual(self.run_monitor(), (20, 4, 6))
+        self.assertTupleEqual(self.run_monitor(), (10, 4, 6))
         self.assertDictEqual(self.monitor.internal_labels["probes"], {
             "738": set(["via1267"]),
             "713": set(["via1267"]),
@@ -146,11 +143,11 @@ class TestActionLabel(TestResultsBasicUnit):
             "actions": ["Label_Probe_CheckDstIP", "Log"]
         })
 
-        # 28 = rule n. 2, 16 (8 probes * 2 "result" lines each) +
-        #      rule n. 3, 12 (6 probes, 8 - the 2 matched on rule n. 2 and tagged with "CheckDstIP", * 2 "result" lines each)
+        # 14 = rule n. 2, 8 probes +
+        #      rule n. 3, 6 probes, 8 - the 2 probes matched on rule n. 2 and tagged with "CheckDstIP"
         #  4 = 4 "OK" (probe 738, 713 for "ASPath_1267", probe 12120, 12527 for "ASPath_S_IX_dst")
         # 10 = 10 "MISMATCH", 6 on rule n. 2 and 4 on rule n. 3
-        self.assertTupleEqual(self.run_monitor(), (28, 4, 10))
+        self.assertTupleEqual(self.run_monitor(), (14, 4, 10))
         self.assertDictEqual(
             self.monitor.internal_labels["probes"],
             {
@@ -187,11 +184,13 @@ class TestActionLabel(TestResultsBasicUnit):
             ]
         )
 
-        # 24 = 4 probes "OK" + log (8) +
-        #      4 probes "MISMATCH" * 2 "expected_results" ("ASPath_1267" and "ASPath_S_IX_dst") + log (16)
+        # 2nd run
+
+        # 24 = 4, 4 probes "OK" +
+        #      8, 4 probes "MISMATCH" * 2 "expected_results" ("ASPath_1267" and "ASPath_S_IX_dst")
         #  4 = 4 probes "OK" (738, 713, 12120, 12527)
         #  8 = 4 probes "MISMATCH" * 2 "expected_results"
-        self.assertTupleEqual(self.run_monitor(), (24, 4, 8))
+        self.assertTupleEqual(self.run_monitor(), (12, 4, 8))
         self.assertListEqual(
             self.results,
             [

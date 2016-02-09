@@ -10,10 +10,11 @@
 var_dir:
 
 # Verbosity level:
-# - 0: only warnings and errors
-# - 1: processing results (corresponds to -v argument)
-# - 2: info messages (corresponds to -vv argument)
-# - 3: debug information (corresponds to -vvv argument)
+# - 0: only warnings and errors are produced; 
+# - 1: messages from logging actions are produced;
+# - 2: results from matching rules are produced too;
+# - 3: information messages are logged (internal decisions about rules and results processing);
+# - 4: debug messages are logged too, useful to debug monitors' configurations.
 #verbosity: 0
 
 ip_cache:

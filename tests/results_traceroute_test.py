@@ -149,10 +149,10 @@ class TestTracerouteResult(TestResultsBasicUnit):
     def test_rtt_mismatch(self):
         """Traceroute, rtt, mismatch"""
 
-        self.cfg["matching_rules"][0]["probe_id"] = [832, 24503]
+        self.cfg["matching_rules"][0]["probe_id"] = [832]
         self.cfg["matching_rules"][0]["expected_results"] = ["RTT_150"]
 
-        self.process_output(False, 2)
+        self.process_output(False, 1)
 
     def test_rtt_tolerance_ok(self):
         """Traceroute, rtt with tolerance"""
