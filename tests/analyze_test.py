@@ -18,10 +18,10 @@ class TestAnalyze(TestBasicUnit):
         return monitor.analyze()
 
     def equal(self, a, b):
-        a = [line.strip() for line in a.split("\n") if line]
-        b = [line.strip() for line in b.split("\n") if line]
+        a = "\n".join([line.strip() for line in a.split("\n") if line])
+        b = "\n".join([line.strip() for line in b.split("\n") if line])
         self.assertGreater(len(a), 0)
-        self.assertListEqual(a, b)
+        self.assertEqual(a, b)
 
     def test_traceroute_msm(self):
         """Analyze, traceroute"""
