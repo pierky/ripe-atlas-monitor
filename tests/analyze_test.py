@@ -105,11 +105,11 @@ Unique AS path (with IXPs networks):
 
    34.26 ms
 
-   29.61 ms
+   14.32 ms
 
    37.42 ms
 
-   14.32 ms
+   29.61 ms
 
    30.51 ms
 
@@ -133,11 +133,11 @@ Unique destination IP addresses:
 
     38.229.72.16: 2 times
 
- 204.194.238.143: 1 time
+    38.229.72.14: 1 time
 
      86.59.30.40: 1 time
 
-    38.229.72.14: 1 time
+ 204.194.238.143: 1 time
 
    67.215.65.130: 1 time
 
@@ -148,7 +148,6 @@ Unique SSL certificate fingerprints:
 
  6D:5B:C9:79:46:1C:72:64:E1:71:00:10:CD:7D:4E:A3:EC:57:FA:11:21:5F:04:FF:A5:16:AE:61:95:9A:B2:B2,
  BE:9E:83:54:86:12:70:4C:E3:18:7F:E4:53:F8:73:B2:05:B3:9D:7B:4E:7C:19:A9:05:27:B7:4E:05:F3:9E:5F: 2 times"""
-
         self.equal(r, exp_r)
 
     def test_dns_msm(self):

@@ -875,7 +875,7 @@ class Monitor(BasicConfigElement):
             if not normalize_key:
                 normalize_key = no_normalize_key
 
-            src_list = parsed_results[prop]
+            src_list = sorted(parsed_results[prop])
 
             key_cnt_dict = {
                 normalize_key(e):
