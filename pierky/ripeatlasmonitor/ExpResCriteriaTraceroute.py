@@ -3,6 +3,7 @@ import re
 from Errors import ConfigError, ResultProcessingError
 from ExpResCriteriaBase import ExpResCriterion
 from Logging import logger
+from ParsedResults import ParsedResult_TracerouteBased
 
 
 class ExpResCriterion_TracerouteBased(ExpResCriterion):
@@ -14,79 +15,9 @@ class ExpResCriterion_TracerouteBased(ExpResCriterion):
         self.res_as_path_ixps = None
 
     def prepare(self, result):
-        if self.monitor.msm_type != "traceroute":
-            raise NotImplementedError()
-
-        self.res_as_path = self.get_parsed_res(result, result.probe_id,
-                                               "res_as_path")
-        self.res_as_path_ixps = self.get_parsed_res(result, result.probe_id,
-                                                    "res_as_path_ixps")
-
-        if self.res_as_path:
-            return
-
-        self.parse_data(result)
-
-    def parse_data(self, result):
-        probe = self.monitor.get_probe(result)
-
-        # res_as_path contains the AS path with disregard of IXPs
-        # example: IX1 is an IXP which doesn't announce its peering LAN pfx
-        #   123 IX1 456 becomes res_as_path = ["123", "456"]
-        self.res_as_path = [str(probe.asn)]
-
-        # res_as_path_ixps contains the AS path with 'IX' in place of IXP
-        #   peering LAN for those IXPs that don't announce their peering
-        #   LAN pfx
-        # example: IX1 is an IXP which doesn't announce its peering LAN pfx
-        #   123 IX1 456 ==> res_as_path_ixps = ["123", "IX", "456"]
-        # example: IX2 is an IXP which do announce its peering LAN pfx
-        #   123 IX2 (AS789) 456 ==> res_as_path_ixps = ["123", "789", "456"]
-        self.res_as_path_ixps = [str(probe.asn)]
-
-        try:
-            for hop in result.hops:
-                for pkt in hop.packets:
-                    if pkt.origin:
-                        ip = pkt.origin
-
-                        ip_info = self.monitor.ip_cache.get_ip_info(ip)
-
-                        asn = ""
-
-                        if ip_info["ASN"].isdigit():
-                            asn = ip_info["ASN"]
-
-                            if asn != self.res_as_path[-1]:
-                                self.res_as_path.append(asn)
-
-                            if asn != self.res_as_path_ixps[-1]:
-                                self.res_as_path_ixps.append(asn)
-
-                            break
-
-                        elif ip_info["IsIXP"]:
-                            asn = "IX"
-
-                            if asn != self.res_as_path_ixps[-1]:
-                                self.res_as_path_ixps.append(asn)
-
-                            break
-        except Exception as e:
-            logger.error(
-                "Can't get IP addresses / ASNs details: "
-                "{}".format(str(e)),
-                exc_info=True
-            )
-            raise ResultProcessingError(
-                "Can't get IP addresses / ASNs details: "
-                "{}".format(str(e))
-            )
-
-        self.set_parsed_res(result, probe.id, "res_as_path",
-                            self.res_as_path)
-        self.set_parsed_res(result, probe.id, "res_as_path_ixps",
-                            self.res_as_path_ixps)
+        res = ParsedResult_TracerouteBased(self.expres.monitor, result)
+        self.res_as_path = res.as_path
+        self.res_as_path_ixps = res.as_path_ixps
 
 
 class ExpResCriterion_DstAS(ExpResCriterion_TracerouteBased):

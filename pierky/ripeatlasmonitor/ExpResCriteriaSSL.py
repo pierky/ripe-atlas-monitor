@@ -3,6 +3,7 @@ import re
 from Errors import ConfigError
 from ExpResCriteriaBase import ExpResCriterion
 from Logging import logger
+from ParsedResults import ParsedResult_CertFps
 
 
 class ExpResCriterion_CertFP(ExpResCriterion):
@@ -127,8 +128,12 @@ class ExpResCriterion_CertFP(ExpResCriterion):
             )
         )
 
+    def prepare(self, result):
+        res = ParsedResult_CertFps(self.expres.monitor, result)
+        self.res_cer_fps = res.cer_fps
+
     def result_matches(self, result):
-        cer_fps = [cer.checksum_sha256.upper() for cer in result.certificates]
+        cer_fps = self.res_cer_fps
 
         logger.debug(
             "  verifying if certificates fingerprints {} in {}...".format(

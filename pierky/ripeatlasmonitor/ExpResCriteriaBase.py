@@ -37,25 +37,6 @@ class ExpResCriterion(BasicConfigElement):
                 )
             )
 
-    @staticmethod
-    def get_parsed_res_key(result, prb_id):
-        return "{}-{}".format(prb_id, result.created)
-
-    def get_parsed_res(self, result, prb_id, param):
-        k = self.get_parsed_res_key(result, prb_id)
-
-        if k in self.monitor.parsed_res:
-            if param in self.monitor.parsed_res[k]:
-                return self.monitor.parsed_res[k][param]
-        return None
-
-    def set_parsed_res(self, result, prb_id, param, val):
-        k = self.get_parsed_res_key(result, prb_id)
-
-        if k not in self.monitor.parsed_res:
-            self.monitor.parsed_res[k] = {}
-        self.monitor.parsed_res[k][param] = val
-
     def prepare(self, result):           # pragma: no cover
         # Called before result_matches().
         # It can be used to parse results and store the new internal
@@ -65,12 +46,7 @@ class ExpResCriterion(BasicConfigElement):
         # parsed_res cache; the first _TracerouteBased criterion
         # builds the path and store it using set_parsed_res, the following
         # criteria find the path already built and reuse it.
-        pass
-
-    def parse_data(self, result):        # pragma: no cover
-        # Called by prepare() when no parsed data are present
-        # in the cache.
-        pass
+        raise NotImplementedError()
 
     def result_matches(self, result):    # pragma: no cover
         raise NotImplementedError()

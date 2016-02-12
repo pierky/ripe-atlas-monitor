@@ -3,6 +3,8 @@ import IPy
 from Errors import ConfigError, ResultProcessingError
 from ExpResCriteriaBase import ExpResCriterion
 from Logging import logger
+from ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
+                          ParsedResult_DstIP
 
 
 class ExpResCriterion_RTT(ExpResCriterion):
@@ -52,13 +54,12 @@ class ExpResCriterion_RTT(ExpResCriterion):
                         self.rtt
                 )
 
+    def prepare(self, result):
+        res = ParsedResult_RTT(self.expres.monitor, result)
+        self.res_rtt = res.rtt
+
     def result_matches(self, result):
-        if self.monitor.msm_type == "traceroute":
-            result_rtt = result.last_median_rtt
-        elif self.monitor.msm_type == "ping":
-            result_rtt = result.rtt_median
-        else:
-            raise NotImplementedError()
+        result_rtt = self.res_rtt
 
         if result_rtt:
             if not self.rtt_tolerance:
@@ -128,13 +129,18 @@ class ExpResCriterion_DstResponded(ExpResCriterion):
         else:
             return "Destination must not respond"
 
+    def prepare(self, result):
+        res = ParsedResult_DstResponded(self.expres.monitor, result)
+        self.res_responded = res.responded
+
     def result_matches(self, result):
-        if self.monitor.msm_type == "traceroute":
-            result_responded = result.destination_ip_responded
-        elif self.monitor.msm_type == "ping":
-            result_responded = result.packets_received > 0
-        else:
-            raise NotImplementedError()
+        result_responded = self.res_responded
+
+        logger.debug(
+            "  testing if target responded ({}) is {}...".format(
+                result_responded, self.dst_responded
+            )
+        )
 
         if result_responded and not self.dst_responded:
             logger.debug("  target responded while it should not")
@@ -207,11 +213,12 @@ class ExpResCriterion_DstIP(ExpResCriterion):
 
         return tpl.format(self._str_list())
 
+    def prepare(self, result):
+        res = ParsedResult_DstIP(self.expres.monitor, result)
+        self.res_dst_ip = res.dst_ip
+
     def result_matches(self, result):
-        if self.monitor.msm_type in ["traceroute", "ping", "sslcert"]:
-            result_dst_ip = result.destination_address
-        else:
-            raise NotImplementedError()
+        result_dst_ip = self.res_dst_ip
 
         try:
             result_dst_ip = IPy.IP(result_dst_ip)

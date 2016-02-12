@@ -83,3 +83,14 @@ If you want to contribute to the code, you can clone the repository and install 
     $ pip install -e git+https://github.com/YOUR_USERNAME/ripe-atlas-monitor.git#egg=ripe-atlas-monitor
 
 See also: :doc:`CONTRIBUTING`.
+
+Bash autocomplete
+-----------------
+
+To enable bash autocomplete, register the **ripe-atlas-monitor** script and update your shell preferences:
+
+.. code:: bash
+
+    eval "$(register-python-argcomplete ripe-atlas-monitor)"
+
+If you want it to be enabled on every access, you can it to your ``.bashrc`` file.

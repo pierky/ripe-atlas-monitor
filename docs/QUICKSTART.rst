@@ -37,6 +37,9 @@ QuickStart
 
       $ pip install ripe-atlas-monitor
 
+      $ # to enable bash autocomplete:
+      $ eval "$(register-python-argcomplete ripe-atlas-monitor)"
+
   More: :doc:`installation options <INSTALL>`.
 
 
@@ -65,7 +68,13 @@ QuickStart
 
   More: :doc:`how monitors work <MONITORS>` and :doc:`syntax <SYNTAX>`.
 
-  Alternatively, take a look at the sample monitors provided within the `examples <https://github.com/pierky/ripe-atlas-monitor/tree/master/examples>`_ directory.
+  The ``analyze`` command can give you an overview of the results for a specific measurement, as elaborated by **ripe-atlas-monitor**:
+
+  .. code:: bash
+
+      $ ripe-atlas-monitor analyze --measurement-id 1234567890
+
+  Alternatively, you can take a look at the sample monitors provided within the `examples <https://github.com/pierky/ripe-atlas-monitor/tree/master/examples>`_ directory.
 
 
 - Step 5: run the brand new monitor to process measurement's latest results.

@@ -483,6 +483,44 @@ def main():
              "increase value.",
         dest="verbose")
 
+    # analyze command
+
+    sub_parser = subparsers.add_parser(
+        "analyze",
+        help="Analyze a measurement.")
+
+    sub_parser.add_argument(
+        "--measurement-id",
+        required=True,
+        help="Measurement ID.",
+        type=int,
+        metavar="msm_id",
+        dest="measurement_id")
+
+    sub_parser.add_argument(
+        "--key",
+        help="RIPE Atlas API key.",
+        metavar="key",
+        dest="key")
+
+    sub_parser.add_argument(
+        "--show-stats",
+        action="store_true",
+        help="Show statistics about probes distribution.",
+        dest="show_stats")
+
+    sub_parser.add_argument(
+        "--top-countries",
+        type=int,
+        help="Analyze results for the top most countries.",
+        dest="top_countries")
+
+    sub_parser.add_argument(
+        "--top-asns",
+        type=int,
+        help="Analyze results for the top most source ASNs.",
+        dest="top_asns")
+
     argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
@@ -513,6 +551,22 @@ def main():
     elif args.command == "edit-monitor":
         edit_monitor(args.monitor_name, ask=False)
         check_monitor_cfg_loop(args.monitor_name, args.verbose)
+
+    elif args.command == "analyze":
+        ip_cache = IPCache()
+        ip_cache.setup(
+            _dir=Config.get("ip_cache.dir"),
+            lifetime=Config.get("ip_cache.lifetime"),
+            use_ixps_info=Config.get("ip_cache.use_ixps_info")
+        )
+        monitor = Monitor({
+            "measurement-id": args.measurement_id,
+            "key": args.key,
+            "matching_rules": [{}]
+        }, ip_cache)
+
+        print("Downloading and processing results... please wait")
+        print(monitor.analyze(**vars(args)))
 
     elif args.command in ["run", "daemonize"]:
         lock_file_path = "{}/locks/main.lock".format(Config.get("var_dir"))

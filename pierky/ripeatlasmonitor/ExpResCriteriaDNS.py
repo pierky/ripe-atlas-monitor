@@ -2,12 +2,20 @@ from Errors import ConfigError
 from ExpResCriteriaBase import ExpResCriterion
 from ExpResCriteriaDNSRecords import HANDLED_RECORD_TYPES
 from Logging import logger
+from ParsedResults import ParsedResult_DNSFlags, ParsedResult_EDNS
 
 
 class ExpResCriterion_DNSBased(ExpResCriterion):
 
     def response_matches(self, response):
         raise NotImplementedError()
+
+    def prepare_response(self, result, response):
+        raise NotImplementedError()
+
+    def prepare(self, result):
+        for response in result.responses:
+            self.prepare_response(result, response)
 
     def result_matches(self, result):
         response_found = False
@@ -51,8 +59,6 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
     MANDATORY_CFG_FIELDS = []
     OPTIONAL_CFG_FIELDS = []
 
-    DNS_HEADER_FLAGS = ("aa", "ad", "cd", "qr", "ra", "rd")
-
     def __init__(self, cfg, expres):
         ExpResCriterion_DNSBased.__init__(self, cfg, expres)
 
@@ -60,7 +66,7 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
         dns_flags = self._enforce_list("dns_flags", str)
 
         for flag in dns_flags:
-            if flag.lower() not in self.DNS_HEADER_FLAGS:
+            if flag.lower() not in ParsedResult_DNSFlags.DNS_HEADER_FLAGS:
                 raise ConfigError("Invalid DNS flag: {}".format(flag))
             if flag.lower() not in self.dns_flags:
                 self.dns_flags.add(flag.lower())
@@ -70,11 +76,12 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
             ", ".join(sorted(self.dns_flags))
         )
 
+    def prepare_response(self, result, response):
+        res = ParsedResult_DNSFlags(self.expres.monitor, result, response)
+        self.response_flags = res.flags
+
     def response_matches(self, response):
-        response_flags = set()
-        for flag in self.DNS_HEADER_FLAGS:
-            if getattr(response.abuf.header, flag):
-                response_flags.add(flag)
+        response_flags = self.response_flags
 
         logger.debug(
             "  verifying if expected flags ({}) are "
@@ -146,36 +153,42 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
             r = "EDNS not supported"
         return r
 
+    def prepare_response(self, result, response):
+        res = ParsedResult_EDNS(self.expres.monitor, result, response)
+        self.response_edns = res.edns
+        self.response_edns_size = res.edns_size
+        self.response_edns_do = res.edns_do
+
     def response_matches(self, response):
-        if response.abuf.edns0 and not self.edns:
+        if self.response_edns and not self.edns:
             logger.debug(
                 "  EDNS is supported while it shouldn't"
             )
             return False
 
-        if not response.abuf.edns0 and self.edns:
+        if not self.response_edns and self.edns:
             logger.debug(
                 "  EDNS is not supported while it should be"
             )
             return False
 
         if self.edns and self.edns_size:
-            if response.abuf.edns0.udp_size < self.edns_size:
+            if self.response_edns_size < self.edns_size:
                 logger.debug(
                     "  EDNS udp size {} < {}".format(
-                        response.abuf.edns0.udp_size, self.edns_size
+                        self.response_edns_size, self.edns_size
                     )
                 )
                 return False
 
         if self.edns and self.edns_do is not None:
-            if response.abuf.edns0.do and not self.edns_do:
+            if self.response_edns_do and not self.edns_do:
                 logger.debug(
                     "  EDNS DO flag is on while it should be off"
                 )
                 return False
 
-            if not response.abuf.edns0.do and self.edns_do:
+            if not self.response_edns_do and self.edns_do:
                 logger.debug(
                     "  EDNS DO flag is off while is should be on"
                 )
@@ -294,6 +307,9 @@ class ExpResCriterion_DNSAnswers(ExpResCriterion_DNSBased):
                 ", ".join(map(str, section.records))
             )
         return r
+
+    def prepare_response(self, result, response):
+        pass
 
     def response_matches(self, response):
         for section in self.sections:

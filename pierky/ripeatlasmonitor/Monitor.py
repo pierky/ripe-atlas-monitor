@@ -15,6 +15,10 @@ from Errors import ConfigError, MissingFileError, MeasurementProcessingError, \
 from ExpectedResult import ExpectedResult
 from Helpers import BasicConfigElement, Probe, LockFile
 from Logging import logger
+from ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
+                          ParsedResult_DstIP, ParsedResult_CertFps, \
+                          ParsedResult_TracerouteBased, \
+                          ParsedResult_DNSFlags, ParsedResult_EDNS
 from ripe.atlas.cousteau import AtlasResultsRequest, AtlasLatestRequest, \
                                 ProbeRequest, AtlasStream, Measurement
 from ripe.atlas.cousteau.exceptions import CousteauGenericError, \
@@ -509,7 +513,9 @@ class Monitor(BasicConfigElement):
         # Processing results...
 
         for json_result in results:
-            result = Result.get(json_result)
+            result = Result.get(json_result, on_error=Result.ACTION_IGNORE,
+                                on_malformation=Result.ACTION_IGNORE)
+
             self.process_result(result)
             self.update_latest_result_ts(result)
             self.internal_labels["results"] = {}
@@ -733,3 +739,228 @@ class Monitor(BasicConfigElement):
                               latest_results=latest_results)
         finally:
             self.release_lock()
+
+    def analyze(self, **kwargs):
+        cc_threshold = kwargs.get("cc_threshold", 3)
+        top_countries = kwargs.get("top_countries", 0)
+        as_threshold = kwargs.get("as_threshold", 3)
+        top_asns = kwargs.get("top_asns", 0)
+        show_stats = kwargs.get("show_stats", False)
+
+        json_results = self.download(latest_results=True)
+        self.update_probes(json_results)
+
+        results = []
+        probe_ids = []
+
+        for result in json_results:
+            result = Result.get(result, on_error=Result.ACTION_IGNORE,
+                                on_malformation=Result.ACTION_IGNORE)
+            results.append(result)
+            if result.probe_id not in probe_ids:
+                probe_ids.append(result.probe_id)
+
+        r = self.analyze_results(results)
+
+        ccs = {}
+        asns = {}
+
+        for id in probe_ids:
+            prb = self.get_probe(id)
+
+            if prb.country_code:
+                if prb.country_code not in ccs:
+                    ccs[prb.country_code] = []
+                ccs[prb.country_code].append(id)
+
+            if prb.asn:
+                if prb.asn not in asns:
+                    asns[prb.asn] = []
+                asns[prb.asn].append(id)
+
+        probes_per_country = sorted({
+            cc: lst for cc, lst in ccs.items() if len(lst) > cc_threshold
+        }.items(), key=lambda x: len(x[1]), reverse=True)
+        probes_per_src_asn = sorted({
+            asn: lst for asn, lst in asns.items() if len(lst) > as_threshold
+        }.items(), key=lambda x: len(x[1]), reverse=True)
+
+        if show_stats:
+            r += "Statistics:\n"
+            r += "\n"
+
+            r += " - {} unique probes found\n".format(len(probe_ids))
+
+            if len(probes_per_country) > 0:
+                tpl = " - countries with more than {} probe{}:\n"
+            else:
+                tpl = " - no countries with more than {} probe{}\n"
+            r += tpl.format(cc_threshold, "s" if cc_threshold > 1 else "")
+
+            for cc, probes in probes_per_country:
+                r += "   - {}: {} probes\n".format(cc, len(probes))
+
+            if len(probes_per_src_asn) > 0:
+                tpl = " - source ASNs with more than {} probe{}:\n"
+            else:
+                tpl = " - no source ASNs with more than {} probe{}\n"
+            r += tpl.format(as_threshold, "s" if as_threshold > 1 else "")
+
+            for asn, probes in probes_per_src_asn:
+                r += "   - {:>7}: {} probes\n".format(asn, len(probes))
+
+            r += "\n"
+
+        def top_most(lst, tpl, top_cnt):
+            r = ""
+            for k, probes in lst[:top_cnt]:
+                r += tpl.format(k=k, n=len(probes))
+                r += "\n"
+
+                r += self.analyze_results(
+                    [result for result in results if result.probe_id in probes]
+                )
+            return r
+
+        if top_countries > 0 and len(probes_per_country) > 0:
+            r += top_most(probes_per_country,
+                          "Analyzing results from {k} ({n} probes)...\n",
+                          top_countries)
+
+        if top_asns > 0 and len(probes_per_src_asn) > 0:
+            r += top_most(probes_per_src_asn,
+                          "Analyzing results from AS{k} ({n} probes)...\n",
+                          top_asns)
+        return r
+
+    def analyze_results(self, results):
+        r = ""
+
+        parsed_results = {}
+
+        def analyze_classes(classes, *args):
+            for c in classes:
+                parsed_result = c(self, *args)
+                try:
+                    parsed_result.prepare()
+                except NotImplementedError:
+                    continue
+
+                for prop in parsed_result.PROPERTIES:
+                    if prop not in parsed_results:
+                        parsed_results[prop] = []
+                    parsed_results[prop].append(getattr(parsed_result, prop))
+
+        for result in results:
+
+            analyze_classes([ParsedResult_RTT, ParsedResult_DstResponded,
+                             ParsedResult_DstIP, ParsedResult_CertFps,
+                             ParsedResult_TracerouteBased], result)
+
+            if result.type == "dns":
+                for response in result.responses:
+                    if response.abuf:
+                        analyze_classes([ParsedResult_DNSFlags,
+                                         ParsedResult_EDNS], result, response)
+
+        def group_by(prop, title, normalize_key=None, show_times=True):
+            r = ""
+
+            if prop not in parsed_results:
+                return r
+
+            def no_normalize_key(k):
+                return str(k) if k else "none"
+
+            if not normalize_key:
+                normalize_key = no_normalize_key
+
+            src_list = parsed_results[prop]
+
+            key_cnt_dict = {
+                normalize_key(e):
+                src_list.count(e) for e in src_list
+            }
+
+            sorted_key_cnt = sorted(key_cnt_dict.items(),
+                                    key=lambda k: k[1],
+                                    reverse=True)
+            r += title + "\n"
+            r += "\n"
+
+            longest_key = max([k for k in key_cnt_dict.keys()], key=len)
+            tpl = " {:>" + str(len(longest_key)) + "}"
+            if show_times:
+                tpl += ": {} time{}"
+            tpl += "\n"
+
+            for k, cnt in sorted_key_cnt:
+                r += tpl.format(k, cnt, "s" if cnt > 1 else "")
+                r += "\n"
+
+            return r
+
+        def normalize_bool(k):
+            if k is True:
+                return "yes"
+            elif k is False:
+                return "no"
+            else:
+                return "none"
+
+        def normalize_rtt(x):
+            return "{:>7.2f} ms".format(x) if x else "none"
+
+#        def normalize_rtt_ranges(x):
+#            if x is None:
+#                return "none"
+#            rtts = [rtt for rtt in parsed_results["rtt"] if rtt]
+#            min_rtt = int(min(rtts))
+#            max_rtt = int(max(rtts))
+#            increment = (max_rtt - min_rtt) / 6
+#            if increment == 0:
+#                increment = 1
+#            thresholds = [min_rtt + increment * (i + 1) for i in range(6)]
+#            if x < thresholds[0]:
+#                r = "< {} ms".format(thresholds[0])
+#            elif x >= thresholds[-1]:
+#                r = ">= {} ms".format(thresholds[-1])
+#            else:
+#                r = str(x)
+#                for i in range(len(thresholds)-1):
+#                    if x >= thresholds[i] and x < thresholds[i+1]:
+#                        r = "{} - {} ms".format(
+#                            thresholds[i], thresholds[i+1]
+#                        )
+#                        break
+#
+#            return r
+
+        r += group_by("rtt", "Median RTT times:", show_times=False,
+                      normalize_key=normalize_rtt)
+
+        r += group_by("responded", "Destination responded:",
+                      normalize_key=normalize_bool)
+
+        r += group_by("dst_ip", "Unique destination IP addresses:")
+
+        # TODO: better format for empty list
+        r += group_by("cer_fps", "Unique SSL certificate fingerprints:",
+                      normalize_key=lambda x: ",\n ".join(x))
+
+        r += group_by("as_path", "Unique AS path:",
+                      normalize_key=lambda k: " ".join(map(str, k)))
+
+        r += group_by("as_path_ixps", "Unique AS path (with IXPs networks):",
+                      normalize_key=lambda k: " ".join(map(str, k)))
+
+        r += group_by("flags", "Unique DNS flags combinations:",
+                      normalize_key=lambda k: ", ".join(k))
+
+        r += group_by("edns", "EDNS present:", normalize_key=normalize_bool)
+
+        r += group_by("edns_size", "EDNS size:")
+
+        r += group_by("edns_do", "EDNS DO flag:", normalize_key=normalize_bool)
+
+        return r

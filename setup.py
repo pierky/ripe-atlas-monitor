@@ -34,6 +34,7 @@ setup(
     maintainer_email="pierky@pierky.com",
 
     install_requires=[
+        "argcomplete>=1.0.0",
         "IPy>=0.83",
         "python-dateutil>=1.0, != 2.0",
         "ripe.atlas.cousteau>=1.0.7",

@@ -16,6 +16,17 @@ Some commands can be used to manage monitors' configuration:
 
     $ ripe-atlas-monitor [init-monitor | edit-monitor | check-monitor] -m MonitorName
 
+Results analysis
+----------------
+
+The ``analyze`` command can be used to have an overview of results received from a measurement and how they are elaborated by **ripe-atlas-monitor**:
+
+.. code:: bash
+
+    $ ripe-atlas-monitor analyze --measurement-id 1234567890
+
+The ``--key`` argument can be used to provide a RIPE Atlas key to fetch the results. Other arguments may be used to display statistics about probes distribution and to show sub-results grouped by country or by source AS: the ``--help`` will show all of them.
+
 Execution modes
 ---------------
 

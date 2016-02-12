@@ -123,7 +123,6 @@ class TestBasicUnit(unittest.TestCase):
                 self.created_monitor = Monitor(self.cfg, self.ip_cache)
                 return self.created_monitor
             except Exception as e:
-                raise
                 raise self.failureException(e)
         else:
             with self.assertRaisesRegexp(exp_exc, exp_msg):
