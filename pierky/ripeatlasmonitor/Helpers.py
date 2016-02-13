@@ -5,7 +5,8 @@ from multiprocessing.managers import BaseManager
 
 from Errors import ConfigError, ProgramError
 from Logging import logger
-from pierky.ipdetailscache import IPDetailsCache
+from pierky.ipdetailscache import IPDetailsCache, \
+                                  IPDetailsCacheIXPInformationError
 
 
 class BasicConfigElement(object):
@@ -168,6 +169,13 @@ class IPCache(object):
                     WhenUse=1,
                     IXP_CACHE_FILE=IXP_CACHE_FILE
                 )
+        except IPDetailsCacheIXPInformationError as e:
+            raise ConfigError(
+                "An error occurred while setting up the IP addresses cache. "
+                "IXPs information are not available at the moment; please "
+                "consider setting the ip_cache.use_ixps_info to False to "
+                "temporary avoid problems."
+            )
         except Exception as e:
             raise ProgramError(
                 "Error while setting up the IXPs cache: {}".format(str(e))
