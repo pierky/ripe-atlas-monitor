@@ -863,28 +863,30 @@ class Monitor(BasicConfigElement):
                         analyze_classes([ParsedResult_DNSFlags,
                                          ParsedResult_EDNS], result, response)
 
-        def group_by(prop, title, normalize_key=None, show_times=True):
+        def group_by(src, title, format_key=None, show_times=True):
             r = ""
 
-            if prop not in parsed_results:
-                return r
+            if isinstance(src, list):
+                src_list = sorted(src)
+            else:
+                if src not in parsed_results:
+                    return r
+                src_list = sorted(parsed_results[src])
 
-            def no_normalize_key(k):
+            def no_format_key(k):
                 return str(k) if k else "none"
 
-            if not normalize_key:
-                normalize_key = no_normalize_key
-
-            src_list = sorted(parsed_results[prop])
+            if not format_key:
+                format_key = no_format_key
 
             key_cnt_dict = {
-                normalize_key(e):
+                format_key(e):
                 src_list.count(e) for e in src_list
             }
 
             sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                    key=lambda k: k[1],
-                                    reverse=True)
+                                    key=lambda k: k[1] if show_times else k[0],
+                                    reverse=show_times)
             r += title + "\n"
             r += "\n"
 
@@ -900,7 +902,7 @@ class Monitor(BasicConfigElement):
 
             return r
 
-        def normalize_bool(k):
+        def format_key_bool(k):
             if k is True:
                 return "yes"
             elif k is False:
@@ -908,59 +910,68 @@ class Monitor(BasicConfigElement):
             else:
                 return "none"
 
-        def normalize_rtt(x):
+        def format_key_rtt(x):
             return "{:>7.2f} ms".format(x) if x else "none"
 
-#        def normalize_rtt_ranges(x):
-#            if x is None:
-#                return "none"
-#            rtts = [rtt for rtt in parsed_results["rtt"] if rtt]
-#            min_rtt = int(min(rtts))
-#            max_rtt = int(max(rtts))
-#            increment = (max_rtt - min_rtt) / 6
-#            if increment == 0:
-#                increment = 1
-#            thresholds = [min_rtt + increment * (i + 1) for i in range(6)]
-#            if x < thresholds[0]:
-#                r = "< {} ms".format(thresholds[0])
-#            elif x >= thresholds[-1]:
-#                r = ">= {} ms".format(thresholds[-1])
-#            else:
-#                r = str(x)
-#                for i in range(len(thresholds)-1):
-#                    if x >= thresholds[i] and x < thresholds[i+1]:
-#                        r = "{} - {} ms".format(
-#                            thresholds[i], thresholds[i+1]
-#                        )
-#                        break
-#
-#            return r
+        def normalize_rtt_ranges(rtts):
+            min_rtt = int(min(rtts))
+            max_rtt = int(max(rtts))
+            increment = (max_rtt - min_rtt) / 6
+            if increment == 0:
+                increment = 1
+            thresholds = [min_rtt + increment * (i + 1) for i in range(6)]
 
-        r += group_by("rtt", "Median RTT times:", show_times=False,
-                      normalize_key=normalize_rtt)
+            res = []
+            for rtt in rtts:
+                if rtt < thresholds[0]:
+                    res.append("< {} ms".format(thresholds[0]))
+                elif rtt >= thresholds[-1]:
+                    res.append(">= {} ms".format(thresholds[-1]))
+                else:
+                    r = str(rtt)
+                    for i in range(len(thresholds)-1):
+                        if rtt >= thresholds[i] and rtt < thresholds[i+1]:
+                            r = "{} - {} ms".format(
+                                thresholds[i], thresholds[i+1]
+                            )
+                            break
+                    res.append(r)
+
+            return res
+
+        if "rtt" in parsed_results:
+            rtts = parsed_results["rtt"]
+
+            if len(rtts) > 10:
+                normalized_rtts = normalize_rtt_ranges(parsed_results["rtt"])
+
+                r += group_by(normalized_rtts, "Median RTTs:")
+            else:
+                r += group_by(rtts, "Median RTTs:", show_times=False,
+                              format_key=format_key_rtt)
 
         r += group_by("responded", "Destination responded:",
-                      normalize_key=normalize_bool)
+                      format_key=format_key_bool)
 
         r += group_by("dst_ip", "Unique destination IP addresses:")
 
         # TODO: better format for empty list
         r += group_by("cer_fps", "Unique SSL certificate fingerprints:",
-                      normalize_key=lambda x: ",\n ".join(x))
+                      format_key=lambda x: ",\n ".join(x))
 
         r += group_by("as_path", "Unique AS path:",
-                      normalize_key=lambda k: " ".join(map(str, k)))
+                      format_key=lambda k: " ".join(map(str, k)))
 
         r += group_by("as_path_ixps", "Unique AS path (with IXPs networks):",
-                      normalize_key=lambda k: " ".join(map(str, k)))
+                      format_key=lambda k: " ".join(map(str, k)))
 
         r += group_by("flags", "Unique DNS flags combinations:",
-                      normalize_key=lambda k: ", ".join(k))
+                      format_key=lambda k: ", ".join(k))
 
-        r += group_by("edns", "EDNS present:", normalize_key=normalize_bool)
+        r += group_by("edns", "EDNS present:", format_key=format_key_bool)
 
         r += group_by("edns_size", "EDNS size:")
 
-        r += group_by("edns_do", "EDNS DO flag:", normalize_key=normalize_bool)
+        r += group_by("edns_do", "EDNS DO flag:", format_key=format_key_bool)
 
         return r
