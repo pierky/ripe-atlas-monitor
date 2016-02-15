@@ -59,41 +59,40 @@ Unique destination IP addresses:
 
 Unique AS path:
 
+ 60049 5602 32934 60049 32934: 1 time
+
  49360 1200 32934 49360 32934: 1 time
-
-        20912 1267 1200 32934: 1 time
-
-                        12363: 1 time
-
-                    137 32934: 1 time
-
-                  25309 32934: 1 time
 
              39759 1267 32934: 1 time
 
- 60049 5602 32934 60049 32934: 1 time
+                  25309 32934: 1 time
 
              21034 8928 32934: 1 time
 
+        20912 1267 1200 32934: 1 time
+
+                    137 32934: 1 time
+
+                        12363: 1 time
+
 Unique AS path (with IXPs networks):
-
-    49360 1200 32934 49360 32934: 1 time
-
-           20912 1267 1200 32934: 1 time
-
-                           12363: 1 time
 
  60049 5602 IX 32934 60049 32934: 1 time
 
-                    137 IX 32934: 1 time
+    49360 1200 32934 49360 32934: 1 time
 
              39759 1267 IX 32934: 1 time
 
                   25309 IX 32934: 1 time
 
-                21034 8928 32934: 1 time"""
+                21034 8928 32934: 1 time
 
-#        self.equal(r, exp_r)
+           20912 1267 1200 32934: 1 time
+
+                    137 IX 32934: 1 time
+
+                           12363: 1 time"""
+        self.equal(r, exp_r)
 
     def test_ping_msm(self):
         """Analyze, ping"""
@@ -133,13 +132,13 @@ Unique destination IP addresses:
 
     38.229.72.16: 2 times
 
-    38.229.72.14: 1 time
-
      86.59.30.40: 1 time
 
- 204.194.238.143: 1 time
-
    67.215.65.130: 1 time
+
+    38.229.72.14: 1 time
+
+ 204.194.238.143: 1 time
 
 Unique SSL certificate fingerprints:
 
@@ -148,8 +147,7 @@ Unique SSL certificate fingerprints:
 
  6D:5B:C9:79:46:1C:72:64:E1:71:00:10:CD:7D:4E:A3:EC:57:FA:11:21:5F:04:FF:A5:16:AE:61:95:9A:B2:B2,
  BE:9E:83:54:86:12:70:4C:E3:18:7F:E4:53:F8:73:B2:05:B3:9D:7B:4E:7C:19:A9:05:27:B7:4E:05:F3:9E:5F: 2 times"""
-
-#        self.equal(r, exp_r)
+        self.equal(r, exp_r)
 
     def test_dns_msm(self):
         """Analyze, dns"""
@@ -159,9 +157,9 @@ Unique SSL certificate fingerprints:
 
         exp_r = """Unique DNS flags combinations:
 
-     rd, qr, ra: 2 times
+     qr, ra, rd: 2 times
 
- rd, qr, ad, ra: 1 time
+ ad, qr, ra, rd: 1 time
 
 EDNS present:
 
@@ -176,5 +174,4 @@ EDNS size:
 EDNS DO flag:
 
  yes: 3 times"""
-
-#        self.equal(r, exp_r)
+        self.equal(r, exp_r)

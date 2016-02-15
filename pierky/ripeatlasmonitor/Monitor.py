@@ -1,5 +1,6 @@
 import datetime
 import json
+import operator
 import os
 from Queue import Queue, Empty
 import time
@@ -884,9 +885,14 @@ class Monitor(BasicConfigElement):
                 src_list.count(e) for e in src_list
             }
 
-            sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                    key=lambda k: k[1] if show_times else k[0],
-                                    reverse=show_times)
+            if show_times:
+                sorted_key_cnt = sorted(key_cnt_dict.items(),
+                                        key=operator.itemgetter(1, 0),
+                                        reverse=True)
+            else:
+                sorted_key_cnt = sorted(key_cnt_dict.items(),
+                                        key=operator.itemgetter(0))
+
             r += title + "\n"
             r += "\n"
 

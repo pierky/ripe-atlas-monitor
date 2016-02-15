@@ -252,7 +252,7 @@ class ParsedResult_DNSFlags(ParsedResult_DNSBased):
             if getattr(self.response.abuf.header, flag):
                 response_flags.add(flag)
 
-        self.set_attr_to_cache("flags", response_flags)
+        self.set_attr_to_cache("flags", sorted(response_flags))
 
 
 class ParsedResult_EDNS(ParsedResult_DNSBased):
