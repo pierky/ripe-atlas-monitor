@@ -96,7 +96,8 @@ def run_multiple(args):
 
 
 def run(args):
-    logger.setup(args.verbose or Config.get("verbosity"))
+    logger.setup(args.verbose or Config.get("verbosity"),
+                 stdout=args.command == "run")
 
     if args.command == "run":
         run_one(args)

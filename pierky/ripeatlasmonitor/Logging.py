@@ -23,13 +23,7 @@ class CustomLogger(object):
         self.logger.propagate = False
         self.logger.setLevel(logging.DEBUG)
 
-        self.stream_hdlr = logging.StreamHandler(stream=sys.stdout)
-        fmt = logging.Formatter("[%(processName)s] %(message)s")
-        self.stream_hdlr.setFormatter(fmt)
-        self.stream_hdlr.setLevel(logging.WARNING)
-        self.logger.addHandler(self.stream_hdlr)
-
-    def setup(self, verbosity_lvl):
+    def setup(self, verbosity_lvl, stdout=True):
         self.lvl = verbosity_lvl
 
         if self.lvl == 0:
@@ -43,7 +37,12 @@ class CustomLogger(object):
         elif self.lvl >= 4:
             logging_level = logging.DEBUG
 
-        self.stream_hdlr.setLevel(logging_level)
+        if stdout:
+            stream_hdlr = logging.StreamHandler(stream=sys.stdout)
+            fmt = logging.Formatter("[%(processName)s] %(message)s")
+            stream_hdlr.setFormatter(fmt)
+            stream_hdlr.setLevel(logging_level)
+            self.logger.addHandler(stream_hdlr)
 
         file_path = Config.get("logging.file_path")
         if file_path:

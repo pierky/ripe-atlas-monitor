@@ -1,9 +1,12 @@
 from ..Config import Config
 from ..Helpers import IPCache
+from ..Logging import logger
 from ..Monitor import Monitor
 
 
 def execute(args):
+    logger.setup(0)
+
     ip_cache = IPCache()
     ip_cache.setup(
         _dir=Config.get("ip_cache.dir"),
