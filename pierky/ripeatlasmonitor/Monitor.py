@@ -199,6 +199,7 @@ class Monitor(BasicConfigElement):
 
         msm = self._load_msm(id=self.msm_id, key=self.key)
 
+        self.msm_is_public = msm.is_public
         self.msm_type = msm.type.lower()
         self.msm_af = int(msm.protocol)
         self.msm_status = msm.status
@@ -212,6 +213,9 @@ class Monitor(BasicConfigElement):
                 "Unhandled measurement's type: "
                 "{}".format(self.msm_type)
             )
+
+        if self.stream:
+            self.ensure_streaming_enabled(ConfigError)
 
         # Expected results normalization
 
@@ -579,20 +583,28 @@ class Monitor(BasicConfigElement):
     def release_lock(self):
         self.lock_file.release()
 
-    def run_stream(self):
-        logger.info(" - using real-time results streaming")
-
+    def ensure_streaming_enabled(self, exception_class):
         err = "Can't use results streaming for this measurement: {}"
 
         if self.msm_is_oneoff:
-            raise MeasurementProcessingError(
+            raise exception_class(
                 err.format("it's a one-off measurement.")
             )
 
         if not self.msm_is_running:
-            raise MeasurementProcessingError(
+            raise exception_class(
                 err.format("it is not running anymore.")
             )
+
+        if not self.msm_is_public:
+            raise exception_class(
+                err.format("it is not public.")
+            )
+
+    def run_stream(self):
+        logger.info(" - using real-time results streaming")
+
+        self.ensure_streaming_enabled(MeasurementProcessingError)
 
         try:
             atlas_stream = AtlasStream()
