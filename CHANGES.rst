@@ -1,6 +1,20 @@
 Changelog
 =========
 
+0.1.3
+-----
+
+improvements
+++++++++++++
+
+- better RTT results formatting in ``analyze`` command
+- no stdout logging when used in ``daemonize`` mode
+
+fixes
++++++
+
+- error handling for IXPs networks info unavailability
+
 0.1.2
 -----
 
