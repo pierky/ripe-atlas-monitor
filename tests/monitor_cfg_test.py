@@ -77,10 +77,8 @@ class TestMonitorCfg(TestBasicUnit):
         self.cfg["stream"] = True
         self.add_criterion("rtt")
 
-        with self.assertRaisesRegexp(MeasurementProcessingError,
-                                     "Can't use results streaming"):
-            monitor = self.create_monitor()
-            monitor.run()
+        monitor = self.create_monitor(exp_exc=ConfigError,
+                                      exp_msg="Can't use results streaming")
 
     def test_expres(self):
         """Expected results with no criteria"""
