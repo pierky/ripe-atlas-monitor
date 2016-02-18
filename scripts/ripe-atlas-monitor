@@ -265,9 +265,17 @@ def main():
         "analyze",
         help="Analyze a measurement.")
 
-    sub_parser.add_argument(
+    group = sub_parser.add_mutually_exclusive_group(required=True)
+
+    group.add_argument(
+        "-m", "--monitor",
+        type=validator_monitorname,
+        help="Monitor to be used to gather measurement's ID to analyze.",
+        metavar="monitor_name",
+        dest="monitor_name").completer = ChoicesCompleter(monitor_list)
+
+    group.add_argument(
         "--measurement-id",
-        required=True,
         help="Measurement ID.",
         type=int,
         metavar="msm_id",

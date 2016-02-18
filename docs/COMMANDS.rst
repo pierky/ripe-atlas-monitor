@@ -25,7 +25,9 @@ The ``analyze`` command can be used to have an overview of results received from
 
     $ ripe-atlas-monitor analyze --measurement-id 1234567890
 
-The ``--key`` argument can be used to provide a RIPE Atlas key to fetch the results. Other arguments may be used to display statistics about probes distribution and to show sub-results grouped by country or by source AS: the ``--help`` will show all of them.
+    $ ripe-atlas-monitor analyze -m MonitorName
+
+The ``--key`` argument can be used to provide a RIPE Atlas key to fetch the results. Other arguments may be used to display statistics about probes distribution and to show sub-results, grouping them by country or by source AS: the ``--help`` will show all of these options.
 
 Execution modes
 ---------------

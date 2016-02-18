@@ -21,11 +21,19 @@ def execute(args):
             lifetime=Config.get("ip_cache.lifetime"),
             use_ixps_info=Config.get("ip_cache.use_ixps_info")
         )
-        monitor = Monitor({
-            "measurement-id": args.measurement_id,
-            "key": args.key,
-            "matching_rules": [{}]
-        }, ip_cache)
+
+        if args.measurement_id:
+            monitor = Monitor({
+                "measurement-id": args.measurement_id,
+                "key": args.key,
+                "matching_rules": [{}]
+            }, ip_cache)
+        else:
+            monitor = Monitor(
+                args.monitor_name,
+                ip_cache,
+                key=args.key
+            )
 
         print("Downloading and processing results... please wait")
         print(monitor.analyze(**vars(args)))
