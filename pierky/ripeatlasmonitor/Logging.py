@@ -4,7 +4,7 @@ from socket import SOCK_DGRAM, SOCK_STREAM
 import sys
 
 
-from Config import Config
+from .Config import Config
 
 
 LOG_LVL_RESULT = 25

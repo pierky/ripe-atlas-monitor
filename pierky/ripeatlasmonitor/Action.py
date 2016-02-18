@@ -6,10 +6,10 @@ from smtplib import SMTP, SMTP_SSL, SMTPException
 import socket
 from subprocess import call
 
-from Config import Config
-from Errors import ConfigError, ProgramError
-from Helpers import BasicConfigElement
-from Logging import logger, CustomSysLogLogger
+from .Config import Config
+from .Errors import ConfigError, ProgramError
+from .Helpers import BasicConfigElement
+from .Logging import logger, CustomSysLogLogger
 
 
 class Action(BasicConfigElement):
@@ -784,7 +784,7 @@ class ActionRunProgram(Action):
             )
 
         env = environ
-        for k in env_base.keys():
+        for k in env_base:
             env["{}{}".format(self.env_prefix, k)] = str(env_base[k])
 
         args = [self.path] + self.get_args(env_base)
@@ -878,14 +878,14 @@ class ActionLabel(Action):
             raise NotImplementedError()
 
         if self.op == "add":
-            if lbl_key not in labels.keys():
+            if lbl_key not in labels:
                 labels[lbl_key] = set()
 
             tpl = "adding label {name} to {scope} {key}"
             labels[lbl_key].add(self.label_name)
 
         elif self.op == "del":
-            if lbl_key in labels.keys() and self.label_name in labels[lbl_key]:
+            if lbl_key in labels and self.label_name in labels[lbl_key]:
 
                 tpl = "removing label {name} from {scope} {key}"
                 labels[lbl_key].remove(self.label_name)

@@ -26,7 +26,7 @@ class ConfigError(RIPEAtlasMonitorError):
 class GlobalConfigError(RIPEAtlasMonitorError):
 
     def __str__(self):
-        return "Global configuration error: {}".format(self.message)
+        return "Global configuration error: {}".format(self.args[0])
 
 
 class ArgumentError(RIPEAtlasMonitorError):
@@ -60,6 +60,6 @@ class ProgramError(RIPEAtlasMonitorError):
             indent = "    "
             s = indent + ("\n"+indent).join(self.err_descr.split("\n"))
 
-            return "{}\n{}".format(self.message, s)
+            return "{}\n{}".format(self.args[0], s)
         else:
-            return self.message
+            return self.args[0]

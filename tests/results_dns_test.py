@@ -1,5 +1,5 @@
-from base import TestBasicUnit, TestResultsBasicUnit
-from data import MSM_Results_DNS
+from .base import TestBasicUnit, TestResultsBasicUnit
+from .data import MSM_Results_DNS
 from pierky.ripeatlasmonitor.Monitor import Monitor
 
 

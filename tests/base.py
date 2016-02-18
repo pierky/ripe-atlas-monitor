@@ -6,17 +6,17 @@ import re
 import sys
 
 
-from data import *
+from .data import *
 from pierky.ripeatlasmonitor.Helpers import IPCache
 from pierky.ipdetailscache import IPDetailsCache
-from pierky.ripeatlasmonitor.Logging import CustomLogger, LOG_LVL_RESULT
+from pierky.ripeatlasmonitor.Logging import logger, CustomLogger, LOG_LVL_RESULT
 from pierky.ripeatlasmonitor.Monitor import Monitor
 from ripe.atlas.cousteau import Measurement
 from ripe.atlas.cousteau.request import AtlasLatestRequest, AtlasRequest
 
 
 log_output = ""
-
+logger.setup(0)
 
 class TestBasicUnit(unittest.TestCase):
 

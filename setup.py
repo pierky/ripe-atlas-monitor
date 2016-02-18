@@ -41,7 +41,8 @@ setup(
         "ripe.atlas.sagan>=1.1.8",
         "ipdetailscache>=0.4.3",
         "pyyaml",
-        "pytz"
+        "pytz",
+        "six>=1.10.0"
     ],
     tests_require=[
         "nose",

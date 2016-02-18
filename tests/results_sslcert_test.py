@@ -1,5 +1,5 @@
-from base import TestBasicUnit, TestResultsBasicUnit
-from data import MSM_Results_SSLCert
+from .base import TestBasicUnit, TestResultsBasicUnit
+from .data import MSM_Results_SSLCert
 from pierky.ripeatlasmonitor.Monitor import Monitor
 
 

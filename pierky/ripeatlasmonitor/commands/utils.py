@@ -1,3 +1,4 @@
+from six.moves import input
 import os
 
 from ..Config import Config
@@ -7,7 +8,7 @@ def edit_file(file_path, ask=None):
     # return True if user tries to edit the file
     if ask:
         try:
-            answer = raw_input(ask)
+            answer = input(ask)
         except KeyboardInterrupt:
             return False
 

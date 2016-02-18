@@ -1,9 +1,9 @@
 import re
 
-from Errors import ConfigError, ResultProcessingError
-from ExpResCriteriaBase import ExpResCriterion
-from Logging import logger
-from ParsedResults import ParsedResult_TracerouteBased
+from .Errors import ConfigError, ResultProcessingError
+from .ExpResCriteriaBase import ExpResCriterion
+from .Logging import logger
+from .ParsedResults import ParsedResult_TracerouteBased
 
 
 class ExpResCriterion_TracerouteBased(ExpResCriterion):

@@ -1,5 +1,5 @@
-from data import *
-from base import TestBasicUnit
+from .data import *
+from .base import TestBasicUnit
 from pierky.ripeatlasmonitor.Errors import *
 from pierky.ripeatlasmonitor.ExpResCriteria import CRITERIA_CLASSES
 from pierky.ripeatlasmonitor.Monitor import Monitor

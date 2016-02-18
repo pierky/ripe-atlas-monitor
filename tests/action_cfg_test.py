@@ -1,5 +1,5 @@
-from data import MSM_Ping_IPv6_Ongoing
-from base import TestBasicUnit
+from .data import MSM_Ping_IPv6_Ongoing
+from .base import TestBasicUnit
 from pierky.ripeatlasmonitor.Errors import *
 from pierky.ripeatlasmonitor.Monitor import Monitor
 

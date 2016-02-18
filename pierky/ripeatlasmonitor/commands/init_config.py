@@ -1,6 +1,7 @@
 import os
+from six.moves import input
 
-from utils import edit_file
+from .utils import edit_file
 from ..Config import Config
 from ..Errors import GlobalConfigError
 
@@ -22,7 +23,7 @@ def execute(args):
 
     if not os.path.exists(dir_name):
         try:
-            answer = raw_input(
+            answer = input(
                 "Directory {} does not exist. Do you want to "
                 "create it now? [yes/NO] ".format(dir_name)
             )
@@ -41,7 +42,7 @@ def execute(args):
             )
 
     try:
-        answer = raw_input(
+        answer = input(
             "The global configuration file will be created in {}: "
             "do you want to proceed? [yes/NO] ".format(file_path)
         )

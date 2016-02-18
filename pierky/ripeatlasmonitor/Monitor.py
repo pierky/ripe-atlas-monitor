@@ -2,30 +2,35 @@ import datetime
 import json
 import operator
 import os
-from Queue import Queue, Empty
+import six
+if six.PY2:
+    from Queue import Queue, Empty
+else:
+    from queue import Queue, Empty
 import time
 from threading import Thread
 
 import pytz
 import yaml
 
-from Action import ACTION_CLASSES
-from Config import Config
-from Errors import ConfigError, MissingFileError, MeasurementProcessingError, \
-                   LockError, ProgramError, ResultProcessingError
-from ExpectedResult import ExpectedResult
-from Helpers import BasicConfigElement, Probe, LockFile
-from Logging import logger
-from ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
-                          ParsedResult_DstIP, ParsedResult_CertFps, \
-                          ParsedResult_TracerouteBased, \
-                          ParsedResult_DNSFlags, ParsedResult_EDNS
+from .Action import ACTION_CLASSES
+from .Config import Config
+from .Errors import ConfigError, MissingFileError, \
+                    MeasurementProcessingError, \
+                    LockError, ProgramError, ResultProcessingError
+from .ExpectedResult import ExpectedResult
+from .Helpers import BasicConfigElement, Probe, LockFile
+from .Logging import logger
+from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
+                           ParsedResult_DstIP, ParsedResult_CertFps, \
+                           ParsedResult_TracerouteBased, \
+                           ParsedResult_DNSFlags, ParsedResult_EDNS
 from ripe.atlas.cousteau import AtlasResultsRequest, AtlasLatestRequest, \
                                 ProbeRequest, AtlasStream, Measurement
 from ripe.atlas.cousteau.exceptions import CousteauGenericError, \
                                            APIResponseError
 from ripe.atlas.sagan import Result
-from Rule import Rule
+from .Rule import Rule
 
 
 class MonitorResultsThread(Thread):
@@ -222,7 +227,7 @@ class Monitor(BasicConfigElement):
         self.expected_results = {}
 
         if self.cfg["expected_results"]:
-            for expres_name in self.cfg["expected_results"].keys():
+            for expres_name in self.cfg["expected_results"]:
                 expres_cfg = self.cfg["expected_results"][expres_name]
                 try:
                     expres = ExpectedResult(self, expres_name, expres_cfg)
@@ -239,7 +244,7 @@ class Monitor(BasicConfigElement):
         self.actions = {}
 
         if self.cfg["actions"]:
-            for action_name in self.cfg["actions"].keys():
+            for action_name in self.cfg["actions"]:
                 action_cfg = self.cfg["actions"][action_name]
                 try:
                     if "kind" in action_cfg:
@@ -291,7 +296,7 @@ class Monitor(BasicConfigElement):
 
                 if rule.actions and rule.actions != []:
                     for action_name in rule.actions:
-                        if action_name not in self.actions.keys():
+                        if action_name not in self.actions:
                             raise ConfigError(
                                 "Action not found: "
                                 "{}".format(action_name)
@@ -880,7 +885,7 @@ class Monitor(BasicConfigElement):
             r = ""
 
             if isinstance(src, list):
-                src_list = sorted(src)
+                src_list = sorted([v for v in src if v is not None])
             else:
                 if src not in parsed_results:
                     return r
@@ -908,7 +913,7 @@ class Monitor(BasicConfigElement):
             r += title + "\n"
             r += "\n"
 
-            longest_key = max([k for k in key_cnt_dict.keys()], key=len)
+            longest_key = max([k for k in key_cnt_dict], key=len)
             tpl = " {:>" + str(len(longest_key)) + "}"
             if show_times:
                 tpl += ": {} time{}"

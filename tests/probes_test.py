@@ -1,5 +1,5 @@
-from base import TestResultsBasicUnit
-from data import MSM_Results_Traceroute_IPv4
+from .base import TestResultsBasicUnit
+from .data import MSM_Results_Traceroute_IPv4
 from pierky.ripeatlasmonitor.Monitor import Monitor
 
 class TestMatchingProbes(TestResultsBasicUnit):

@@ -1,9 +1,9 @@
 import re
 
 
-from Errors import ConfigError, RIPEAtlasMonitorError
-from Helpers import BasicConfigElement
-from Logging import logger
+from .Errors import ConfigError, RIPEAtlasMonitorError
+from .Helpers import BasicConfigElement
+from .Logging import logger
 
 
 class Rule(BasicConfigElement):

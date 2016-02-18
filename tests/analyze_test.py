@@ -1,6 +1,6 @@
-from base import TestBasicUnit
-from data import MSM_Results_Traceroute_IPv4, MSM_Results_Ping_IPv4, \
-                 MSM_Results_SSLCert, MSM_Results_DNS
+from .base import TestBasicUnit
+from .data import MSM_Results_Traceroute_IPv4, MSM_Results_Ping_IPv4, \
+                  MSM_Results_SSLCert, MSM_Results_DNS
 
 
 class TestAnalyze(TestBasicUnit):
@@ -44,8 +44,6 @@ class TestAnalyze(TestBasicUnit):
   116.87 ms
 
   181.18 ms
-
-       none
 
 Destination responded:
 

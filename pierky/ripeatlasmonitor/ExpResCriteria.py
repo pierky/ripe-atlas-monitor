@@ -1,13 +1,13 @@
-from ExpResCriteriaCommon import ExpResCriterion_RTT, \
-                                 ExpResCriterion_DstResponded, \
-                                 ExpResCriterion_DstIP
-from ExpResCriteriaTraceroute import ExpResCriterion_DstAS, \
-                                     ExpResCriterion_ASPath, \
-                                     ExpResCriterion_UpstreamAS
-from ExpResCriteriaSSL import ExpResCriterion_CertFP
-from ExpResCriteriaDNS import ExpResCriterion_DNSFlags, \
-                              ExpResCriterion_EDNS, \
-                              ExpResCriterion_DNSAnswers
+from .ExpResCriteriaCommon import ExpResCriterion_RTT, \
+                                  ExpResCriterion_DstResponded, \
+                                  ExpResCriterion_DstIP
+from .ExpResCriteriaTraceroute import ExpResCriterion_DstAS, \
+                                      ExpResCriterion_ASPath, \
+                                      ExpResCriterion_UpstreamAS
+from .ExpResCriteriaSSL import ExpResCriterion_CertFP
+from .ExpResCriteriaDNS import ExpResCriterion_DNSFlags, \
+                               ExpResCriterion_EDNS, \
+                               ExpResCriterion_DNSAnswers
 
 
 CRITERIA_CLASSES_COMMON = [

@@ -1,5 +1,5 @@
-from Errors import ConfigError
-from Helpers import BasicConfigElement
+from .Errors import ConfigError
+from .Helpers import BasicConfigElement
 
 
 class ExpResCriterion(BasicConfigElement):

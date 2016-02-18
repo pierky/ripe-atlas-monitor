@@ -1,12 +1,14 @@
+from six.moves import input
 import os
 
 from ..Config import Config
 from ..Doc import build_monitor_cfg_tpl
 from pierky.ripeatlasmonitor.Monitor import Monitor
+from pierky.ripeatlasmonitor.Logging import logger
 from pierky.ripeatlasmonitor.Errors import RIPEAtlasMonitorError, \
                                            ProgramError, ArgumentError, \
                                            MissingFileError
-from utils import edit_file
+from .utils import edit_file
 
 
 def init_monitor_cfg_file(monitor_name, force):
@@ -21,8 +23,8 @@ def init_monitor_cfg_file(monitor_name, force):
             "configuration.".format(monitor_name)
         )
 
-    answer = raw_input("Do you want help comments to be removed "
-                       "from the new monitor's config template? [yes/NO] ")
+    answer = input("Do you want help comments to be removed "
+                   "from the new monitor's config template? [yes/NO] ")
 
     show_doc = answer.lower() != "yes"
 
@@ -74,25 +76,30 @@ def check_monitor_cfg_loop(name, verbose):
 
 
 def execute(args):
-    if args.command == "init-monitor":
-        init_monitor_cfg_file(args.monitor_name, args.force)
-        print("Monitor configuration initialized.")
+    logger.setup(0)
 
-        if edit_monitor(args.monitor_name):
-            check_monitor_cfg_loop(args.monitor_name, False)
+    try:
+        if args.command == "init-monitor":
+            init_monitor_cfg_file(args.monitor_name, args.force)
+            print("Monitor configuration initialized.")
 
-    elif args.command == "check-monitor":
-        if args.silent:
-            if check_monitor_cfg(args.monitor_name, args.verbose):
-                return 0
+            if edit_monitor(args.monitor_name):
+                check_monitor_cfg_loop(args.monitor_name, False)
+
+        elif args.command == "check-monitor":
+            if args.silent:
+                if check_monitor_cfg(args.monitor_name, args.verbose):
+                    return 0
+                else:
+                    return 1
             else:
-                return 1
-        else:
+                check_monitor_cfg_loop(args.monitor_name, args.verbose)
+
+        elif args.command == "edit-monitor":
+            edit_monitor(args.monitor_name, ask=False)
             check_monitor_cfg_loop(args.monitor_name, args.verbose)
 
-    elif args.command == "edit-monitor":
-        edit_monitor(args.monitor_name, ask=False)
-        check_monitor_cfg_loop(args.monitor_name, args.verbose)
-
-    else:
-        raise NotImplementedError()
+        else:
+            raise NotImplementedError()
+    except KeyboardInterrupt:
+        pass

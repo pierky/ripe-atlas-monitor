@@ -1,19 +1,20 @@
 import re
+import six
 import sys
 
-from Action import Action, ACTION_CLASSES
-from ExpectedResult import ExpectedResult
-from ExpResCriteria import CRITERIA_CLASSES, \
-                           CRITERIA_CLASSES_COMMON, \
-                           CRITERIA_CLASSES_TRACEROUTE, \
-                           CRITERIA_CLASSES_SSL, \
-                           CRITERIA_CLASSES_DNS
-from ExpResCriteriaDNS import ExpResCriterion_DNSAnswers, \
-                              ExpResCriterion_AnswersSection
-from ExpResCriteriaDNSRecords import ExpResCriterion_DNSRecord, \
-                                     HANDLED_RECORD_TYPES
-from Monitor import Monitor
-from Rule import Rule
+from .Action import Action, ACTION_CLASSES
+from .ExpectedResult import ExpectedResult
+from .ExpResCriteria import CRITERIA_CLASSES, \
+                            CRITERIA_CLASSES_COMMON, \
+                            CRITERIA_CLASSES_TRACEROUTE, \
+                            CRITERIA_CLASSES_SSL, \
+                            CRITERIA_CLASSES_DNS
+from .ExpResCriteriaDNS import ExpResCriterion_DNSAnswers, \
+                               ExpResCriterion_AnswersSection
+from .ExpResCriteriaDNSRecords import ExpResCriterion_DNSRecord, \
+                                      HANDLED_RECORD_TYPES
+from .Monitor import Monitor
+from .Rule import Rule
 
 
 def format_docstring(docstring):
@@ -23,14 +24,14 @@ def format_docstring(docstring):
     # and split into a list of lines:
     lines = docstring.expandtabs().splitlines()
     # Determine minimum indentation (first line doesn't count):
-    indent = sys.maxint
+    indent = six.MAXSIZE
     for line in lines[1:]:
         stripped = line.lstrip()
         if stripped:
             indent = min(indent, len(line) - len(stripped))
     # Remove indentation (first line is special):
     trimmed = [lines[0].strip()]
-    if indent < sys.maxint:
+    if indent < six.MAXSIZE:
         for line in lines[1:]:
             trimmed.append(line[indent:].rstrip())
     # Strip off trailing and leading blank lines:

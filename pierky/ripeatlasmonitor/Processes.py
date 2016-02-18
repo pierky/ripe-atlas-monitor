@@ -1,8 +1,8 @@
 from multiprocessing import Process
 
-from Errors import RIPEAtlasMonitorError
-from Logging import logger
-from Monitor import Monitor
+from .Errors import RIPEAtlasMonitorError
+from .Logging import logger
+from .Monitor import Monitor
 
 
 class RunMonitorProcess(Process):

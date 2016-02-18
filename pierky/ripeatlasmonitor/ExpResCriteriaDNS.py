@@ -1,8 +1,8 @@
-from Errors import ConfigError
-from ExpResCriteriaBase import ExpResCriterion
-from ExpResCriteriaDNSRecords import HANDLED_RECORD_TYPES
-from Logging import logger
-from ParsedResults import ParsedResult_DNSFlags, ParsedResult_EDNS
+from .Errors import ConfigError
+from .ExpResCriteriaBase import ExpResCriterion
+from .ExpResCriteriaDNSRecords import HANDLED_RECORD_TYPES
+from .Logging import logger
+from .ParsedResults import ParsedResult_DNSFlags, ParsedResult_EDNS
 
 
 class ExpResCriterion_DNSBased(ExpResCriterion):
@@ -275,7 +275,7 @@ class ExpResCriterion_DNSAnswers(ExpResCriterion_DNSBased):
         self.sections = []
 
         SECTIONS = ["answers", "authorities", "additionals"]
-        for section in self.dns_answers.keys():
+        for section in self.dns_answers:
             if section.lower() not in SECTIONS:
                 raise ConfigError(
                     "Invalid section: {}. Must be one of {}".format(

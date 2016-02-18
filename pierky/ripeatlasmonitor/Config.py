@@ -4,7 +4,7 @@ import sys
 import yaml
 
 
-from Errors import MissingFileError, GlobalConfigError
+from .Errors import MissingFileError, GlobalConfigError
 
 DEFAULT_CFG_PATH = "/etc/ripe-atlas-monitor/config.cfg"
 

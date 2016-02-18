@@ -1,8 +1,8 @@
 import IPy
 
-from Errors import ConfigError
-from Helpers import BasicConfigElement
-from Logging import logger
+from .Errors import ConfigError
+from .Helpers import BasicConfigElement
+from .Logging import logger
 
 
 class ExpResCriterion_DNSRecord(BasicConfigElement):

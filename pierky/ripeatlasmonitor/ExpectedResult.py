@@ -1,7 +1,7 @@
-from Errors import ConfigError, ResultProcessingError
-from ExpResCriteria import CRITERIA_CLASSES
-from Helpers import BasicConfigElement
-from Logging import logger
+from .Errors import ConfigError, ResultProcessingError
+from .ExpResCriteria import CRITERIA_CLASSES
+from .Helpers import BasicConfigElement
+from .Logging import logger
 
 
 class ExpectedResult(BasicConfigElement):

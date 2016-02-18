@@ -78,6 +78,7 @@ def main():
         title="commands",
         help="Run 'ripe-atlas-monitor <command> -h' for more details.",
         dest="command")
+    subparsers.required = True
 
     # init-config
 

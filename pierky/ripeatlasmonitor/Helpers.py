@@ -3,8 +3,8 @@ import fcntl
 import os
 from multiprocessing.managers import BaseManager
 
-from Errors import ConfigError, ProgramError
-from Logging import logger
+from .Errors import ConfigError, ProgramError
+from .Logging import logger
 from pierky.ipdetailscache import IPDetailsCache, \
                                   IPDetailsCacheIXPInformationError
 
@@ -86,7 +86,7 @@ class BasicConfigElement(object):
             )
 
         # Any unknown field?
-        for f in self.cfg.keys():
+        for f in self.cfg:
             if f not in CFG_FIELDS:
                 raise ConfigError(
                     "Unknown configuration field: {}".format(f)

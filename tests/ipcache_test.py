@@ -1,5 +1,5 @@
-from base import TestBasicUnit
-from data import *
+from .base import TestBasicUnit
+from .data import *
 from pierky.ripeatlasmonitor.Monitor import Monitor
 
 class TestIPCache(TestBasicUnit):

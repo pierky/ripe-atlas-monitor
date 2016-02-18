@@ -1,7 +1,7 @@
 from ripe.atlas.sagan import PingResult, TracerouteResult, DnsResult, SslResult
 
-from Errors import ProgramError, ResultProcessingError
-from Logging import logger
+from .Errors import ProgramError, ResultProcessingError
+from .Logging import logger
 
 
 class ParsedResult(object):
