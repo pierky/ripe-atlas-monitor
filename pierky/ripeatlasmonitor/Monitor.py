@@ -840,12 +840,12 @@ class Monitor(BasicConfigElement):
                 )
             return r
 
-        if top_countries > 0 and len(probes_per_country) > 0:
+        if top_countries and len(probes_per_country) > 0:
             r += top_most(probes_per_country,
                           "Analyzing results from {k} ({n} probes)...\n",
                           top_countries)
 
-        if top_asns > 0 and len(probes_per_src_asn) > 0:
+        if top_asns and len(probes_per_src_asn) > 0:
             r += top_most(probes_per_src_asn,
                           "Analyzing results from AS{k} ({n} probes)...\n",
                           top_asns)
