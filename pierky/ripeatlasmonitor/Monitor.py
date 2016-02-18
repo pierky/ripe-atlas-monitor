@@ -931,7 +931,9 @@ class Monitor(BasicConfigElement):
         def format_key_rtt(x):
             return "{:>7.2f} ms".format(x) if x else "none"
 
-        def normalize_rtt_ranges(rtts):
+        def normalize_rtt_ranges(src_rtts):
+            rtts = [rtt for rtt in src_rtts if rtt is not None]
+
             min_rtt = int(min(rtts))
             max_rtt = int(max(rtts))
             increment = (max_rtt - min_rtt) / 6
