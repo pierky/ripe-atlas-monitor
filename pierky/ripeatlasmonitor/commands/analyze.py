@@ -36,7 +36,10 @@ def execute(args):
             )
 
         print("Downloading and processing results... please wait")
-        print(monitor.analyze(**vars(args)))
+        try:
+            print(monitor.analyze(**vars(args)))
+        finally:
+            ip_cache.save()
     except KeyboardInterrupt:
         pass
     finally:
