@@ -35,11 +35,8 @@ def run_one(args):
                 "results streaming."
             )
 
-    try:
-        monitor.run(start=args.start_time, stop=args.stop_time,
-                    latest_results=args.latest_results)
-    finally:
-        ip_cache.save()
+    monitor.run(start=args.start_time, stop=args.stop_time,
+                latest_results=args.latest_results)
 
 
 def run_multiple(args):
@@ -92,8 +89,6 @@ def run_multiple(args):
             logger.error(str(e), exc_info=True)
     except Exception as e:
         logger.error(str(e), exc_info=True)
-    finally:
-        ip_cache.save()
 
     logger.info("Main process completed.")
 
