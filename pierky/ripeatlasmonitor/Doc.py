@@ -1,6 +1,5 @@
 import re
 import six
-import sys
 
 from .Action import Action, ACTION_CLASSES
 from .ExpectedResult import ExpectedResult

@@ -2,11 +2,7 @@ import datetime
 import json
 import operator
 import os
-import six
-if six.PY2:
-    from Queue import Queue, Empty
-else:
-    from queue import Queue, Empty
+from six.moves.queue import Queue, Empty
 import time
 from threading import Thread
 
