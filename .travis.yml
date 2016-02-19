@@ -4,6 +4,7 @@ env:
   - TOXENV=py27
   - TOXENV=py27-pyflakes
   - TOXENV=py27-pep8
+  - TOXENV=py34
 install:
   - pip install tox
 script:
