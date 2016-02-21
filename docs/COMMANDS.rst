@@ -56,6 +56,8 @@ In this mode, the ``--start``, ``--stop`` and ``--latest`` arguments allow to se
 Time frame options
 ~~~~~~~~~~~~~~~~~~
 
+By default, for measurements which are still running, results are fetched continously every *measurement's interval* seconds, starting from the time of the last received result.
+
 - The ``--start`` and ``--stop`` arguments set the lower and upper bounds for results downloading and processing. They can be used togheter or separately.
 
 - If the ``--start`` argument is not given, results are downloaded starting from the last processed result's timestamp, or from the last 7 days (configurable in the global config) if the measurement has not been processed yet.
@@ -63,6 +65,8 @@ Time frame options
 - If the ``--stop`` argument is missing, results up to the last produced one are downloaded.
 
 - The ``--latest`` argument can be used when the other two are not passed and it allows to download the `latest results <https://atlas.ripe.net/docs/measurement-latest-api/>`_ only.
+
+- For running measurements, the ``--dont-wait`` argument allows to run a monitor against up to date results then exiting, without waiting for measurement's interval before running it again.
 
 Multiple monitors: ``daemonize`` command
 ****************************************

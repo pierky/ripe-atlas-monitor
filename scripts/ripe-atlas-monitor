@@ -212,7 +212,11 @@ def main():
     group = sub_parser.add_argument_group(
         title="Results timeframe",
         description="The following arguments can be used only when the "
-                    "results streaming is disabled.")
+                    "results streaming is disabled. By default, for "
+                    "measurements which are still running results are "
+                    "fetched continously every <measurement's interval> "
+                    "seconds, starting from the time of the last received "
+                    "result.")
 
     group.add_argument(
         "--start-time",
@@ -223,12 +227,22 @@ def main():
         metavar="YYYY-MM-DDThh:mm:ss",
         dest="start_time")
 
-    group.add_argument(
+    subgroup = group.add_mutually_exclusive_group()
+
+    subgroup.add_argument(
         "--stop-time",
         help="Results are fetched up to this date/time.",
         type=validator_datetime,
         metavar="YYYY-MM-DDThh:mm:ss",
         dest="stop_time")
+
+    subgroup.add_argument(
+        "--dont-wait",
+        action="store_true",
+        help="For measurements which are still running, fetch results but "
+             "don't wait for the measurement's interval before processing "
+             "new results again.",
+        dest="dont_wait")
 
     group.add_argument(
         "-l", "--latest",

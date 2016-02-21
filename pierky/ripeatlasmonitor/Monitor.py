@@ -734,7 +734,7 @@ class Monitor(BasicConfigElement):
         except KeyboardInterrupt:
             pass
 
-    def run(self, start=None, stop=None, latest_results=None):
+    def run(self, start=None, stop=None, latest_results=None, dont_wait=False):
         self.acquire_lock()
 
         logger.info("Starting {}".format(str(self)))
@@ -744,7 +744,7 @@ class Monitor(BasicConfigElement):
                 self.run_stream()
 
             elif not self.msm_is_oneoff and self.msm_is_running and \
-                    not latest_results and not stop:
+                    not latest_results and not stop and not dont_wait:
 
                 self.run_continously(start=start)
 

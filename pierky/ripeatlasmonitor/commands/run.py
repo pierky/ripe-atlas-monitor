@@ -28,15 +28,18 @@ def run_one(args):
             monitor.stream_timeout = args.stream_timeout
 
     if monitor.stream:
-        if args.start_time or args.stop_time or args.latest_results:
+        if args.start_time or args.stop_time or args.latest_results or \
+                args.dont_wait:
+
             raise ArgumentError(
-                "The --start-time, --stop-time and --latest "
-                "arguments can't be used for monitors which use "
+                "The 'Results timeframe' arguments (--start-time, --stop-time "
+                "and so on) can't be used for monitors which use "
                 "results streaming."
             )
 
     monitor.run(start=args.start_time, stop=args.stop_time,
-                latest_results=args.latest_results)
+                latest_results=args.latest_results,
+                dont_wait=args.dont_wait)
 
 
 def run_multiple(args):
