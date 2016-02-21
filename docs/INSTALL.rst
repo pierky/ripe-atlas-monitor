@@ -4,7 +4,7 @@ Requirements & Installation
 Requirements
 ++++++++++++
 
-This is a tool written in Python for Linux environments; currently, only Python 2.7 is supported but there are plans to have it working in version 3 too. Windows is not supported at all.
+This is a tool written in Python for Linux environments; currently, Python 2.7 and 3.4 are supported. Windows is not supported at all.
 
 It is based on two RIPE NCC packages: `RIPE Atlas Sagan <https://github.com/RIPE-NCC/ripe.atlas.sagan>`_ and `RIPE Atlas Cousteau <https://github.com/RIPE-NCC/ripe-atlas-cousteau>`_, both available on GitHub and PyPI. It also has some other dependencies, they are reported in the `setup.py` file and managed by the `pip` installer.
 

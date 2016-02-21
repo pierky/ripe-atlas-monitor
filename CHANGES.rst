@@ -1,6 +1,25 @@
 Changelog
 =========
 
+0.1.4
+-----
+
+new features
+++++++++++++
+
+- Python 3.4 support
+
+improvements
+++++++++++++
+
+- ``-m`` argument for ``analyze`` command, to gather msm id and auth key from the monitor itself
+- ``--dont-wait`` argument for ``run`` command
+
+fixes
++++++
+
+- herror handling for null RTT results in ``analyze`` command
+
 0.1.3
 -----
 
