@@ -119,10 +119,14 @@ class Probe(object):
         self.asn = probe["asn_v{}".format(af)]  # ASN for the current msm AF
 
     def __str__(self):
-        return "probe ID {} (AS{} - {})".format(
-            self.id,
-            self.asn,
-            self.country_code
+        if self.asn is not None:
+            tpl = "probe ID {id} (AS{asn}, {cc})"
+        else:
+            tpl = "probe ID {id} ({cc})"
+        return tpl.format(
+            id=self.id,
+            asn=self.asn,
+            cc=self.country_code
         )
 
 

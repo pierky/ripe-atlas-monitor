@@ -1,6 +1,6 @@
 import datetime
+from itertools import groupby
 import json
-import operator
 import os
 from six.moves.queue import Queue, Empty
 import time
@@ -852,7 +852,7 @@ class Monitor(BasicConfigElement):
 
         parsed_results = {}
 
-        def analyze_classes(classes, *args):
+        def analyze_classes(classes, probe_id, *args):
             for c in classes:
                 parsed_result = c(self, *args)
                 try:
@@ -863,21 +863,29 @@ class Monitor(BasicConfigElement):
                 for prop in parsed_result.PROPERTIES:
                     if prop not in parsed_results:
                         parsed_results[prop] = []
-                    parsed_results[prop].append(getattr(parsed_result, prop))
+                    parsed_results[prop].append(
+                        (getattr(parsed_result, prop), probe_id)
+                    )
 
         for result in results:
 
             analyze_classes([ParsedResult_RTT, ParsedResult_DstResponded,
                              ParsedResult_DstIP, ParsedResult_CertFps,
-                             ParsedResult_TracerouteBased], result)
+                             ParsedResult_TracerouteBased], result.probe_id,
+                            result)
 
             if result.type == "dns":
                 for response in result.responses:
                     if response.abuf:
                         analyze_classes([ParsedResult_DNSFlags,
-                                         ParsedResult_EDNS], result, response)
+                                         ParsedResult_EDNS], result.probe_id,
+                                        result, response)
 
         def group_by(src, title, format_key=None, show_times=True):
+            # src = list of (value, probe) tuples
+
+            SHOW_PROBE_IDS = 3
+
             r = ""
 
             if isinstance(src, list):
@@ -886,7 +894,9 @@ class Monitor(BasicConfigElement):
                 if src not in parsed_results:
                     return r
                 src_list = parsed_results[src]
-            sorted_src_list = sorted([v for v in src_list if v is not None])
+            not_none_list = \
+                [(v, prb) for v, prb in src_list if v not in (None, "", [])]
+            sorted_src_list = sorted(not_none_list, key=lambda x: x[0])
 
             if len(sorted_src_list) == 0:
                 return r
@@ -897,30 +907,42 @@ class Monitor(BasicConfigElement):
             if not format_key:
                 format_key = no_format_key
 
-            key_cnt_dict = {
-                format_key(e):
-                sorted_src_list.count(e) for e in sorted_src_list
-            }
+            key_cnt_dict = {}
+            for v, v_prb_list in groupby(sorted_src_list, key=lambda x: x[0]):
+                prb_list = [probe for _, probe in list(v_prb_list)]
+                key_cnt_dict[format_key(v)] = {
+                    "cnt": len(list(prb_list)),
+                    "probes": prb_list
+                }
 
             if show_times:
                 sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                        key=operator.itemgetter(1, 0),
+                                        key=lambda x: (x[1]["cnt"], x[0]),
                                         reverse=True)
             else:
                 sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                        key=operator.itemgetter(0))
+                                        key=lambda x: x[0])
 
             r += title + "\n"
             r += "\n"
 
             longest_key = max([k for k in key_cnt_dict], key=len)
-            tpl = " {:>" + str(len(longest_key)) + "}"
+            tpl = " {key:>" + str(len(longest_key)) + "}"
             if show_times:
-                tpl += ": {} time{}"
-            tpl += "\n"
+                tpl += ": {times} time{times_s}"
+            tpl += ", {probes}{more_probe}\n"
 
-            for k, cnt in sorted_key_cnt:
-                r += tpl.format(k, cnt, "s" if cnt > 1 else "")
+            for k, e in sorted_key_cnt:
+                cnt = e["cnt"]
+                probes = sorted(e["probes"])
+                r += tpl.format(
+                    key=k, times=cnt, times_s="s" if cnt > 1 else "",
+                    probes=", ".join(
+                        map(str,
+                            map(self.get_probe, probes[0:SHOW_PROBE_IDS]))),
+                    more_probe=", ..." if len(probes) > SHOW_PROBE_IDS else ""
+                )
+
                 r += "\n"
 
             return r
@@ -936,22 +958,22 @@ class Monitor(BasicConfigElement):
         def format_key_rtt(x):
             return "{:>7.2f} ms".format(x) if x else "none"
 
-        def normalize_rtt_ranges(src_rtts):
-            rtts = [rtt for rtt in src_rtts if rtt is not None]
+        def normalize_rtt_ranges(src):
+            rtts_probes = [(rtt, prb) for rtt, prb in src if rtt is not None]
 
-            min_rtt = int(min(rtts))
-            max_rtt = int(max(rtts))
-            increment = (max_rtt - min_rtt) / 6
+            min_rtt = int(min([rtt for rtt, _ in rtts_probes]))
+            max_rtt = int(max([rtt for rtt, _ in rtts_probes]))
+            increment = int((max_rtt - min_rtt) / 6)
             if increment == 0:
                 increment = 1
             thresholds = [min_rtt + increment * (i + 1) for i in range(6)]
 
             res = []
-            for rtt in rtts:
+            for rtt, prb in rtts_probes:
                 if rtt < thresholds[0]:
-                    res.append("< {} ms".format(thresholds[0]))
+                    res.append(("< {} ms".format(thresholds[0]), prb))
                 elif rtt >= thresholds[-1]:
-                    res.append(">= {} ms".format(thresholds[-1]))
+                    res.append((">= {} ms".format(thresholds[-1]), prb))
                 else:
                     r = str(rtt)
                     for i in range(len(thresholds)-1):
@@ -960,7 +982,7 @@ class Monitor(BasicConfigElement):
                                 thresholds[i], thresholds[i+1]
                             )
                             break
-                    res.append(r)
+                    res.append((r, prb))
 
             return res
 
