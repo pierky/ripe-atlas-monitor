@@ -881,11 +881,15 @@ class Monitor(BasicConfigElement):
             r = ""
 
             if isinstance(src, list):
-                src_list = sorted([v for v in src if v is not None])
+                src_list = src
             else:
                 if src not in parsed_results:
                     return r
-                src_list = sorted(parsed_results[src])
+                src_list = parsed_results[src]
+            sorted_src_list = sorted([v for v in src_list if v is not None])
+
+            if len(sorted_src_list) == 0:
+                return r
 
             def no_format_key(k):
                 return str(k) if k else "none"
@@ -895,7 +899,7 @@ class Monitor(BasicConfigElement):
 
             key_cnt_dict = {
                 format_key(e):
-                src_list.count(e) for e in src_list
+                sorted_src_list.count(e) for e in sorted_src_list
             }
 
             if show_times:
