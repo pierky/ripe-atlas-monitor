@@ -126,8 +126,6 @@ class ParsedResult_CertFps(ParsedResult):
 
 class ParsedResult_TracerouteBased(ParsedResult):
 
-    PROPERTIES = ["as_path", "as_path_ixps"]
-
     @property
     def as_path(self):
         return self.get_attr_from_cache("as_path")
@@ -145,7 +143,7 @@ class ParsedResult_TracerouteBased(ParsedResult):
         # res_as_path contains the AS path with disregard of IXPs
         # example: IX1 is an IXP which doesn't announce its peering LAN pfx
         #   123 IX1 456 becomes res_as_path = ["123", "456"]
-        res_as_path = [str(probe.asn)]
+        res_as_path = []
 
         # res_as_path_ixps contains the AS path with 'IX' in place of IXP
         #   peering LAN for those IXPs that don't announce their peering
@@ -154,49 +152,102 @@ class ParsedResult_TracerouteBased(ParsedResult):
         #   123 IX1 456 ==> res_as_path_ixps = ["123", "IX", "456"]
         # example: IX2 is an IXP which do announce its peering LAN pfx
         #   123 IX2 (AS789) 456 ==> res_as_path_ixps = ["123", "789", "456"]
-        res_as_path_ixps = [str(probe.asn)]
+        res_as_path_ixps = []
 
-        try:
-            for hop in self.result.hops:
-                for pkt in hop.packets:
-                    if pkt.origin:
-                        ip = pkt.origin
+        if probe.asn is not None:
+            res_as_path.append("S")
+            res_as_path_ixps.append("S")
 
-                        ip_info = self.monitor.ip_cache.get_ip_info(ip)
+        for hop in self.result.hops:
+            for pkt in hop.packets:
+                if not pkt.origin:
+                    continue
 
-                        asn = ""
+                ip = pkt.origin
 
-                        if ip_info["ASN"].isdigit():
-                            asn = ip_info["ASN"]
+                try:
+                    ip_info = self.monitor.ip_cache.get_ip_info(ip)
+                except Exception as e:
+                    logger.error(
+                        "Can't get IP addresses / ASNs details: "
+                        "{}".format(str(e)),
+                        exc_info=True
+                    )
+                    raise ResultProcessingError(
+                        "Can't get IP addresses / ASNs details: "
+                        "{}".format(str(e))
+                    )
 
-                            if asn != res_as_path[-1]:
-                                res_as_path.append(asn)
+                asn = ""
 
-                            if asn != res_as_path_ixps[-1]:
-                                res_as_path_ixps.append(asn)
+                if ip_info["ASN"].isdigit():
+                    asn = ip_info["ASN"]
+                    if probe.asn is not None and asn == str(probe.asn):
+                        asn = "S"
 
-                            break
+                    if not res_as_path or asn != res_as_path[-1]:
+                        res_as_path.append(asn)
+                    if not res_as_path_ixps or asn != res_as_path_ixps[-1]:
+                        res_as_path_ixps.append(asn)
 
-                        elif ip_info["IsIXP"]:
-                            asn = "IX"
+                    break
+                elif ip_info["IsIXP"]:
+                    asn = "IX"
 
-                            if asn != res_as_path_ixps[-1]:
-                                res_as_path_ixps.append(asn)
+                    if not res_as_path_ixps or asn != res_as_path_ixps[-1]:
+                        res_as_path_ixps.append(asn)
 
-                            break
-        except Exception as e:
-            logger.error(
-                "Can't get IP addresses / ASNs details: "
-                "{}".format(str(e)),
-                exc_info=True
-            )
-            raise ResultProcessingError(
-                "Can't get IP addresses / ASNs details: "
-                "{}".format(str(e))
-            )
+                    break
 
         self.set_attr_to_cache("as_path", res_as_path)
         self.set_attr_to_cache("as_path_ixps", res_as_path_ixps)
+
+
+class ParsedResult_DstAS(ParsedResult_TracerouteBased):
+
+    PROPERTIES = ["dst_as"]
+
+    @property
+    def dst_as(self):
+        return self.get_attr_from_cache("dst_as")
+
+    def prepare(self):
+        ParsedResult_TracerouteBased.prepare(self)
+
+        if len(self.as_path) > 0:
+            dst_as = self.as_path[-1].replace(
+                "S", str(self.monitor.get_probe(self.result).asn)
+            )
+            dst_as = int(dst_as)
+            self.set_attr_to_cache("dst_as", dst_as)
+        else:
+            self.set_attr_to_cache("dst_as", None)
+
+
+class ParsedResult_UpstreamAS(ParsedResult_TracerouteBased):
+
+    PROPERTIES = ["upstream_as"]
+
+    @property
+    def upstream_as(self):
+        return self.get_attr_from_cache("upstream_as")
+
+    def prepare(self):
+        ParsedResult_TracerouteBased.prepare(self)
+
+        if len(self.as_path) > 1:
+            upstream_as = self.as_path[-2].replace(
+                "S", str(self.monitor.get_probe(self.result).asn)
+            )
+            upstream_as = int(upstream_as)
+            self.set_attr_to_cache("upstream_as", upstream_as)
+        else:
+            self.set_attr_to_cache("upstream_as", None)
+
+
+class ParsedResult_ASPath(ParsedResult_TracerouteBased):
+
+    PROPERTIES = ["as_path", "as_path_ixps"]
 
 
 class ParsedResult_DNSBased(ParsedResult):

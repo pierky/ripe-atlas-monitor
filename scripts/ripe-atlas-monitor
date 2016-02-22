@@ -303,6 +303,30 @@ def main():
         dest="key")
 
     sub_parser.add_argument(
+        "--show-all-rtts",
+        help="Show the full list of RTTs, even if very long.",
+        action="store_true",
+        dest="show_full_rtts")
+
+    sub_parser.add_argument(
+        "--show-all-aspaths",
+        help="Show the full list of AS paths, even if very long.",
+        action="store_true",
+        dest="show_full_aspaths")
+
+    sub_parser.add_argument(
+        "--show-all-dest-asns",
+        help="Show the full list of destination ASNs, even if very long.",
+        action="store_true",
+        dest="show_full_destasn")
+
+    sub_parser.add_argument(
+        "--show-all-upstream-asns",
+        help="Show the full list of upstream ASNs, even if very long.",
+        action="store_true",
+        dest="show_full_upstreamasn")
+
+    sub_parser.add_argument(
         "--show-stats",
         action="store_true",
         help="Show statistics about probes distribution.",

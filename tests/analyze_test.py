@@ -30,7 +30,7 @@ class TestAnalyze(TestBasicUnit):
         self.cfg["measurement-id"] = MSM_Results_Traceroute_IPv4
         r = self.analyze()
 
-        exp_r = """Median RTTs:
+        exp_r = """Unique median RTTs:
 
    98.34 ms, probe ID 12527 (AS25309, IT)
 
@@ -56,41 +56,60 @@ Unique destination IP addresses:
 
  66.220.156.68: 8 times, probe ID 713 (AS20912, IT), probe ID 738 (AS39759, IT), probe ID 832 (AS21034, IT), ...
 
+Destination AS:
+
+ 32934: 7 times, probe ID 713 (AS20912, IT), probe ID 738 (AS39759, IT), probe ID 832 (AS21034, IT), ...
+
+ 12363: 1 time, probe ID 24503 (AS12363, IT)
+
+Upstream AS:
+
+  8928: 1 time, probe ID 832 (AS21034, IT)
+
+ 60049: 1 time, probe ID 24535 (AS60049, IT)
+
+ 49360: 1 time, probe ID 11821 (AS49360, IT)
+
+ 25309: 1 time, probe ID 12527 (AS25309, IT)
+
+   137: 1 time, probe ID 12120 (AS137, IT)
+
+  1267: 1 time, probe ID 738 (AS39759, IT)
+
+  1200: 1 time, probe ID 713 (AS20912, IT)
+
 Unique AS path:
 
- 60049 5602 32934 60049 32934: 1 time, probe ID 24535 (AS60049, IT)
+              S 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
 
- 49360 1200 32934 49360 32934: 1 time, probe ID 11821 (AS49360, IT)
+         S 8928 32934: 1 time, probe ID 832 (AS21034, IT)
 
-             39759 1267 32934: 1 time, probe ID 738 (AS39759, IT)
+ S 5602 32934 S 32934: 1 time, probe ID 24535 (AS60049, IT)
 
-                  25309 32934: 1 time, probe ID 12527 (AS25309, IT)
+         S 1267 32934: 1 time, probe ID 738 (AS39759, IT)
 
-             21034 8928 32934: 1 time, probe ID 832 (AS21034, IT)
+    S 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
 
-        20912 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
+ S 1200 32934 S 32934: 1 time, probe ID 11821 (AS49360, IT)
 
-                    137 32934: 1 time, probe ID 12120 (AS137, IT)
-
-                        12363: 1 time, probe ID 24503 (AS12363, IT)
+                    S: 1 time, probe ID 24503 (AS12363, IT)
 
 Unique AS path (with IXPs networks):
 
- 60049 5602 IX 32934 60049 32934: 1 time, probe ID 24535 (AS60049, IT)
+              S IX 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
 
-    49360 1200 32934 49360 32934: 1 time, probe ID 11821 (AS49360, IT)
+            S 8928 32934: 1 time, probe ID 832 (AS21034, IT)
 
-             39759 1267 IX 32934: 1 time, probe ID 738 (AS39759, IT)
+ S 5602 IX 32934 S 32934: 1 time, probe ID 24535 (AS60049, IT)
 
-                  25309 IX 32934: 1 time, probe ID 12527 (AS25309, IT)
+         S 1267 IX 32934: 1 time, probe ID 738 (AS39759, IT)
 
-                21034 8928 32934: 1 time, probe ID 832 (AS21034, IT)
+       S 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
 
-           20912 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
+    S 1200 32934 S 32934: 1 time, probe ID 11821 (AS49360, IT)
 
-                    137 IX 32934: 1 time, probe ID 12120 (AS137, IT)
+                       S: 1 time, probe ID 24503 (AS12363, IT)"""
 
-                           12363: 1 time, probe ID 24503 (AS12363, IT)"""
         self.equal(r, exp_r)
 
     def test_ping_msm(self):
@@ -99,7 +118,7 @@ Unique AS path (with IXPs networks):
         self.cfg["measurement-id"] = MSM_Results_Ping_IPv4
         r = self.analyze()
 
-        exp_r = """Median RTTs:
+        exp_r = """Unique median RTTs:
 
    14.32 ms, probe ID 13939 (AS51862, DE) 
 

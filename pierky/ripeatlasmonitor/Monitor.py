@@ -1,5 +1,6 @@
+from collections import Counter
 import datetime
-from itertools import groupby
+from itertools import groupby, combinations
 import json
 import os
 from six.moves.queue import Queue, Empty
@@ -19,8 +20,9 @@ from .Helpers import BasicConfigElement, Probe, LockFile
 from .Logging import logger
 from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
                            ParsedResult_DstIP, ParsedResult_CertFps, \
-                           ParsedResult_TracerouteBased, \
-                           ParsedResult_DNSFlags, ParsedResult_EDNS
+                           ParsedResult_DstAS, ParsedResult_UpstreamAS, \
+                           ParsedResult_ASPath, ParsedResult_DNSFlags, \
+                           ParsedResult_EDNS
 from ripe.atlas.cousteau import AtlasResultsRequest, AtlasLatestRequest, \
                                 ProbeRequest, AtlasStream, Measurement
 from ripe.atlas.cousteau.exceptions import CousteauGenericError, \
@@ -774,7 +776,7 @@ class Monitor(BasicConfigElement):
             if result.probe_id not in probe_ids:
                 probe_ids.append(result.probe_id)
 
-        r = self.analyze_results(results)
+        r = self.analyze_results(results, **kwargs)
 
         ccs = {}
         asns = {}
@@ -847,7 +849,7 @@ class Monitor(BasicConfigElement):
                           top_asns)
         return r
 
-    def analyze_results(self, results):
+    def analyze_results(self, results, **kwargs):
         r = ""
 
         parsed_results = {}
@@ -871,8 +873,8 @@ class Monitor(BasicConfigElement):
 
             analyze_classes([ParsedResult_RTT, ParsedResult_DstResponded,
                              ParsedResult_DstIP, ParsedResult_CertFps,
-                             ParsedResult_TracerouteBased], result.probe_id,
-                            result)
+                             ParsedResult_DstAS, ParsedResult_UpstreamAS,
+                             ParsedResult_ASPath], result.probe_id, result)
 
             if result.type == "dns":
                 for response in result.responses:
@@ -881,25 +883,23 @@ class Monitor(BasicConfigElement):
                                          ParsedResult_EDNS], result.probe_id,
                                         result, response)
 
-        def group_by(src, title, format_key=None, show_times=True):
+        def group_by(src, format_key=None):#, show_times=True, top_n=None):
             # src = list of (value, probe) tuples
-
-            SHOW_PROBE_IDS = 3
-
-            r = ""
 
             if isinstance(src, list):
                 src_list = src
             else:
                 if src not in parsed_results:
-                    return r
+                    return ""
                 src_list = parsed_results[src]
+
             not_none_list = \
                 [(v, prb) for v, prb in src_list if v not in (None, "", [])]
+
             sorted_src_list = sorted(not_none_list, key=lambda x: x[0])
 
             if len(sorted_src_list) == 0:
-                return r
+                return ""
 
             def no_format_key(k):
                 return str(k) if k else "none"
@@ -914,6 +914,24 @@ class Monitor(BasicConfigElement):
                     "cnt": len(list(prb_list)),
                     "probes": prb_list
                 }
+            return key_cnt_dict
+
+        def print_group_by_result(key_cnt_dict, title, show_times=True,
+                                  has_probes=False, top_n=None):
+            SHOW_PROBE_IDS = 3
+
+            r = ""
+            r += title + "\n"
+            r += "\n"
+
+            longest_key = max([k for k in key_cnt_dict], key=len)
+            tpl = " {key:>" + str(len(longest_key)) + "}"
+            if show_times:
+                tpl += ": {times} time{times_s}"
+
+            if has_probes:
+                tpl += ", {probes}{more_probe}"
+            tpl += "\n"
 
             if show_times:
                 sorted_key_cnt = sorted(key_cnt_dict.items(),
@@ -923,18 +941,17 @@ class Monitor(BasicConfigElement):
                 sorted_key_cnt = sorted(key_cnt_dict.items(),
                                         key=lambda x: x[0])
 
-            r += title + "\n"
-            r += "\n"
-
-            longest_key = max([k for k in key_cnt_dict], key=len)
-            tpl = " {key:>" + str(len(longest_key)) + "}"
-            if show_times:
-                tpl += ": {times} time{times_s}"
-            tpl += ", {probes}{more_probe}\n"
+            if top_n:
+                sorted_key_cnt = sorted_key_cnt[0:top_n]
 
             for k, e in sorted_key_cnt:
                 cnt = e["cnt"]
-                probes = sorted(e["probes"])
+
+                if has_probes:
+                    probes = sorted(e["probes"])
+                else:
+                    probes = []
+
                 r += tpl.format(
                     key=k, times=cnt, times_s="s" if cnt > 1 else "",
                     probes=", ".join(
@@ -955,8 +972,40 @@ class Monitor(BasicConfigElement):
             else:
                 return "none"
 
-        def format_key_rtt(x):
-            return "{:>7.2f} ms".format(x) if x else "none"
+        def print_prop(prop, title, format_key=None, show_times=True,
+                       print_short_list_function=None, short_list_title=None,
+                       show_full_list=False, show_full_list_arg=None):
+
+            r = ""
+
+            if prop in parsed_results:
+                src_list = parsed_results[prop]
+
+                key_cnt_dict = group_by(src_list, format_key)
+
+                if len(key_cnt_dict) <= 10 or show_full_list:
+                    r += print_group_by_result(key_cnt_dict, title, show_times,
+                                               has_probes=True, top_n=None)
+                    return r
+
+                if short_list_title:
+                    if print_short_list_function:
+                        r += print_short_list_function(src_list,
+                                                       short_list_title)
+                    else:
+                        r += print_group_by_result(key_cnt_dict,
+                                                   short_list_title,
+                                                   show_times,
+                                                   has_probes=True,
+                                                   top_n=10)
+                    if show_full_list_arg:
+                        r += ("  (use the {} argument "
+                              "to show the full list)\n\n").format(
+                                show_full_list_arg)
+            return r
+
+        # --------------------------------------------------------
+        # RTT
 
         def normalize_rtt_ranges(src):
             rtts_probes = [(rtt, prb) for rtt, prb in src if rtt is not None]
@@ -986,39 +1035,90 @@ class Monitor(BasicConfigElement):
 
             return res
 
-        if "rtt" in parsed_results:
-            rtts = parsed_results["rtt"]
+        def print_rtt_ranges(src_list, title):
+            normalized_rtts = normalize_rtt_ranges(src_list)
+            key_cnt_dict = group_by(normalized_rtts)
+            return print_group_by_result(key_cnt_dict, title)
 
-            if len(rtts) > 10:
-                normalized_rtts = normalize_rtt_ranges(parsed_results["rtt"])
+        def format_key_rtt(x):
+            return "{:>7.2f} ms".format(x) if x else "none"
 
-                r += group_by(normalized_rtts, "Median RTTs:")
-            else:
-                r += group_by(rtts, "Median RTTs:", show_times=False,
-                              format_key=format_key_rtt)
+        r += print_prop("rtt", "Unique median RTTs:",
+                        format_key=format_key_rtt,
+                        show_times=False,
+                        print_short_list_function=print_rtt_ranges,
+                        short_list_title="Median RTTs:",
+                        show_full_list=kwargs.get("show_full_rtts"),
+                        show_full_list_arg="--show-all-rtts")
 
-        r += group_by("responded", "Destination responded:",
-                      format_key=format_key_bool)
+        # --------------------------------------------------------
 
-        r += group_by("dst_ip", "Unique destination IP addresses:")
+        r += print_prop("responded", "Destination responded:",
+                        format_key=format_key_bool)
+
+        r += print_prop("dst_ip", "Unique destination IP addresses:",
+                        short_list_title="Most common destination "
+                                         "IP addresses:")
 
         # TODO: better format for empty list
-        r += group_by("cer_fps", "Unique SSL certificate fingerprints:",
-                      format_key=lambda x: ",\n ".join(x))
+        r += print_prop("cer_fps", "Unique SSL certificate fingerprints:",
+                        format_key=lambda x: ",\n ".join(x))
 
-        r += group_by("as_path", "Unique AS path:",
-                      format_key=lambda k: " ".join(map(str, k)))
+        r += print_prop("dst_as", "Destination AS:",
+                        short_list_title="Most common destination ASs:",
+                        show_full_list=kwargs.get("show_full_destasn"),
+                        show_full_list_arg="--show-all-dest-asns")
 
-        r += group_by("as_path_ixps", "Unique AS path (with IXPs networks):",
-                      format_key=lambda k: " ".join(map(str, k)))
+        r += print_prop("upstream_as", "Upstream AS:",
+                        short_list_title="Most common upstream ASs:",
+                        show_full_list=kwargs.get("show_full_upstreamasn"),
+                        show_full_list_arg="--show-all-upstream-asns")
 
-        r += group_by("flags", "Unique DNS flags combinations:",
-                      format_key=lambda k: ", ".join(k))
+        # --------------------------------------------------------
+        # AS path
 
-        r += group_by("edns", "EDNS present:", format_key=format_key_bool)
+        def find_common_aspath(src):
+            # Stolen from http://codereview.stackexchange.com/questions/108052/
+            sequences = [as_path for as_path, _ in src if as_path != []]
+            counter = Counter(seq[i:j]
+                              for seq in map(tuple, sequences)
+                              for i, j in combinations(range(len(seq) + 1), 2))
+            ordered = sorted(counter.items(), key=lambda x: x[1], reverse=True)
+            filtered = [(as_path, cnt)
+                        for as_path, cnt in ordered if len(as_path) > 1]
+            key_cnt_dict = {}
+            for as_path, cnt in filtered[0:10]:
+                key_cnt_dict[" ".join(as_path)] = {"cnt": cnt}
+            return key_cnt_dict
 
-        r += group_by("edns_size", "EDNS size:")
+        def print_common_aspath(src_list, title):
+            common_aspaths = find_common_aspath(src_list)
+            return print_group_by_result(common_aspaths, title, True, False)
 
-        r += group_by("edns_do", "EDNS DO flag:", format_key=format_key_bool)
+        r += print_prop("as_path", "Unique AS path:",
+                        format_key=lambda k: " ".join(map(str, k)),
+                        print_short_list_function=print_common_aspath,
+                        short_list_title="Most common ASs sequences:",
+                        show_full_list=kwargs.get("show_full_aspaths"),
+                        show_full_list_arg="--show-all-aspaths")
+
+        r += print_prop("as_path_ixps", "Unique AS path (with IXPs networks):",
+                        format_key=lambda k: " ".join(map(str, k)),
+                        print_short_list_function=print_common_aspath,
+                        short_list_title="Most common ASs sequences "
+                                         "(with IXPs networks):",
+                        show_full_list=kwargs.get("show_full_aspaths"),
+                        show_full_list_arg="--show-all-aspaths")
+
+        # --------------------------------------------------------
+
+        r += print_prop("flags", "Unique DNS flags combinations:",
+                        format_key=lambda k: ", ".join(k))
+
+        r += print_prop("edns", "EDNS present:", format_key=format_key_bool)
+
+        r += print_prop("edns_size", "EDNS size:")
+
+        r += print_prop("edns_do", "EDNS DO flag:", format_key=format_key_bool)
 
         return r

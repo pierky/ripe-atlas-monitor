@@ -3,24 +3,11 @@ import re
 from .Errors import ConfigError, ResultProcessingError
 from .ExpResCriteriaBase import ExpResCriterion
 from .Logging import logger
-from .ParsedResults import ParsedResult_TracerouteBased
+from .ParsedResults import ParsedResult_DstAS, ParsedResult_UpstreamAS, \
+                           ParsedResult_ASPath
 
 
-class ExpResCriterion_TracerouteBased(ExpResCriterion):
-
-    def __init__(self, cfg, expres):
-        ExpResCriterion.__init__(self, cfg, expres)
-
-        self.res_as_path = None
-        self.res_as_path_ixps = None
-
-    def prepare(self, result):
-        res = ParsedResult_TracerouteBased(self.expres.monitor, result)
-        self.res_as_path = res.as_path
-        self.res_as_path_ixps = res.as_path_ixps
-
-
-class ExpResCriterion_DstAS(ExpResCriterion_TracerouteBased):
+class ExpResCriterion_DstAS(ExpResCriterion):
     """Criterion: dst_as
 
     Verify the traceroute destination's AS number.
@@ -48,7 +35,7 @@ class ExpResCriterion_DstAS(ExpResCriterion_TracerouteBased):
     OPTIONAL_CFG_FIELDS = []
 
     def __init__(self, cfg, expres):
-        ExpResCriterion_TracerouteBased.__init__(self, cfg, expres)
+        ExpResCriterion.__init__(self, cfg, expres)
 
         self.dst_as = self._enforce_list("dst_as", int)
 
@@ -65,20 +52,24 @@ class ExpResCriterion_DstAS(ExpResCriterion_TracerouteBased):
             )
         )
 
+    def prepare(self, result):
+        res = ParsedResult_DstAS(self.expres.monitor, result)
+        self.res_dst_as = res.dst_as
+
     def result_matches(self, result):
         logger.debug(
             "  verifying if destination AS {} in {}...".format(
-                self.res_as_path[-1], self._str_list()
+                self.res_dst_as, self._str_list()
             )
         )
 
-        if int(self.res_as_path[-1]) not in self.dst_as:
+        if self.res_dst_as not in self.dst_as:
             return False
 
         return True
 
 
-class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
+class ExpResCriterion_ASPath(ExpResCriterion):
     """Criterion: as_path
 
     Verify the path of ASs traversed by a traceroute.
@@ -123,7 +114,7 @@ class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
     OPTIONAL_CFG_FIELDS = []
 
     def __init__(self, cfg, expres):
-        ExpResCriterion_TracerouteBased.__init__(self, cfg, expres)
+        ExpResCriterion.__init__(self, cfg, expres)
 
         self.as_path = self._enforce_list("as_path", str)
 
@@ -162,6 +153,11 @@ class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
             )
         )
 
+    def prepare(self, result):
+        res = ParsedResult_ASPath(self.expres.monitor, result)
+        self.res_as_path = res.as_path
+        self.res_as_path_ixps = res.as_path_ixps
+
     def result_matches(self, result):
         matching_as_path_found = False
 
@@ -187,7 +183,7 @@ class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
                 r" {} ".format(
                     exp_as_path.replace("S", str(probe.asn))
                 ),
-                " {} ".format(path)
+                " {} ".format(path.replace("S", str(probe.asn)))
             ):
                 logger.debug(
                     "    path {} matches {}".format(
@@ -200,7 +196,7 @@ class ExpResCriterion_ASPath(ExpResCriterion_TracerouteBased):
         return matching_as_path_found
 
 
-class ExpResCriterion_UpstreamAS(ExpResCriterion_TracerouteBased):
+class ExpResCriterion_UpstreamAS(ExpResCriterion):
     """Criterion: upstream_as
 
     Verify the traceroute destination upstream's AS number.
@@ -228,7 +224,7 @@ class ExpResCriterion_UpstreamAS(ExpResCriterion_TracerouteBased):
     OPTIONAL_CFG_FIELDS = []
 
     def __init__(self, cfg, expres):
-        ExpResCriterion_TracerouteBased.__init__(self, cfg, expres)
+        ExpResCriterion.__init__(self, cfg, expres)
 
         self.upstream_as = self._enforce_list("upstream_as", int)
 
@@ -246,24 +242,20 @@ class ExpResCriterion_UpstreamAS(ExpResCriterion_TracerouteBased):
             )
         )
 
+    def prepare(self, result):
+        res = ParsedResult_UpstreamAS(self.expres.monitor, result)
+        self.res_upstream_as = res.upstream_as
+
     def result_matches(self, result):
-        if len(self.res_as_path) > 1:
-            upstream_as = int(self.res_as_path[-2])
+        upstream_as = self.res_upstream_as
 
-            logger.debug(
-                "  verifying if upstream AS {} in {}...".format(
-                    upstream_as, self._str_list()
-                )
+        logger.debug(
+            "  verifying if upstream AS {} in {}...".format(
+                upstream_as, self._str_list()
             )
+        )
 
-            if upstream_as not in self.upstream_as:
-                return False
-        else:
-            raise ResultProcessingError(
-                "Can't verify target upstream AS: "
-                "only one ASN found ({}).".format(
-                    self.res_as_path[0]
-                )
-            )
+        if upstream_as not in self.upstream_as:
+            return False
 
         return True
