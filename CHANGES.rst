@@ -1,6 +1,24 @@
 Changelog
 =========
 
+0.1.5
+-----
+
+improvements
+++++++++++++
+
+- more options for the ``analyze`` command:
+  - show probes (up to 3) beside results
+  - destination AS and upstream AS results
+  - show common sequences/patterns among results
+- add ``--probes`` argument to ``run`` and ``analyze`` commands to filter results
+- email logging of error messages
+
+fixes
++++++
+
+- fix empty resultset handling in ``analyze`` cmd
+
 0.1.4
 -----
 
