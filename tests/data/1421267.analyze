@@ -1,0 +1,19 @@
+Unique DNS flags combinations:
+
+     qr, ra, rd: 2 times, probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+
+ ad, qr, ra, rd: 1 time, probe ID 10080 (AS4713, JP)
+
+EDNS present:
+
+ yes: 3 times, probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+
+EDNS size:
+
+ 4096: 2 times, probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+
+  512: 1 time, probe ID 10080 (AS4713, JP)
+
+EDNS DO flag:
+
+ yes: 3 times, probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)

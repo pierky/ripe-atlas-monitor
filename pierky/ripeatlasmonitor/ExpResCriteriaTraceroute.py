@@ -1,6 +1,6 @@
 import re
 
-from .Errors import ConfigError, ResultProcessingError
+from .Errors import ConfigError
 from .ExpResCriteriaBase import ExpResCriterion
 from .Logging import logger
 from .ParsedResults import ParsedResult_DstAS, ParsedResult_UpstreamAS, \

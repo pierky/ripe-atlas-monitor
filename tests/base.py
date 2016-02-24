@@ -64,7 +64,12 @@ class TestBasicUnit(unittest.TestCase):
         ).start()
         self.mock_probe_request.side_effect = AtlasRequest_get
 
+        # -------------------------------------------------------
         # IP Cache mocking
+        # Comment this block to enable IP info gathering when adding
+        # new measurements to tests; once completed, replace TS
+        # within ip_addr.json and ip_pref.json:
+        #    :%s/"TS": \d\+/"TS": 1451606400/g
 
         self.ip_cache_mocked = True
 
@@ -100,6 +105,9 @@ class TestBasicUnit(unittest.TestCase):
         ).start()
         self.mock_ip_cache_save.side_effect = ip_cache_save
 
+        # End of IP Cache mocking
+        # -------------------------------------------------------
+
         self.ip_cache = IPCache()
         self.ip_cache.setup(
             IP_ADDRESSES_CACHE_FILE="tests/data/ip_addr.json",
@@ -110,6 +118,8 @@ class TestBasicUnit(unittest.TestCase):
         )
 
     def tearDown(self):
+        if not self.ip_cache_mocked:
+            self.ip_cache.save()
         mock.patch.stopall()
 
     def check_ip_cache_fetch_cnt(self, ip_cnt=0):

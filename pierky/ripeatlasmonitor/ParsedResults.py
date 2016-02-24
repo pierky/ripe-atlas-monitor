@@ -6,14 +6,14 @@ from .Logging import logger
 
 class ParsedResult(object):
 
-    def __init__(self, monitor, result):
-        self.monitor = monitor
-        self.cache = monitor.parsed_res
+    def __init__(self, msm_proc_unit, result):
+        self.msm_proc_unit = msm_proc_unit
+        self.cache = msm_proc_unit.parsed_res
         self.result = result
 
     def __str__(self):
         return "parsed result for {} at {}".format(
-            self.monitor.get_probe(self.result), self.result.created
+            self.msm_proc_unit.get_probe(self.result), self.result.created
         )
 
     def _get_cached_data(self):
@@ -138,7 +138,7 @@ class ParsedResult_TracerouteBased(ParsedResult):
         if not isinstance(self.result, TracerouteResult):
             raise NotImplementedError()
 
-        probe = self.monitor.get_probe(self.result)
+        probe = self.msm_proc_unit.get_probe(self.result)
 
         # res_as_path contains the AS path with disregard of IXPs
         # example: IX1 is an IXP which doesn't announce its peering LAN pfx
@@ -166,7 +166,7 @@ class ParsedResult_TracerouteBased(ParsedResult):
                 ip = pkt.origin
 
                 try:
-                    ip_info = self.monitor.ip_cache.get_ip_info(ip)
+                    ip_info = self.msm_proc_unit.ip_cache.get_ip_info(ip)
                 except Exception as e:
                     logger.error(
                         "Can't get IP addresses / ASNs details: "
@@ -216,7 +216,7 @@ class ParsedResult_DstAS(ParsedResult_TracerouteBased):
 
         if len(self.as_path) > 0:
             dst_as = self.as_path[-1].replace(
-                "S", str(self.monitor.get_probe(self.result).asn)
+                "S", str(self.msm_proc_unit.get_probe(self.result).asn)
             )
             dst_as = int(dst_as)
             self.set_attr_to_cache("dst_as", dst_as)
@@ -237,7 +237,7 @@ class ParsedResult_UpstreamAS(ParsedResult_TracerouteBased):
 
         if len(self.as_path) > 1:
             upstream_as = self.as_path[-2].replace(
-                "S", str(self.monitor.get_probe(self.result).asn)
+                "S", str(self.msm_proc_unit.get_probe(self.result).asn)
             )
             upstream_as = int(upstream_as)
             self.set_attr_to_cache("upstream_as", upstream_as)
@@ -252,8 +252,8 @@ class ParsedResult_ASPath(ParsedResult_TracerouteBased):
 
 class ParsedResult_DNSBased(ParsedResult):
 
-    def __init__(self, monitor, result, response):
-        ParsedResult.__init__(self, monitor, result)
+    def __init__(self, msm_proc_unit, result, response):
+        ParsedResult.__init__(self, msm_proc_unit, result)
         self.response = response
 
         if not self.response.abuf:
@@ -262,7 +262,7 @@ class ParsedResult_DNSBased(ParsedResult):
     def __str__(self):
         return "parsed result for response ID {} of {} at {}".format(
             self.response.id,
-            self.monitor.get_probe(self.result), self.result.created
+            self.msm_proc_unit.get_probe(self.result), self.result.created
         )
 
     def _get_cached_data(self):

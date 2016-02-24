@@ -1,6 +1,4 @@
-from collections import Counter
 import datetime
-from itertools import groupby, combinations
 import json
 import os
 from six.moves.queue import Queue, Empty
@@ -14,19 +12,12 @@ from .Action import ACTION_CLASSES
 from .Config import Config
 from .Errors import ConfigError, MissingFileError, \
                     MeasurementProcessingError, \
-                    LockError, ProgramError, ResultProcessingError
+                    LockError, ProgramError
 from .ExpectedResult import ExpectedResult
-from .Helpers import BasicConfigElement, Probe, LockFile
+from .Helpers import BasicConfigElement, LockFile
 from .Logging import logger
-from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
-                           ParsedResult_DstIP, ParsedResult_CertFps, \
-                           ParsedResult_DstAS, ParsedResult_UpstreamAS, \
-                           ParsedResult_ASPath, ParsedResult_DNSFlags, \
-                           ParsedResult_EDNS
-from ripe.atlas.cousteau import AtlasResultsRequest, AtlasLatestRequest, \
-                                ProbeRequest, AtlasStream, Measurement
-from ripe.atlas.cousteau.exceptions import CousteauGenericError, \
-                                           APIResponseError
+from .MsmProcessingUnit import MsmProcessingUnit
+from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
 from .Rule import Rule
 
@@ -45,7 +36,7 @@ class MonitorResultsThread(Thread):
                 pass
 
 
-class Monitor(BasicConfigElement):
+class Monitor(BasicConfigElement, MsmProcessingUnit):
     """Monitor
 
     A monitor allows to process results from a measurement.
@@ -84,17 +75,6 @@ class Monitor(BasicConfigElement):
     OPTIONAL_CFG_FIELDS = ["measurement-id", "stream", "stream_timeout",
                            "actions", "key", "key_file", "descr",
                            "expected_results"]
-
-    @staticmethod
-    def _load_msm(id=None, key=None):
-        try:
-            return Measurement(id=id, key=key)
-        except (CousteauGenericError, APIResponseError) as e:
-            raise MeasurementProcessingError(
-                "Error while retrieving measurement details: {}".format(
-                    repr(e)
-                )
-            )
 
     def _get_statusfile_path(self):
         if self.monitor_name:
@@ -154,8 +134,6 @@ class Monitor(BasicConfigElement):
                 )
             )
 
-        self.ip_cache = ip_cache
-
         BasicConfigElement.__init__(self, cfg)
 
         self.normalize_fields()
@@ -168,54 +146,17 @@ class Monitor(BasicConfigElement):
 
         self._enforce_param("actions", dict)
 
-        self.msm_id = msm_id or self._enforce_param("measurement-id", int)
-
-        if self.msm_id is None:
-            raise ConfigError(
-                "Missing measurement ID: it must be specified in the "
-                "monitor configuration file or provided using the "
-                "command line argument --measurement-id."
-            )
-
-        self.key = key or self._enforce_param("key", str)
-        self.key_file = self._enforce_param("key_file", str)
-
-        if not self.key and self.key_file:
-            if os.path.isfile(self.key_file):
-                try:
-                    with open(self.key_file, "r") as f:
-                        self.key = f.read().rstrip()
-                except Exception as e:
-                    raise ConfigError(
-                        "Can't read RIPE Atlas Key file {}: {}".format(
-                            self.key_file, str(e)
-                        )
-                    )
-            else:
-                raise MissingFileError(self.key_file)
+        MsmProcessingUnit.__init__(
+            self,
+            ip_cache=ip_cache,
+            msm_id=msm_id or self._enforce_param("measurement-id", int),
+            key=key or self._enforce_param("key", str),
+            key_file=self._enforce_param("key_file", str)
+        )
 
         self.stream = self._enforce_param("stream", bool) or False
 
         self.stream_timeout = self._enforce_param("stream_timeout", int)
-
-        # Measurement validation
-
-        msm = self._load_msm(id=self.msm_id, key=self.key)
-
-        self.msm_is_public = msm.is_public
-        self.msm_type = msm.type.lower()
-        self.msm_af = int(msm.protocol)
-        self.msm_status = msm.status
-        self.msm_status_id = msm.status_id
-        self.msm_is_running = self.msm_status_id in [0, 1, 2]
-        self.msm_is_oneoff = msm.is_oneoff
-        self.msm_interval = msm.interval
-
-        if self.msm_type not in ["traceroute", "ping", "sslcert", "dns"]:
-            raise MeasurementProcessingError(
-                "Unhandled measurement's type: "
-                "{}".format(self.msm_type)
-            )
 
         if self.stream:
             self.ensure_streaming_enabled(ConfigError)
@@ -306,19 +247,6 @@ class Monitor(BasicConfigElement):
                         rule_n, str(e)
                     )
                 )
-
-        # dictionary of "<probe_id>": "<json>"
-        #   where <json> = https://atlas.ripe.net/docs/rest/#probe
-        self.probes = {}      # TODO: add a cache for probes
-
-        # Used by ExpResCriterion [get|set]_parsed_res.
-        # ExpResCriterion objects use this dictionary as
-        # a cache when they parse results and transform
-        # them in a way they can subsequently understand.
-        # Multiple criteria for the same ExpectedResult
-        # can parse results only once and store here the
-        # data they need for the result_matches method.
-        self.parsed_res = {}
 
         self.internal_labels = {
             "probes": {},
@@ -425,44 +353,6 @@ class Monitor(BasicConfigElement):
                         tpl = "    Action always fired: {}"
                     print(tpl.format(self.actions[action_name]))
                     print("")
-
-    def get_probe(self, origin):
-        if isinstance(origin, Result):
-            prb_id = origin.probe_id
-        elif isinstance(origin, str):
-            prb_id = int(origin)
-        elif isinstance(origin, int):
-            prb_id = origin
-        else:
-            raise ResultProcessingError(
-                "Unknown origin type: {}".format(type(origin))
-            )
-
-        return Probe(self.probes[str(prb_id)], self.msm_af)
-
-    def update_probes(self, results):
-        # List of probe IDs whose details must be retrieved
-        unknown_probes_ids = []
-
-        for json_result in results:
-            probe_id = json_result["prb_id"]
-            if str(probe_id) not in self.probes:
-                # Probe never seen before, add it to the list of
-                # probes to request details for
-                if probe_id not in unknown_probes_ids:
-                    unknown_probes_ids.append(probe_id)
-
-        # Get details about missing probes
-
-        if len(unknown_probes_ids) > 0:
-            try:
-                json_probes = ProbeRequest(id__in=unknown_probes_ids)
-                for json_probe in json_probes:
-                    self.probes[str(json_probe["id"])] = json_probe
-            except Exception as e:
-                raise ResultProcessingError(
-                    "Error while retrieving probes info: {}".format(str(e))
-                )
 
     def process_matching_probe(self, probe, rule_n, rule, result):
         logger.info("  probe ID {} matches".format(probe.id))
@@ -642,80 +532,10 @@ class Monitor(BasicConfigElement):
             self.exit_thread = True
             thread.join(timeout=10)
 
-    def download(self, start=None, stop=None, latest_results=None):
-        atlas_params = {
-            "msm_id": self.msm_id,
-            "key": self.key
-        }
-
-        logger.info("Downloading results...")
-
-        if not latest_results:
-            atlas_class = AtlasResultsRequest
-
-            msm_results_days_limit = Config.get("misc.msm_results_days_limit")
-
-            if start:
-                tpl = "{start}"
-
-            elif "latest_result_ts" in self.status:
-                start = datetime.datetime.fromtimestamp(
-                    self.status["latest_result_ts"]+1, tz=pytz.UTC
-                )
-                tpl = "{start} (last result received)"
-            elif msm_results_days_limit > 0:
-                start = datetime.date.today() + datetime.timedelta(
-                    days=-msm_results_days_limit
-                )
-                tpl = ("{start} (last {limit} days on the basis of global "
-                       "config msm_results_days_limit option)")
-            else:
-                tpl = (" - no start time given, downloading results from "
-                       "the beginning of the measurement")
-
-            logger.info(" - start time: " + tpl.format(
-                start=start,
-                limit=msm_results_days_limit
-            ))
-
-            if start:
-                atlas_params["start"] = start
-
-            if stop:
-                tpl = "{stop}"
-            else:
-                tpl = (" - no stop time given, downloading results "
-                       "until the last one")
-
-            logger.info(" - stop time: " + tpl.format(stop=stop))
-
-            if stop:
-                atlas_params["stop"] = stop
-        else:
-            logger.info(" - retrieving latest results only")
-
-            atlas_class = AtlasLatestRequest
-
-        try:
-            atlas_request = atlas_class(**atlas_params)
-
-            is_success, results = atlas_request.create()
-        except Exception as e:
-            raise MeasurementProcessingError(
-                "Error while retrieving results: {}".format(str(e))
-            )
-
-        if is_success:
-            return results
-        else:
-            err = str(results)
-            if isinstance(results, dict):
-                if "detail" in results:
-                    err = results["detail"]
-                elif "error" in results:
-                    if "detail" in results["error"]:
-                        err = results["error"]["detail"]
-            raise MeasurementProcessingError(str(err))
+    def get_latest_result_ts(self):
+        if "latest_result_ts" in self.status:
+            return self.status["latest_result_ts"]
+        return None
 
     def run_once(self, start=None, stop=None, latest_results=None):
         results = self.download(start=start, stop=stop,
@@ -755,370 +575,3 @@ class Monitor(BasicConfigElement):
                               latest_results=latest_results)
         finally:
             self.release_lock()
-
-    def analyze(self, **kwargs):
-        cc_threshold = kwargs.get("cc_threshold", 3)
-        top_countries = kwargs.get("top_countries", 0)
-        as_threshold = kwargs.get("as_threshold", 3)
-        top_asns = kwargs.get("top_asns", 0)
-        show_stats = kwargs.get("show_stats", False)
-
-        json_results = self.download(latest_results=True)
-        self.update_probes(json_results)
-
-        results = []
-        probe_ids = []
-
-        for result in json_results:
-            result = Result.get(result, on_error=Result.ACTION_IGNORE,
-                                on_malformation=Result.ACTION_IGNORE)
-            results.append(result)
-            if result.probe_id not in probe_ids:
-                probe_ids.append(result.probe_id)
-
-        r = self.analyze_results(results, **kwargs)
-
-        ccs = {}
-        asns = {}
-
-        for id in probe_ids:
-            prb = self.get_probe(id)
-
-            if prb.country_code:
-                if prb.country_code not in ccs:
-                    ccs[prb.country_code] = []
-                ccs[prb.country_code].append(id)
-
-            if prb.asn:
-                if prb.asn not in asns:
-                    asns[prb.asn] = []
-                asns[prb.asn].append(id)
-
-        probes_per_country = sorted({
-            cc: lst for cc, lst in ccs.items() if len(lst) > cc_threshold
-        }.items(), key=lambda x: len(x[1]), reverse=True)
-        probes_per_src_asn = sorted({
-            asn: lst for asn, lst in asns.items() if len(lst) > as_threshold
-        }.items(), key=lambda x: len(x[1]), reverse=True)
-
-        if show_stats:
-            r += "Statistics:\n"
-            r += "\n"
-
-            r += " - {} unique probes found\n".format(len(probe_ids))
-
-            if len(probes_per_country) > 0:
-                tpl = " - countries with more than {} probe{}:\n"
-            else:
-                tpl = " - no countries with more than {} probe{}\n"
-            r += tpl.format(cc_threshold, "s" if cc_threshold > 1 else "")
-
-            for cc, probes in probes_per_country:
-                r += "   - {}: {} probes\n".format(cc, len(probes))
-
-            if len(probes_per_src_asn) > 0:
-                tpl = " - source ASNs with more than {} probe{}:\n"
-            else:
-                tpl = " - no source ASNs with more than {} probe{}\n"
-            r += tpl.format(as_threshold, "s" if as_threshold > 1 else "")
-
-            for asn, probes in probes_per_src_asn:
-                r += "   - {:>7}: {} probes\n".format(asn, len(probes))
-
-            r += "\n"
-
-        def top_most(lst, tpl, top_cnt):
-            r = ""
-            for k, probes in lst[:top_cnt]:
-                r += tpl.format(k=k, n=len(probes))
-                r += "\n"
-
-                r += self.analyze_results(
-                    [result for result in results if result.probe_id in probes]
-                )
-            return r
-
-        if top_countries and len(probes_per_country) > 0:
-            r += top_most(probes_per_country,
-                          "Analyzing results from {k} ({n} probes)...\n",
-                          top_countries)
-
-        if top_asns and len(probes_per_src_asn) > 0:
-            r += top_most(probes_per_src_asn,
-                          "Analyzing results from AS{k} ({n} probes)...\n",
-                          top_asns)
-        return r
-
-    def analyze_results(self, results, **kwargs):
-        r = ""
-
-        parsed_results = {}
-
-        def analyze_classes(classes, probe_id, *args):
-            for c in classes:
-                parsed_result = c(self, *args)
-                try:
-                    parsed_result.prepare()
-                except NotImplementedError:
-                    continue
-
-                for prop in parsed_result.PROPERTIES:
-                    if prop not in parsed_results:
-                        parsed_results[prop] = []
-                    parsed_results[prop].append(
-                        (getattr(parsed_result, prop), probe_id)
-                    )
-
-        for result in results:
-
-            analyze_classes([ParsedResult_RTT, ParsedResult_DstResponded,
-                             ParsedResult_DstIP, ParsedResult_CertFps,
-                             ParsedResult_DstAS, ParsedResult_UpstreamAS,
-                             ParsedResult_ASPath], result.probe_id, result)
-
-            if result.type == "dns":
-                for response in result.responses:
-                    if response.abuf:
-                        analyze_classes([ParsedResult_DNSFlags,
-                                         ParsedResult_EDNS], result.probe_id,
-                                        result, response)
-
-        def group_by(src, format_key=None):#, show_times=True, top_n=None):
-            # src = list of (value, probe) tuples
-
-            if isinstance(src, list):
-                src_list = src
-            else:
-                if src not in parsed_results:
-                    return ""
-                src_list = parsed_results[src]
-
-            not_none_list = \
-                [(v, prb) for v, prb in src_list if v not in (None, "", [])]
-
-            sorted_src_list = sorted(not_none_list, key=lambda x: x[0])
-
-            if len(sorted_src_list) == 0:
-                return ""
-
-            def no_format_key(k):
-                return str(k) if k else "none"
-
-            if not format_key:
-                format_key = no_format_key
-
-            key_cnt_dict = {}
-            for v, v_prb_list in groupby(sorted_src_list, key=lambda x: x[0]):
-                prb_list = [probe for _, probe in list(v_prb_list)]
-                key_cnt_dict[format_key(v)] = {
-                    "cnt": len(list(prb_list)),
-                    "probes": prb_list
-                }
-            return key_cnt_dict
-
-        def print_group_by_result(key_cnt_dict, title, show_times=True,
-                                  has_probes=False, top_n=None):
-            SHOW_PROBE_IDS = 3
-
-            r = ""
-            r += title + "\n"
-            r += "\n"
-
-            longest_key = max([k for k in key_cnt_dict], key=len)
-            tpl = " {key:>" + str(len(longest_key)) + "}"
-            if show_times:
-                tpl += ": {times} time{times_s}"
-
-            if has_probes:
-                tpl += ", {probes}{more_probe}"
-            tpl += "\n"
-
-            if show_times:
-                sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                        key=lambda x: (x[1]["cnt"], x[0]),
-                                        reverse=True)
-            else:
-                sorted_key_cnt = sorted(key_cnt_dict.items(),
-                                        key=lambda x: x[0])
-
-            if top_n:
-                sorted_key_cnt = sorted_key_cnt[0:top_n]
-
-            for k, e in sorted_key_cnt:
-                cnt = e["cnt"]
-
-                if has_probes:
-                    probes = sorted(e["probes"])
-                else:
-                    probes = []
-
-                r += tpl.format(
-                    key=k, times=cnt, times_s="s" if cnt > 1 else "",
-                    probes=", ".join(
-                        map(str,
-                            map(self.get_probe, probes[0:SHOW_PROBE_IDS]))),
-                    more_probe=", ..." if len(probes) > SHOW_PROBE_IDS else ""
-                )
-
-                r += "\n"
-
-            return r
-
-        def format_key_bool(k):
-            if k is True:
-                return "yes"
-            elif k is False:
-                return "no"
-            else:
-                return "none"
-
-        def print_prop(prop, title, format_key=None, show_times=True,
-                       print_short_list_function=None, short_list_title=None,
-                       show_full_list=False, show_full_list_arg=None):
-
-            r = ""
-
-            if prop in parsed_results:
-                src_list = parsed_results[prop]
-
-                key_cnt_dict = group_by(src_list, format_key)
-
-                if len(key_cnt_dict) <= 10 or show_full_list:
-                    r += print_group_by_result(key_cnt_dict, title, show_times,
-                                               has_probes=True, top_n=None)
-                    return r
-
-                if short_list_title:
-                    if print_short_list_function:
-                        r += print_short_list_function(src_list,
-                                                       short_list_title)
-                    else:
-                        r += print_group_by_result(key_cnt_dict,
-                                                   short_list_title,
-                                                   show_times,
-                                                   has_probes=True,
-                                                   top_n=10)
-                    if show_full_list_arg:
-                        r += ("  (use the {} argument "
-                              "to show the full list)\n\n").format(
-                                show_full_list_arg)
-            return r
-
-        # --------------------------------------------------------
-        # RTT
-
-        def normalize_rtt_ranges(src):
-            rtts_probes = [(rtt, prb) for rtt, prb in src if rtt is not None]
-
-            min_rtt = int(min([rtt for rtt, _ in rtts_probes]))
-            max_rtt = int(max([rtt for rtt, _ in rtts_probes]))
-            increment = int((max_rtt - min_rtt) / 6)
-            if increment == 0:
-                increment = 1
-            thresholds = [min_rtt + increment * (i + 1) for i in range(6)]
-
-            res = []
-            for rtt, prb in rtts_probes:
-                if rtt < thresholds[0]:
-                    res.append(("< {} ms".format(thresholds[0]), prb))
-                elif rtt >= thresholds[-1]:
-                    res.append((">= {} ms".format(thresholds[-1]), prb))
-                else:
-                    r = str(rtt)
-                    for i in range(len(thresholds)-1):
-                        if rtt >= thresholds[i] and rtt < thresholds[i+1]:
-                            r = "{} - {} ms".format(
-                                thresholds[i], thresholds[i+1]
-                            )
-                            break
-                    res.append((r, prb))
-
-            return res
-
-        def print_rtt_ranges(src_list, title):
-            normalized_rtts = normalize_rtt_ranges(src_list)
-            key_cnt_dict = group_by(normalized_rtts)
-            return print_group_by_result(key_cnt_dict, title)
-
-        def format_key_rtt(x):
-            return "{:>7.2f} ms".format(x) if x else "none"
-
-        r += print_prop("rtt", "Unique median RTTs:",
-                        format_key=format_key_rtt,
-                        show_times=False,
-                        print_short_list_function=print_rtt_ranges,
-                        short_list_title="Median RTTs:",
-                        show_full_list=kwargs.get("show_full_rtts"),
-                        show_full_list_arg="--show-all-rtts")
-
-        # --------------------------------------------------------
-
-        r += print_prop("responded", "Destination responded:",
-                        format_key=format_key_bool)
-
-        r += print_prop("dst_ip", "Unique destination IP addresses:",
-                        short_list_title="Most common destination "
-                                         "IP addresses:")
-
-        # TODO: better format for empty list
-        r += print_prop("cer_fps", "Unique SSL certificate fingerprints:",
-                        format_key=lambda x: ",\n ".join(x))
-
-        r += print_prop("dst_as", "Destination AS:",
-                        short_list_title="Most common destination ASs:",
-                        show_full_list=kwargs.get("show_full_destasn"),
-                        show_full_list_arg="--show-all-dest-asns")
-
-        r += print_prop("upstream_as", "Upstream AS:",
-                        short_list_title="Most common upstream ASs:",
-                        show_full_list=kwargs.get("show_full_upstreamasn"),
-                        show_full_list_arg="--show-all-upstream-asns")
-
-        # --------------------------------------------------------
-        # AS path
-
-        def find_common_aspath(src):
-            # Stolen from http://codereview.stackexchange.com/questions/108052/
-            sequences = [as_path for as_path, _ in src if as_path != []]
-            counter = Counter(seq[i:j]
-                              for seq in map(tuple, sequences)
-                              for i, j in combinations(range(len(seq) + 1), 2))
-            ordered = sorted(counter.items(), key=lambda x: x[1], reverse=True)
-            filtered = [(as_path, cnt)
-                        for as_path, cnt in ordered if len(as_path) > 1]
-            key_cnt_dict = {}
-            for as_path, cnt in filtered[0:10]:
-                key_cnt_dict[" ".join(as_path)] = {"cnt": cnt}
-            return key_cnt_dict
-
-        def print_common_aspath(src_list, title):
-            common_aspaths = find_common_aspath(src_list)
-            return print_group_by_result(common_aspaths, title, True, False)
-
-        r += print_prop("as_path", "Unique AS path:",
-                        format_key=lambda k: " ".join(map(str, k)),
-                        print_short_list_function=print_common_aspath,
-                        short_list_title="Most common ASs sequences:",
-                        show_full_list=kwargs.get("show_full_aspaths"),
-                        show_full_list_arg="--show-all-aspaths")
-
-        r += print_prop("as_path_ixps", "Unique AS path (with IXPs networks):",
-                        format_key=lambda k: " ".join(map(str, k)),
-                        print_short_list_function=print_common_aspath,
-                        short_list_title="Most common ASs sequences "
-                                         "(with IXPs networks):",
-                        show_full_list=kwargs.get("show_full_aspaths"),
-                        show_full_list_arg="--show-all-aspaths")
-
-        # --------------------------------------------------------
-
-        r += print_prop("flags", "Unique DNS flags combinations:",
-                        format_key=lambda k: ", ".join(k))
-
-        r += print_prop("edns", "EDNS present:", format_key=format_key_bool)
-
-        r += print_prop("edns_size", "EDNS size:")
-
-        r += print_prop("edns_do", "EDNS DO flag:", format_key=format_key_bool)
-
-        return r

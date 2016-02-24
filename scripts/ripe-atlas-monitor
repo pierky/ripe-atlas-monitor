@@ -329,19 +329,24 @@ def main():
     sub_parser.add_argument(
         "--show-stats",
         action="store_true",
-        help="Show statistics about probes distribution.",
+        help="Show statistics about probes distribution by country and "
+             "by source AS.",
         dest="show_stats")
 
     sub_parser.add_argument(
         "--top-countries",
         type=int,
-        help="Analyze results for the top most countries.",
+        help="Produce individual reports for the N top most probes-populated "
+             "countries.",
+        metavar="N",
         dest="top_countries")
 
     sub_parser.add_argument(
         "--top-asns",
         type=int,
-        help="Analyze results for the top most source ASNs.",
+        help="Produce individual reports for the N top most probes-populated "
+             "source ASNs.",
+        metavar="N",
         dest="top_asns")
 
     argcomplete.autocomplete(parser)

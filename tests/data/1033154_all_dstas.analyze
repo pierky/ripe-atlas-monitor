@@ -1,0 +1,156 @@
+Median RTTs:
+
+    < 13 ms: 17 times, probe ID 3161 (AS1103, NL), probe ID 11675 (NL), probe ID 12081 (AS39647, NL), ...
+
+ 25 - 31 ms: 11 times, probe ID 2866 (AS33885, SE), probe ID 4777 (AS35574, IT), probe ID 11877 (AS57329, IT), ...
+
+   >= 43 ms: 10 times, probe ID 12266 (AS6848, BE), probe ID 10935 (AS29512, PL), probe ID 10904 (AS41733, RU), ...
+
+ 19 - 25 ms: 10 times, probe ID 3319 (AS2116, NO), probe ID 4916 (AS31246, CZ), probe ID 2523 (AS9143, NL), ...
+
+ 37 - 43 ms: 9 times, probe ID 11308 (AS41691, RU), probe ID 10886 (AS5391, HR), probe ID 11125 (AS12991, AT), ...
+
+ 13 - 19 ms: 9 times, probe ID 12482 (AS2856, GB), probe ID 12666 (AS25229, UA), probe ID 4015 (AS29014, DE), ...
+
+ 31 - 37 ms: 7 times, probe ID 10070 (AS12963, UA), probe ID 4746 (AS12741, PL), probe ID 3157 (AS680, DE), ...
+
+  (use the --show-all-rtts argument to show the full list)
+
+Destination responded:
+
+  no: 48 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
+
+ yes: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+Unique destination IP addresses:
+
+ 91.198.174.225: 77 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+Destination AS:
+
+ 43821: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+ 13030: 8 times, probe ID 4746 (AS12741, PL), probe ID 10611 (AS6830, NL), probe ID 11168 (AS8546, GB), ...
+
+  1299: 8 times, probe ID 3082 (AS2547, HU), probe ID 4553 (AS812, CA), probe ID 2736 (AS6830, DE), ...
+
+  1257: 6 times, probe ID 10886 (AS5391, HR), probe ID 11125 (AS12991, AT), probe ID 3319 (AS2116, NO), ...
+
+  6908: 2 times, probe ID 12482 (AS2856, GB), probe ID 2060 (AS25180, GB)
+
+ 57228: 1 time, probe ID 4557 (GB)
+
+ 44923: 1 time, probe ID 3735 (AS44923, RU)
+
+ 44637: 1 time, probe ID 4203 (AS44637, TR)
+
+ 43142: 1 time, probe ID 3564 (AS43142, FR)
+
+ 39602: 1 time, probe ID 4617 (AS39602, GB)
+
+ 38930: 1 time, probe ID 11476 (AS50222, RU)
+
+ 31334: 1 time, probe ID 11106 (AS31334, DE)
+
+ 25229: 1 time, probe ID 12666 (AS25229, UA)
+
+ 21430: 1 time, probe ID 3036 (AS21430, CZ)
+
+ 20825: 1 time, probe ID 2115 (AS20825, DE)
+
+ 12871: 1 time, probe ID 10180 (AS12871, NL)
+
+  9143: 1 time, probe ID 11208 (AS9143, NL)
+
+  9031: 1 time, probe ID 2101 (AS9031, BE)
+
+  6848: 1 time, probe ID 12266 (AS6848, BE)
+
+  5607: 1 time, probe ID 4102 (AS5607, GB)
+
+  5089: 1 time, probe ID 3999 (AS5089, GB)
+
+  3549: 1 time, probe ID 11148 (AS199339, NO)
+
+  3320: 1 time, probe ID 11194 (AS3320, DE)
+
+  3292: 1 time, probe ID 2673 (AS3292, DK)
+
+  3215: 1 time, probe ID 4206 (AS3215, FR)
+
+  1653: 1 time, probe ID 11684 (AS1653, SE)
+
+  1200: 1 time, probe ID 11905 (AS31334, DE)
+
+Upstream AS:
+
+  1200: 37 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+  1120: 3 times, probe ID 11125 (AS12991, AT), probe ID 4844 (AS31510, AT), probe ID 2178 (AS33890, AT)
+
+ 29512: 2 times, probe ID 4746 (AS12741, PL), probe ID 10935 (AS29512, PL)
+
+  6830: 2 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH)
+
+  1299: 2 times, probe ID 12266 (AS6848, BE), probe ID 11194 (AS3320, DE)
+
+   174: 2 times, probe ID 10886 (AS5391, HR), probe ID 4015 (AS29014, DE)
+
+ 42841: 1 time, probe ID 12175 (AS42841, SK)
+
+ 41733: 1 time, probe ID 10904 (AS41733, RU)
+
+ 35574: 1 time, probe ID 4777 (AS35574, IT)
+
+ 34385: 1 time, probe ID 2288 (AS47698, SE)
+
+  Only top 10 most common shown.
+  (use the --show-all-upstream-asns argument to show the full list)
+
+Most common ASs sequences:
+
+         1200 43821: 36 times
+
+             S 1200: 12 times
+
+       S 1200 43821: 10 times
+
+             S 1299: 6 times
+
+   16150 1200 43821: 4 times
+
+            S 13030: 4 times
+
+         16150 1200: 4 times
+
+          1120 1257: 3 times
+
+ S 49562 1200 43821: 2 times
+
+ S 13237 1200 43821: 2 times
+
+  (use the --show-all-aspaths argument to show the full list)
+
+Most common ASs sequences (with IXPs networks):
+
+       1200 43821: 36 times
+
+           S 1200: 12 times
+
+     S 1200 43821: 10 times
+
+             S IX: 7 times
+
+         IX 13030: 7 times
+
+           S 1299: 6 times
+
+       S IX 13030: 4 times
+
+ 16150 1200 43821: 4 times
+
+         IX 16150: 4 times
+
+       16150 1200: 4 times
+
+  (use the --show-all-aspaths argument to show the full list)

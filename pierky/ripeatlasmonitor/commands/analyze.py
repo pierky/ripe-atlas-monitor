@@ -3,6 +3,7 @@ from ..Helpers import IPCache, LockFile
 from ..Errors import LockError
 from ..Logging import logger
 from ..Monitor import Monitor
+from ..Analyzer import Analyzer
 
 
 def execute(args):
@@ -23,21 +24,26 @@ def execute(args):
         )
 
         if args.measurement_id:
-            monitor = Monitor({
-                "measurement-id": args.measurement_id,
-                "key": args.key,
-                "matching_rules": [{}]
-            }, ip_cache)
+            analyzer = Analyzer(
+                ip_cache=ip_cache,
+                msm_id=args.measurement_id,
+                key=args.key
+            )
         else:
             monitor = Monitor(
                 args.monitor_name,
                 ip_cache,
                 key=args.key
             )
+            analyzer = Analyzer(
+                ip_cache=ip_cache,
+                msm_id=monitor.msm_id,
+                key=monitor.key
+            )
 
         print("Downloading and processing results... please wait")
         try:
-            print(monitor.analyze(**vars(args)))
+            print(analyzer.analyze(**vars(args)))
         finally:
             ip_cache.save()
     except KeyboardInterrupt:

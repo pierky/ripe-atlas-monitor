@@ -1,0 +1,257 @@
+Unique median RTTs:
+
+    0.63 ms, probe ID 11132 (GB)
+
+    2.66 ms, probe ID 3161 (AS1103, NL)
+
+    3.13 ms, probe ID 4557 (GB)
+
+    4.63 ms, probe ID 10233 (AS198508, NL)
+
+    5.00 ms, probe ID 12211 (AS8422, DE)
+
+    5.22 ms, probe ID 10015 (AS3265, NL)
+
+    5.55 ms, probe ID 12081 (AS39647, NL)
+
+    7.44 ms, probe ID 11106 (AS31334, DE)
+
+    9.72 ms, probe ID 10037 (AS6830, NL)
+
+    9.76 ms, probe ID 12189 (AS12871, NL)
+
+    9.82 ms, probe ID 10890 (AS6830, NL)
+
+    9.90 ms, probe ID 3999 (AS5089, GB)
+
+   10.46 ms, probe ID 2060 (AS25180, GB)
+
+   10.86 ms, probe ID 4532 (AS2818, GB)
+
+   11.09 ms, probe ID 11675 (NL)
+
+   11.58 ms, probe ID 2748 (AS12586, DE)
+
+   11.73 ms, probe ID 10888 (AS3333, NL)
+
+   14.73 ms, probe ID 10735 (AS8676, GB)
+
+   15.23 ms, probe ID 3919 (AS43503, DE)
+
+   15.55 ms, probe ID 11206 (AS43341, DE)
+
+   15.68 ms, probe ID 4015 (AS29014, DE)
+
+   16.36 ms, probe ID 11587 (AS6848, BE)
+
+   16.39 ms, probe ID 12482 (AS2856, GB)
+
+   16.40 ms, probe ID 10622 (GB)
+
+   16.73 ms, probe ID 12666 (AS25229, UA)
+
+   17.85 ms, probe ID 2288 (AS47698, SE)
+
+   19.61 ms, probe ID 4916 (AS31246, CZ)
+
+   19.69 ms, probe ID 10098 (AS20712, GB)
+
+   19.81 ms, probe ID 10012 (AS3265, NL)
+
+   20.86 ms, probe ID 2178 (AS33890, AT)
+
+   21.08 ms, probe ID 4618 (FR)
+
+   21.49 ms, probe ID 11194 (AS3320, DE)
+
+   21.54 ms, probe ID 2523 (AS9143, NL)
+
+   23.16 ms, probe ID 4553 (AS812, CA)
+
+   23.75 ms, probe ID 3319 (AS2116, NO)
+
+   24.71 ms, probe ID 4484 (AS6830, ET)
+
+   26.09 ms, probe ID 11877 (AS57329, IT)
+
+   26.37 ms, probe ID 2736 (AS6830, DE)
+
+   26.51 ms, probe ID 11815 (AS3209, DE)
+
+   27.66 ms, probe ID 11148 (AS199339, NO)
+
+   27.81 ms, probe ID 12015 (AS41090, FR)
+
+   27.93 ms, probe ID 2866 (AS33885, SE)
+
+   28.45 ms, probe ID 4777 (AS35574, IT)
+
+   29.64 ms, probe ID 12291 (AS49866, FI)
+
+   29.72 ms, probe ID 10928 (AS61174, CH)
+
+   29.97 ms, probe ID 4135 (AS3209, DE)
+
+   30.50 ms, probe ID 4780 (AS51319, FI)
+
+   31.71 ms, probe ID 10029 (AS6830, CH)
+
+   32.29 ms, probe ID 3157 (AS680, DE)
+
+   33.41 ms, probe ID 4401 (AS35244, DE)
+
+   33.64 ms, probe ID 4746 (AS12741, PL)
+
+   34.84 ms, probe ID 10070 (AS12963, UA)
+
+   35.23 ms, probe ID 3082 (AS2547, HU)
+
+   35.93 ms, probe ID 10644 (AS1741, FI)
+
+   37.03 ms, probe ID 2144 (AS3320, DE)
+
+   37.76 ms, probe ID 10611 (AS6830, NL)
+
+   39.48 ms, probe ID 11458 (AS44068, RU)
+
+   40.47 ms, probe ID 10886 (AS5391, HR)
+
+   40.94 ms, probe ID 11308 (AS41691, RU)
+
+   41.48 ms, probe ID 2864 (AS12615, BG)
+
+   41.51 ms, probe ID 11168 (AS8546, GB)
+
+   41.60 ms, probe ID 11125 (AS12991, AT)
+
+   42.71 ms, probe ID 4821 (UA)
+
+   45.35 ms, probe ID 11318 (AS47595, RU)
+
+   46.27 ms, probe ID 11473 (AS41302, RU)
+
+   46.75 ms, probe ID 12175 (AS42841, SK)
+
+   49.08 ms, probe ID 10935 (AS29512, PL)
+
+   50.06 ms, probe ID 10904 (AS41733, RU)
+
+   57.49 ms, probe ID 11476 (AS50222, RU)
+
+   63.23 ms, probe ID 11719 (AS1739, FI)
+
+   76.83 ms, probe ID 4844 (AS31510, AT)
+
+  101.54 ms, probe ID 11905 (AS31334, DE)
+
+ 2680.65 ms, probe ID 12266 (AS6848, BE)
+
+Destination responded:
+
+  no: 48 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
+
+ yes: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+Unique destination IP addresses:
+
+ 91.198.174.225: 77 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+Destination AS:
+
+ 43821: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+ 13030: 8 times, probe ID 4746 (AS12741, PL), probe ID 10611 (AS6830, NL), probe ID 11168 (AS8546, GB), ...
+
+  1299: 8 times, probe ID 3082 (AS2547, HU), probe ID 4553 (AS812, CA), probe ID 2736 (AS6830, DE), ...
+
+  1257: 6 times, probe ID 10886 (AS5391, HR), probe ID 11125 (AS12991, AT), probe ID 3319 (AS2116, NO), ...
+
+  6908: 2 times, probe ID 12482 (AS2856, GB), probe ID 2060 (AS25180, GB)
+
+ 57228: 1 time, probe ID 4557 (GB)
+
+ 44923: 1 time, probe ID 3735 (AS44923, RU)
+
+ 44637: 1 time, probe ID 4203 (AS44637, TR)
+
+ 43142: 1 time, probe ID 3564 (AS43142, FR)
+
+ 39602: 1 time, probe ID 4617 (AS39602, GB)
+
+  Only top 10 most common shown.
+  (use the --show-all-dest-asns argument to show the full list)
+
+Upstream AS:
+
+  1200: 37 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+
+  1120: 3 times, probe ID 11125 (AS12991, AT), probe ID 4844 (AS31510, AT), probe ID 2178 (AS33890, AT)
+
+ 29512: 2 times, probe ID 4746 (AS12741, PL), probe ID 10935 (AS29512, PL)
+
+  6830: 2 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH)
+
+  1299: 2 times, probe ID 12266 (AS6848, BE), probe ID 11194 (AS3320, DE)
+
+   174: 2 times, probe ID 10886 (AS5391, HR), probe ID 4015 (AS29014, DE)
+
+ 42841: 1 time, probe ID 12175 (AS42841, SK)
+
+ 41733: 1 time, probe ID 10904 (AS41733, RU)
+
+ 35574: 1 time, probe ID 4777 (AS35574, IT)
+
+ 34385: 1 time, probe ID 2288 (AS47698, SE)
+
+  Only top 10 most common shown.
+  (use the --show-all-upstream-asns argument to show the full list)
+
+Most common ASs sequences:
+
+         1200 43821: 36 times
+
+             S 1200: 12 times
+
+       S 1200 43821: 10 times
+
+             S 1299: 6 times
+
+   16150 1200 43821: 4 times
+
+            S 13030: 4 times
+
+         16150 1200: 4 times
+
+          1120 1257: 3 times
+
+ S 49562 1200 43821: 2 times
+
+ S 13237 1200 43821: 2 times
+
+  (use the --show-all-aspaths argument to show the full list)
+
+Most common ASs sequences (with IXPs networks):
+
+       1200 43821: 36 times
+
+           S 1200: 12 times
+
+     S 1200 43821: 10 times
+
+             S IX: 7 times
+
+         IX 13030: 7 times
+
+           S 1299: 6 times
+
+       S IX 13030: 4 times
+
+ 16150 1200 43821: 4 times
+
+         IX 16150: 4 times
+
+       16150 1200: 4 times
+
+  (use the --show-all-aspaths argument to show the full list)
+
+

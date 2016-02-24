@@ -1,0 +1,19 @@
+Unique median RTTs:
+
+   14.32 ms, probe ID 13939 (AS51862, DE) 
+
+   29.61 ms, probe ID 10025 (AS44574, GB)
+
+   30.51 ms, probe ID 3207 (AS29562, DE)
+
+   34.26 ms, probe ID 3183 (AS16097, DE)
+
+   37.42 ms, probe ID 11421 (AS3209, DE)
+
+Destination responded:
+
+ yes: 5 times, probe ID 3183 (AS16097, DE), probe ID 3207 (AS29562, DE), probe ID 10025 (AS44574, GB), ...
+
+Unique destination IP addresses:
+
+ 193.170.114.242: 5 times, probe ID 3183 (AS16097, DE), probe ID 3207 (AS29562, DE), probe ID 10025 (AS44574, GB), ...

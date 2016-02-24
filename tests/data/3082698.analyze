@@ -1,0 +1,79 @@
+Unique median RTTs:
+
+   98.34 ms, probe ID 12527 (AS25309, IT)
+
+  100.62 ms, probe ID 12120 (AS137, IT)
+
+  105.16 ms, probe ID 738 (AS39759, IT)
+
+  105.64 ms, probe ID 24535 (AS60049, IT)
+
+  112.69 ms, probe ID 713 (AS20912, IT)
+
+  116.87 ms, probe ID 11821 (AS49360, IT)
+
+  181.18 ms, probe ID 832 (AS21034, IT)
+
+Destination responded:
+
+ yes: 7 times, probe ID 713 (AS20912, IT), probe ID 738 (AS39759, IT), probe ID 832 (AS21034, IT), ...
+
+  no: 1 time, probe ID 24503 (AS12363, IT)
+
+Unique destination IP addresses:
+
+ 66.220.156.68: 8 times, probe ID 713 (AS20912, IT), probe ID 738 (AS39759, IT), probe ID 832 (AS21034, IT), ...
+
+Destination AS:
+
+ 32934: 7 times, probe ID 713 (AS20912, IT), probe ID 738 (AS39759, IT), probe ID 832 (AS21034, IT), ...
+
+ 12363: 1 time, probe ID 24503 (AS12363, IT)
+
+Upstream AS:
+
+ 60049: 1 time, probe ID 24535 (AS60049, IT)
+
+ 49360: 1 time, probe ID 11821 (AS49360, IT)
+
+ 25309: 1 time, probe ID 12527 (AS25309, IT)
+
+  8928: 1 time, probe ID 832 (AS21034, IT)
+
+  1267: 1 time, probe ID 738 (AS39759, IT)
+
+  1200: 1 time, probe ID 713 (AS20912, IT)
+
+   137: 1 time, probe ID 12120 (AS137, IT)
+
+Unique AS path:
+
+              S 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
+
+ S 5602 32934 S 32934: 1 time, probe ID 24535 (AS60049, IT)
+
+ S 1200 32934 S 32934: 1 time, probe ID 11821 (AS49360, IT)
+
+    S 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
+
+         S 8928 32934: 1 time, probe ID 832 (AS21034, IT)
+
+         S 1267 32934: 1 time, probe ID 738 (AS39759, IT)
+
+                    S: 1 time, probe ID 24503 (AS12363, IT)
+
+Unique AS path (with IXPs networks):
+
+              S IX 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
+
+ S 5602 IX 32934 S 32934: 1 time, probe ID 24535 (AS60049, IT)
+
+    S 1200 32934 S 32934: 1 time, probe ID 11821 (AS49360, IT)
+
+         S 1267 IX 32934: 1 time, probe ID 738 (AS39759, IT)
+
+       S 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
+
+            S 8928 32934: 1 time, probe ID 832 (AS21034, IT)
+
+                       S: 1 time, probe ID 24503 (AS12363, IT)
