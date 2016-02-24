@@ -410,6 +410,6 @@ def main():
 
 try:
     sys.exit(main())
-except RIPEAtlasMonitorError as e:
+except Exception as e:
     logger.error(e)
     sys.exit(1)

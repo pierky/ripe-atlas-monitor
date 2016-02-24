@@ -1,10 +1,13 @@
 import logging
-from logging.handlers import RotatingFileHandler, SysLogHandler
+from logging.handlers import RotatingFileHandler, SysLogHandler, SMTPHandler
 from socket import SOCK_DGRAM, SOCK_STREAM
+import six
 import sys
 
 
 from .Config import Config
+from .EMailSettings import read_email_settings
+from .Errors import ConfigError
 
 
 LOG_LVL_RESULT = 25
@@ -59,6 +62,51 @@ class CustomLogger(object):
                 hdlr.setLevel(logging_level)
             else:
                 hdlr.setLevel(LOG_LVL_LOG_ACTION)
+            self.logger.addHandler(hdlr)
+
+        to_addr = Config.get("logging.email.to_addr")
+        if to_addr:
+            try:
+                email_settings = read_email_settings(
+                    from_addr=Config.get("logging.email.from_addr"),
+                    to_addr=Config.get("logging.email.to_addr"),
+                    subject=Config.get("logging.email.subject"),
+                    smtp_host=Config.get("logging.email.smtp_host"),
+                    smtp_port=Config.get("logging.email.smtp_port"),
+                    timeout=Config.get("logging.email.timeout"),
+                    use_ssl=Config.get("logging.email.use_ssl"),
+                    username=Config.get("logging.email.username"),
+                    password=Config.get("logging.email.password")
+                )
+            except ConfigError as e:
+                raise ConfigError(
+                    "Error setting up the email error logging system: {}. "
+                    "Please review the 'logging.email.*' global config "
+                    "options or disable email error logging by removing the "
+                    "'logging.email.to_addr' option.".format(
+                        str(e)
+                    )
+                )
+
+            args = {
+                "mailhost": (email_settings["smtp_host"],
+                             email_settings["smtp_port"]),
+                "fromaddr": email_settings["from_addr"],
+                "toaddrs": email_settings["to_addr"],
+                "subject": email_settings["subject"],
+                "credentials": (email_settings["username"],
+                                email_settings["password"]),
+                "secure": () if email_settings["use_ssl"] else None,
+            }
+            if six.PY3:
+                args["timeout"] = email_settings["timeout"]
+
+            hdlr = SMTPHandler(**args)
+            fmt = logging.Formatter(
+                "%(asctime)s [%(processName)s] %(levelname)s %(message)s"
+            )
+            hdlr.setFormatter(fmt)
+            hdlr.setLevel(logging.ERROR)
             self.logger.addHandler(hdlr)
 
     def log(self, lvl, msg, exc_info=False):

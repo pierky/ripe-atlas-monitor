@@ -41,8 +41,30 @@ logging:
         #max_bytes: 10000000
         #backup_cnt: 3
 
+        email:
+                # Error logging via email.
+                # Only program's errors will be sent via email.
+                # If the 'to_addr' option is filled, all the
+                # mandatory parameters must also be configured, here
+                # or in the 'default_smtp' section.
+
+                #to_addr: ""
+
+                # Mandatory parameters:
+                #smtp_host: ""
+                #smtp_port: 25
+                #from_addr: ""
+                #subject: ""
+
+                # Optional parameters:
+                #use_ssl: False
+                #username: ""
+                #password: ""
+                #timeout: 60
+
 default_smtp:
-        # Default SMTP server used by 'email' Actions.
+        # Default email setting used by 'email' Actions and error
+        # logging system.
        
         #smtp_host: ""
         #smtp_port: 25

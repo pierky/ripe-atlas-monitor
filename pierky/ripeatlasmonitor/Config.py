@@ -17,7 +17,21 @@ class GlobalConfig(object):
         "logging": {
             "file_path": "",
             "max_bytes": 10000000,
-            "backup_cnt": 3
+            "backup_cnt": 3,
+            "email": {
+                "to_addr": "",
+
+                # on parse, if one of the following parameters is null
+                # it's set with the same taken from default_smtp
+                "smtp_host": str,
+                "smtp_port": int,
+                "from_addr": str,
+                "subject": str,
+                "use_ssl": bool,
+                "username": str,
+                "password": str,
+                "timeout": int
+            }
         },
         "ip_cache": {
             "dir": "",  # on load, it will be set to var_dir if missing
@@ -158,6 +172,13 @@ class GlobalConfig(object):
         if custom:
             self.merge(self.cfg, custom)
 
+            for p in ["smtp_host", "smtp_port", "from_addr", "subject",
+                      "use_ssl", "username", "password", "timeout"]:
+                if self.cfg["logging"]["email"][p] is None or \
+                        isinstance(self.cfg["logging"]["email"][p], type):
+                    self.cfg["logging"]["email"][p] = \
+                        self.get("default_smtp.{}".format(p))
+
     def merge(self, orig, new):
         for k, v in new.items():
             if k not in orig:
@@ -171,15 +192,17 @@ class GlobalConfig(object):
             if isinstance(v, dict):
                 self.merge(orig[k], v)
             else:
-                if not isinstance(v, type(orig[k])):
+                if isinstance(v, type(orig[k])):
+                    orig[k] = v
+                elif isinstance(orig[k], type) and isinstance(v, orig[k]):
+                    orig[k] = v
+                else:
                     raise GlobalConfigError(
                         "invalid type for {}. "
                         "It is {} but it must be {}.".format(
                             k, type(v), type(orig[k])
                         )
                     )
-                else:
-                    orig[k] = v
 
     def _get(self, cfg, param):
         if len(param) == 1:

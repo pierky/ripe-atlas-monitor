@@ -1,12 +1,12 @@
 from email.mime.text import MIMEText
 import logging
 from os import environ
-import re
 from smtplib import SMTP, SMTP_SSL, SMTPException
 import socket
 from subprocess import call
 
 from .Config import Config
+from .EMailSettings import read_email_settings
 from .Errors import ConfigError, ProgramError
 from .Helpers import BasicConfigElement
 from .Logging import logger, CustomSysLogLogger
@@ -515,79 +515,23 @@ class ActionSendEMail(Action):
                            "smtp_port", "use_ssl", "username", "password",
                            "timeout"]
 
-    EMAIL_ADDR_VALIDATION_RE = re.compile(
-        Config.get("misc.email_addr_re"),
-        flags=re.IGNORECASE
-    )
-
-    @staticmethod
-    def is_valid_email(s):
-        return ActionSendEMail.EMAIL_ADDR_VALIDATION_RE.match(s)
-
-    def _check_email_addr(self, attr_name):
-        attr = getattr(self, attr_name)
-
-        if isinstance(attr, list):
-            addrs = attr
-        else:
-            addrs = [attr]
-
-        for addr in addrs:
-            if not self.is_valid_email(addr):
-                raise ConfigError(
-                    "Invalid email address in {}: {}".format(
-                        attr_name, attr
-                    )
-                )
-
     def __init__(self, monitor, name, cfg):
         Action.__init__(self, monitor, name, cfg)
 
-        self.from_addr = self._enforce_param("from_addr", str) or \
-            Config.get("default_smtp.from_addr")
-        if self.from_addr:
-            self._check_email_addr("from_addr")
+        email_settings = read_email_settings(
+            from_addr=self._enforce_param("from_addr", str),
+            to_addr=self._enforce_list("to_addr", str),
+            subject=self._enforce_param("subject", str),
+            smtp_host=self._enforce_param("smtp_host", str),
+            smtp_port=self._enforce_param("smtp_port", int),
+            timeout=self._enforce_param("timeout", int),
+            use_ssl=self._enforce_param("use_ssl", bool),
+            username=self._enforce_param("username", str),
+            password=self._enforce_param("password", str)
+        )
 
-        self.to_addr = self._enforce_list("to_addr", str) or \
-            Config.get("default_smtp.to_addr")
-        if self.to_addr:
-            self._check_email_addr("to_addr")
-
-        self.subject = self._enforce_param("subject", str) or \
-            Config.get("default_smtp.subject")
-
-        self.smtp_host = self._enforce_param("smtp_host", str) or \
-            Config.get("default_smtp.smtp_host")
-
-        self.smtp_port = self._enforce_param("smtp_port", int) or \
-            Config.get("default_smtp.smtp_port")
-
-        self.timeout = self._enforce_param("timeout", int) or \
-            Config.get("default_smtp.timeout")
-
-        self.use_ssl = self._enforce_param("use_ssl", bool)
-        if self.use_ssl is None:
-            self.use_ssl = Config.get("default_smtp.use_ssl")
-
-        self.username = self._enforce_param("username", str) or \
-            Config.get("default_smtp.username")
-
-        self.password = self._enforce_param("password", str) or \
-            Config.get("default_smtp.password")
-
-        if self.smtp_host is None:
-            raise ConfigError("Missing SMTP server host")
-        if self.smtp_port is None:
-            raise ConfigError("Missing SMTP server port")
-        if self.subject is None:
-            raise ConfigError("Missing subject")
-        if self.from_addr is None:
-            raise ConfigError("Missing from address")
-        if self.to_addr is None:
-            raise ConfigError("Missing recipient address(es)")
-
-        if isinstance(self.to_addr, str):
-            self.to_addr = [self.to_addr]
+        for _ in email_settings:
+            setattr(self, _, email_settings[_])
 
     def __str__(self):
         if self.descr:
