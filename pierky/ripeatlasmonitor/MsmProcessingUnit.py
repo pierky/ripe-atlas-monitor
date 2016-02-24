@@ -131,13 +131,28 @@ class MsmProcessingUnit(object):
         # Must be implemented in child classes
         raise NotImplementedError()
 
-    def download(self, start=None, stop=None, latest_results=None):
+    def download(self, start=None, stop=None, latest_results=None,
+                 probe_ids=None):
         atlas_params = {
             "msm_id": self.msm_id,
             "key": self.key
         }
 
-        logger.info("Downloading results...")
+        if probe_ids:
+            assert isinstance(probe_ids, list)
+            assert all(isinstance(_, int) for _ in probe_ids)
+            atlas_params["probe_ids"] = probe_ids
+
+            logger.info(
+                "Downloading results for probe ID{s}{IDs}{more}...".format(
+                    s="s " if len(probe_ids) > 1 else " ",
+                    IDs=", ".join(map(str, probe_ids[0:3])),
+                    more=" and {} more".format(len(probe_ids) - 3)
+                         if len(probe_ids) > 3 else ""
+                )
+            )
+        else:
+            logger.info("Downloading results...")
 
         if not latest_results:
             atlas_class = AtlasResultsRequest

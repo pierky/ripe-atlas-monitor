@@ -37,9 +37,15 @@ def run_one(args):
                 "results streaming."
             )
 
+        if args.probes:
+            raise ArgumentError(
+                "The --probes argument can't be used for monitors with use "
+                "results streaming."
+            )
+
     monitor.run(start=args.start_time, stop=args.stop_time,
                 latest_results=args.latest_results,
-                dont_wait=args.dont_wait)
+                dont_wait=args.dont_wait, probes=args.probes)
 
 
 def run_multiple(args):

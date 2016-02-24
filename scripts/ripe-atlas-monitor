@@ -40,6 +40,24 @@ def validator_monitorname(val):
     else:
         return val
 
+def validator_commaseparated_list_of_int(val):
+    try:
+        ret = val.split(",")
+        assert all(str(_).strip().isdigit() for _ in ret)
+        assert len(ret) > 0
+        return list(map(int, ret))
+    except:
+        raise ArgumentError()
+
+def validator_probes_list(val):
+    try:
+        return validator_commaseparated_list_of_int(val)
+    except ArgumentError:
+        raise ArgumentError(
+            "Invalid list of probe IDs: it must be a comma-separated list "
+            "of integers (example: '157,10006')."
+        )
+
 def monitor_list_for_autocomplete():
     ret = []
 
@@ -209,6 +227,14 @@ def main():
         metavar="S",
         dest="stream_timeout")
 
+    group.add_argument(
+        "--probes",
+        help="Comma-separated list of probe ids; only results from "
+             "these probes will be fetched and processed. Not available "
+             "when results streaming is used.",
+        type=validator_probes_list,
+        dest="probes")
+
     group = sub_parser.add_argument_group(
         title="Results timeframe",
         description="The following arguments can be used only when the "
@@ -278,7 +304,7 @@ def main():
 
     sub_parser = subparsers.add_parser(
         "analyze",
-        help="Analyze a measurement.")
+        help="Analyze a measurement's results.")
 
     group = sub_parser.add_mutually_exclusive_group(required=True)
 
@@ -301,6 +327,13 @@ def main():
         help="RIPE Atlas API key.",
         metavar="key",
         dest="key")
+
+    sub_parser.add_argument(
+        "--probes",
+        help="Comma-separated list of probe ids; only results from "
+             "these probes will be fetched and analysed.",
+        type=validator_probes_list,
+        dest="probes")
 
     sub_parser.add_argument(
         "--show-all-rtts",

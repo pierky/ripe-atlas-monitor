@@ -493,7 +493,8 @@ class Analyzer(MsmProcessingUnit):
         top_asns = kwargs.get("top_asns", 0)
         show_stats = kwargs.get("show_stats", False)
 
-        json_results = self.download(latest_results=True)
+        json_results = self.download(latest_results=True,
+                                     probe_ids=kwargs.get("probes"))
         self.update_probes(json_results)
 
         results = []

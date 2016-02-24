@@ -537,15 +537,17 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
             return self.status["latest_result_ts"]
         return None
 
-    def run_once(self, start=None, stop=None, latest_results=None):
+    def run_once(self, start=None, stop=None, latest_results=None,
+                 probes=None):
         results = self.download(start=start, stop=stop,
-                                latest_results=latest_results)
+                                latest_results=latest_results,
+                                probe_ids=probes)
         self.process_results(results)
 
-    def run_continously(self, start=None):
+    def run_continously(self, start, probes):
         try:
             while True:
-                self.run_once(start=start)
+                self.run_once(start=start, probes=probes)
 
                 logger.info(
                     "Waiting {} seconds (measurement's interval) before "
@@ -556,7 +558,8 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
         except KeyboardInterrupt:
             pass
 
-    def run(self, start=None, stop=None, latest_results=None, dont_wait=False):
+    def run(self, start=None, stop=None, latest_results=None, dont_wait=False,
+            probes=None):
         self.acquire_lock()
 
         logger.info("Starting {}".format(str(self)))
@@ -568,10 +571,10 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
             elif not self.msm_is_oneoff and self.msm_is_running and \
                     not latest_results and not stop and not dont_wait:
 
-                self.run_continously(start=start)
+                self.run_continously(start, probes)
 
             else:
                 self.run_once(start=start, stop=stop,
-                              latest_results=latest_results)
+                              latest_results=latest_results, probes=probes)
         finally:
             self.release_lock()
