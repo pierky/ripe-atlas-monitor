@@ -32,7 +32,7 @@ from pierky.ripeatlasmonitor.Errors import RIPEAtlasMonitorError, \
                                            InvalidDateTimeError, \
                                            ArgumentError
 from pierky.ripeatlasmonitor.Logging import logger
-from pierky.ripeatlasmonitor.version import __version__
+from pierky.ripeatlasmonitor.version import __version__, COPYRIGHT_YEAR
 
 
 def validator_datetime(val):
@@ -98,11 +98,14 @@ def main():
                     "collected by RIPE Atlas probes and verify that "
                     "they match against predefined "
                     "expectations.".format(__version__),
-        epilog="Pier Carlo Chiodi - https://pierky.com")
+        epilog="Copyright (c) {} - Pier Carlo Chiodi - "
+               "https://pierky.com".format(COPYRIGHT_YEAR))
 
     parser.add_argument(
         "--cfg",
-        help="Global configuration file.",
+        help="Global configuration file. Default: {}".format(
+            Config.get_default_path()
+        ),
         default=Config.get_default_path(),
         metavar="cfg_file",
         dest="cfg_file")
@@ -117,7 +120,7 @@ def main():
 
     sub_parser = subparsers.add_parser(
         "init-config",
-        help="Initialize a new global configuration file.")
+        help="Initialize/edit the global configuration file.")
 
     # init-monitor command
 
