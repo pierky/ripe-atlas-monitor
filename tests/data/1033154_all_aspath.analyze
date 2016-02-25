@@ -76,7 +76,7 @@ Upstream AS:
   Only top 10 most common shown.
   (use the --show-all-upstream-asns argument to show the full list)
 
-Unique AS path:
+Unique AS paths:
 
                                     S: 15 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
 
@@ -184,114 +184,25 @@ Unique AS path:
 
                                 43821: 1 time, probe ID 11675 (NL)
 
-Unique AS path (with IXPs networks):
+Unique AS paths (with IXPs networks):
 
-                                    S: 15 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
+                  S IX 13030: 3 times, probe ID 10935 (AS29512, PL), probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU)
 
-                         S 1200 43821: 10 times, probe ID 3161 (AS1103, NL), probe ID 4135 (AS3209, DE), probe ID 11815 (AS3209, DE), ...
+ S 21371 IX 16150 1200 43821: 1 time, probe ID 10735 (AS8676, GB)
 
-                               S 1299: 4 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH), probe ID 12175 (AS42841, SK), ...
+ S 12389 IX 16150 1200 43821: 1 time, probe ID 11318 (AS47595, RU)
 
-                           S IX 13030: 3 times, probe ID 10935 (AS29512, PL), probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU)
+          S 50019 S IX 13030: 1 time, probe ID 2864 (AS12615, BG)
 
-                   S 49562 1200 43821: 2 times, probe ID 12081 (AS39647, NL), probe ID 12189 (AS12871, NL)
+       S IX 16150 1200 43821: 1 time, probe ID 2866 (AS33885, SE)
 
-                   S 13237 1200 43821: 2 times, probe ID 11206 (AS43341, DE), probe ID 3919 (AS43503, DE)
+            S IX 16150 43821: 1 time, probe ID 3157 (AS680, DE)
 
-                             S 1299 S: 2 times, probe ID 12266 (AS6848, BE), probe ID 11194 (AS3320, DE)
+             S 8487 IX 13030: 1 time, probe ID 12015 (AS41090, FR)
 
- S 196655 47605 3238 16150 1200 43821: 1 time, probe ID 4780 (AS51319, FI)
+            S 29512 IX 13030: 1 time, probe ID 4746 (AS12741, PL)
 
-          S 21371 IX 16150 1200 43821: 1 time, probe ID 10735 (AS8676, GB)
+             S 2529 IX 13030: 1 time, probe ID 11168 (AS8546, GB)
 
-          S 12389 IX 16150 1200 43821: 1 time, probe ID 11318 (AS47595, RU)
-
-                   S 50019 S IX 13030: 1 time, probe ID 2864 (AS12615, BG)
-
-                S 719 6667 1200 43821: 1 time, probe ID 11719 (AS1739, FI)
-
-               S 5607 4589 1200 43821: 1 time, probe ID 10098 (AS20712, GB)
-
-              S 34554 6939 1200 43821: 1 time, probe ID 10928 (AS61174, CH)
-
-              S 5390 20562 1200 43821: 1 time, probe ID 4484 (AS6830, ET)
-
-                S IX 16150 1200 43821: 1 time, probe ID 2866 (AS33885, SE)
-
-               S 31394 1764 1120 1257: 1 time, probe ID 4844 (AS31510, AT)
-
-                  S 20632 31133 38930: 1 time, probe ID 11476 (AS50222, RU)
-
-                     S IX 16150 43821: 1 time, probe ID 3157 (AS680, DE)
-
-                      S 8487 IX 13030: 1 time, probe ID 12015 (AS41090, FR)
-
-                     S 29512 IX 13030: 1 time, probe ID 4746 (AS12741, PL)
-
-                      S 2529 IX 13030: 1 time, probe ID 11168 (AS8546, GB)
-
-                    S 29644 3257 1299: 1 time, probe ID 4553 (AS812, CA)
-
-                     S 31012 174 1257: 1 time, probe ID 10886 (AS5391, HR)
-
-                    S 8744 1200 43821: 1 time, probe ID 11308 (AS41691, RU)
-
-                    S 6830 1200 43821: 1 time, probe ID 10888 (AS3333, NL)
-
-                    S 5394 1200 43821: 1 time, probe ID 11877 (AS57329, IT)
-
-                49463 8218 1200 43821: 1 time, probe ID 4618 (FR)
-
-                    S 3216 1200 43821: 1 time, probe ID 11473 (AS41302, RU)
-
-                    S 3209 1200 43821: 1 time, probe ID 2144 (AS3320, DE)
-
-                   S 29076 1200 43821: 1 time, probe ID 11458 (AS44068, RU)
-
-                    S 2852 1200 43821: 1 time, probe ID 4916 (AS31246, CZ)
-
-                    S 2603 1200 43821: 1 time, probe ID 10644 (AS1741, FI)
-
-                   S 24957 1200 43821: 1 time, probe ID 10233 (AS198508, NL)
-
-                   S 21011 1200 43821: 1 time, probe ID 10070 (AS12963, UA)
-
-               31148 21011 1200 43821: 1 time, probe ID 4821 (UA)
-
-                   S 16097 1200 43821: 1 time, probe ID 4401 (AS35244, DE)
-
-                     S 1853 1120 1257: 1 time, probe ID 11125 (AS12991, AT)
-
-                     S 1764 1120 1257: 1 time, probe ID 2178 (AS33890, AT)
-
-                            S IX 6908: 1 time, probe ID 2060 (AS25180, GB)
-
-                          S 3356 3549: 1 time, probe ID 11148 (AS199339, NO)
-
-                         S 8737 13030: 1 time, probe ID 10611 (AS6830, NL)
-
-                         S 29422 1299: 1 time, probe ID 12291 (AS49866, FI)
-
-                          S 1955 1299: 1 time, probe ID 3082 (AS2547, HU)
-
-                           S 174 1299: 1 time, probe ID 4015 (AS29014, DE)
-
-                         S 34385 1257: 1 time, probe ID 2288 (AS47698, SE)
-
-                           S 224 1257: 1 time, probe ID 3319 (AS2116, NO)
-
-                             S 1200 S: 1 time, probe ID 11106 (AS31334, DE)
-
-                      8468 1200 43821: 1 time, probe ID 10622 (GB)
-
-                               S 6908: 1 time, probe ID 12482 (AS2856, GB)
-
-                              S 43821: 1 time, probe ID 4777 (AS35574, IT)
-
-                               S 1200: 1 time, probe ID 11905 (AS31334, DE)
-
-                                57228: 1 time, probe ID 4557 (GB)
-
-                                43821: 1 time, probe ID 11675 (NL)
-
+                   S IX 6908: 1 time, probe ID 2060 (AS25180, GB)
 

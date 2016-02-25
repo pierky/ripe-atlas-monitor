@@ -67,7 +67,10 @@ class BasePropertyAnalyzer(object):
         # list_item = tuple (key, cnt, probes)
         return list_item[1], list_item[0], sorted(list_item[2])
 
-    def print_key_cnt_list(self, key_cnt_list, top_n=None):
+    def write_key_cnt_list(self, key_cnt_list, top_n=None):
+
+        if len(key_cnt_list) == 0:
+            return ""
 
         r = ""
         r += self.TITLE + "\n"
@@ -120,7 +123,7 @@ class BasePropertyAnalyzer(object):
         key_cnt_list = self.get_key_cnt_list()
 
         if len(key_cnt_list) <= 10 or self.show_full_list:
-            r += self.print_key_cnt_list(key_cnt_list)
+            r += self.write_key_cnt_list(key_cnt_list)
             return r
 
         if self.SHORT_LIST_CLASS:
@@ -128,7 +131,7 @@ class BasePropertyAnalyzer(object):
                                                         self.src_list)
             r += short_list_analyzer.analyze()
         else:
-            r += self.print_key_cnt_list(key_cnt_list, top_n=10)
+            r += self.write_key_cnt_list(key_cnt_list, top_n=10)
             r += "  Only top 10 most common shown.\n"
 
         if self.SHOW_FULL_LIST_ARG:
@@ -251,7 +254,9 @@ class PropertyAnalyzer_ASPath_Base_Short(BasePropertyAnalyzer):
 
     def get_key_cnt_list(self):
         # Stolen from http://codereview.stackexchange.com/questions/108052/
-        sequences = [as_path for as_path, _ in self.src_list if as_path != []]
+        sequences = [as_path
+                     for as_path, _ in self.get_normalized_src_list()
+                     if as_path != []]
         counter = Counter(seq[i:j]
                           for seq in map(tuple, sequences)
                           for i, j in combinations(range(len(seq) + 1), 2))
@@ -297,7 +302,7 @@ class PropertyAnalyzer_ASPath_Short(PropertyAnalyzer_ASPath_Base_Short):
 
 class PropertyAnalyzer_ASPath(PropertyAnalyzer_ASPath_Base):
 
-    TITLE = "Unique AS path:"
+    TITLE = "Unique AS paths:"
     SHORT_LIST_CLASS = PropertyAnalyzer_ASPath_Short
 
 
@@ -305,11 +310,17 @@ class PropertyAnalyzer_ASPath_IXP_Short(PropertyAnalyzer_ASPath_Base_Short):
 
     TITLE = "Most common ASs sequences (with IXPs networks):"
 
+    def get_normalized_src_list(self):
+        return [(path, probe) for path, probe in self.src_list if "IX" in path]
+
 
 class PropertyAnalyzer_ASPath_IXP(PropertyAnalyzer_ASPath_Base):
 
-    TITLE = "Unique AS path (with IXPs networks):"
+    TITLE = "Unique AS paths (with IXPs networks):"
     SHORT_LIST_CLASS = PropertyAnalyzer_ASPath_IXP_Short
+
+    def get_normalized_src_list(self):
+        return [(path, probe) for path, probe in self.src_list if "IX" in path]
 
 
 class PropertyAnalyzer_Flags(BasePropertyAnalyzer):

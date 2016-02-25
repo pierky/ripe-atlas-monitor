@@ -123,29 +123,9 @@ Example analysis of measurement ID 1674977, a traceroute from 50 probes all over
 
       (use the --show-all-aspaths argument to show the full list)
 
-    Most common ASs sequences (with IXPs networks):
+    Unique AS paths (with IXPs networks):
 
-           1200 3333: 24 times
-
-         S 1200 3333: 14 times
-
-              S 1200: 14 times
-
-              S 3333: 5 times
-
-           1299 3333: 3 times
-
-         S 1299 3333: 2 times
-
-      9002 1200 3333: 2 times
-
-      3356 1200 3333: 2 times
-
-     15589 1200 3333: 2 times
-
-              S 6830: 2 times
-
-      (use the --show-all-aspaths argument to show the full list)
+     S IX 2603 3333: 1 time, probe ID 11585 (AS29518, SE)
 
 The ``--probes`` argument can be used to restrict the analysis to results produced by a limited set of probes by specifying their IDs.
 

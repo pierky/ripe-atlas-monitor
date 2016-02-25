@@ -46,7 +46,7 @@ Upstream AS:
 
    137: 1 time, probe ID 12120 (AS137, IT)
 
-Unique AS path:
+Unique AS paths:
 
               S 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
 
@@ -62,18 +62,11 @@ Unique AS path:
 
                     S: 1 time, probe ID 24503 (AS12363, IT)
 
-Unique AS path (with IXPs networks):
+Unique AS paths (with IXPs networks):
 
               S IX 32934: 2 times, probe ID 12120 (AS137, IT), probe ID 12527 (AS25309, IT)
 
  S 5602 IX 32934 S 32934: 1 time, probe ID 24535 (AS60049, IT)
 
-    S 1200 32934 S 32934: 1 time, probe ID 11821 (AS49360, IT)
-
          S 1267 IX 32934: 1 time, probe ID 738 (AS39759, IT)
 
-       S 1267 1200 32934: 1 time, probe ID 713 (AS20912, IT)
-
-            S 8928 32934: 1 time, probe ID 832 (AS21034, IT)
-
-                       S: 1 time, probe ID 24503 (AS12363, IT)

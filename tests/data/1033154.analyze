@@ -100,26 +100,24 @@ Most common ASs sequences:
 
   (use the --show-all-aspaths argument to show the full list)
 
-Most common ASs sequences (with IXPs networks):
+Unique AS paths (with IXPs networks):
 
-       1200 43821: 36 times
+                  S IX 13030: 3 times, probe ID 10935 (AS29512, PL), probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU)
 
-           S 1200: 12 times
+ S 21371 IX 16150 1200 43821: 1 time, probe ID 10735 (AS8676, GB)
 
-     S 1200 43821: 10 times
+ S 12389 IX 16150 1200 43821: 1 time, probe ID 11318 (AS47595, RU)
 
-             S IX: 7 times
+          S 50019 S IX 13030: 1 time, probe ID 2864 (AS12615, BG)
 
-         IX 13030: 7 times
+       S IX 16150 1200 43821: 1 time, probe ID 2866 (AS33885, SE)
 
-           S 1299: 6 times
+            S IX 16150 43821: 1 time, probe ID 3157 (AS680, DE)
 
-       S IX 13030: 4 times
+             S 8487 IX 13030: 1 time, probe ID 12015 (AS41090, FR)
 
- 16150 1200 43821: 4 times
+            S 29512 IX 13030: 1 time, probe ID 4746 (AS12741, PL)
 
-         IX 16150: 4 times
+             S 2529 IX 13030: 1 time, probe ID 11168 (AS8546, GB)
 
-       16150 1200: 4 times
-
-  (use the --show-all-aspaths argument to show the full list)
+                   S IX 6908: 1 time, probe ID 2060 (AS25180, GB)
