@@ -325,8 +325,9 @@ class Rule(BasicConfigElement):
                     )
             logger.debug(
                 "  testing probe ID {}: "
-                "internal labels {}, expected labels {}".format(
-                    probe.id, ", ".join(probe_labels),
+                "internal labels: {}, expected labels: {}".format(
+                    probe.id,
+                    ", ".join(probe_labels) if probe_labels else "none",
                     self._str_internal_labels()
                 )
             )

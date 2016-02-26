@@ -65,15 +65,20 @@ class BasicConfigElement(object):
                 return v
 
     def _enforce_param(self, k, t):
-        if k not in self.get_all_cfg_fields():
-            raise AttributeError("Unknown attribute: {}".format(k))
-        if k not in self.cfg:
-            return None
-        else:
-            if isinstance(self.cfg[k], str) and self.cfg[k].strip() == "":
+        try:
+            if k not in self.get_all_cfg_fields():
+                raise ConfigError("Unknown attribute: {}".format(k))
+            if k not in self.cfg:
                 return None
             else:
-                return self._enforce_type(self.cfg[k], t)
+                if isinstance(self.cfg[k], str) and self.cfg[k].strip() == "":
+                    return None
+                else:
+                    return self._enforce_type(self.cfg[k], t)
+        except ConfigError as e:
+            raise ConfigError("Error processing '{}' attribute: {}".format(
+                k, str(e)
+            ))
 
     def _enforce_list(self, k, t):
         if k not in self.cfg:
@@ -84,7 +89,15 @@ class BasicConfigElement(object):
         else:
             if isinstance(self.cfg[k], list):
                 for idx in range(0, len(self.cfg[k])):
-                    self.cfg[k][idx] = self._enforce_type(self.cfg[k][idx], t)
+                    try:
+                        self.cfg[k][idx] = self._enforce_type(self.cfg[k][idx],
+                                                              t)
+                    except ConfigError as e:
+                        raise ConfigError(
+                            "Error processing '{}' attribute: {}".format(
+                                k, str(e)
+                            )
+                        )
                 return self.cfg[k]
             else:
                 return [self._enforce_type(self.cfg[k], t)]
