@@ -16,6 +16,7 @@
 from collections import Counter
 from itertools import groupby, combinations
 
+from .Helpers import ProbesFilter
 from .MsmProcessingUnit import MsmProcessingUnit
 from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
                            ParsedResult_DstIP, ParsedResult_CertFps, \
@@ -512,15 +513,18 @@ class ResultsAnalyzer_EDNS(ResultsAnalyzer_DNSBased):
 
 class Analyzer(MsmProcessingUnit):
 
-    def analyze(self, **kwargs):
+    def analyze(self, probes_filter=None, **kwargs):
         cc_threshold = kwargs.get("cc_threshold", 3)
         top_countries = kwargs.get("top_countries", 0)
         as_threshold = kwargs.get("as_threshold", 3)
         top_asns = kwargs.get("top_asns", 0)
         show_stats = kwargs.get("show_stats", False)
 
+        if not probes_filter:
+            probes_filter = ProbesFilter()
+
         json_results = self.download(latest_results=True,
-                                     probe_ids=kwargs.get("probes"))
+                                     probe_ids=probes_filter.probe_ids)
         self.update_probes(json_results)
 
         results = []
@@ -529,6 +533,10 @@ class Analyzer(MsmProcessingUnit):
         for result in json_results:
             result = Result.get(result, on_error=Result.ACTION_IGNORE,
                                 on_malformation=Result.ACTION_IGNORE)
+            probe = self.get_probe(result)
+            if probe not in probes_filter:
+                continue
+
             results.append(result)
             if result.probe_id not in probe_ids:
                 probe_ids.append(result.probe_id)

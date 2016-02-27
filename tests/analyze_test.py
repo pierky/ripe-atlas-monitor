@@ -18,6 +18,7 @@ from .data import MSM_Results_Traceroute_IPv4, MSM_Results_Ping_IPv4, \
                   MSM_Results_SSLCert, MSM_Results_DNS, \
                   MSM_Results_Traceroute_Big
 from pierky.ripeatlasmonitor.Analyzer import Analyzer
+from pierky.ripeatlasmonitor.Helpers import ProbesFilter
 
 
 class TestAnalyze(TestBasicUnit):
@@ -185,3 +186,68 @@ Unique SSL certificate fingerprints:
         self.msm_id = MSM_Results_Traceroute_Big
         self.load_analyze_results(self.msm_id, tag="all_aspath")
         self.analyze(show_full_aspaths=True)
+
+    def test_probes_filter_probes(self):
+        """Analyze, probes filter, probe IDs"""
+
+        probes_filter = ProbesFilter(probe_ids=[13939, 10025])
+        self.exp_res = """Unique median RTTs:
+
+   14.32 ms, probe ID 13939 (AS51862, DE)
+
+   29.61 ms, probe ID 10025 (AS44574, GB)
+
+Destination responded:
+
+ yes: 2 times, probe ID 10025 (AS44574, GB), probe ID 13939 (AS51862, DE)
+
+Unique destination IP addresses:
+
+ 193.170.114.242: 2 times, probe ID 10025 (AS44574, GB), probe ID 13939 (AS51862, DE)"""
+        self.msm_id = MSM_Results_Ping_IPv4
+        self.analyze(probes_filter=probes_filter)
+
+    def test_probes_filter_countries(self):
+        """Analyze, probes filter, countries"""
+
+        probes_filter = ProbesFilter(countries=["DE"])
+        self.exp_res = """Unique median RTTs:
+
+   14.32 ms, probe ID 13939 (AS51862, DE)
+
+   30.51 ms, probe ID 3207 (AS29562, DE)
+
+   34.26 ms, probe ID 3183 (AS16097, DE)
+
+   37.42 ms, probe ID 11421 (AS3209, DE)
+
+Destination responded:
+
+ yes: 4 times, probe ID 3183 (AS16097, DE), probe ID 3207 (AS29562, DE), probe ID 11421 (AS3209, DE), ...
+
+Unique destination IP addresses:
+
+ 193.170.114.242: 4 times, probe ID 3183 (AS16097, DE), probe ID 3207 (AS29562, DE), probe ID 11421 (AS3209, DE), ..."""
+        self.msm_id = MSM_Results_Ping_IPv4
+        self.analyze(probes_filter=probes_filter)
+        
+    def test_probes_filter_countries_ids_combo(self):
+        """Analyze, probes filter, countries and IDs"""
+
+        probes_filter = ProbesFilter(probe_ids=[10025, 13939, 11421], countries=["DE"])
+        self.exp_res = """Unique median RTTs:
+
+   14.32 ms, probe ID 13939 (AS51862, DE)
+
+   37.42 ms, probe ID 11421 (AS3209, DE)
+
+Destination responded:
+
+ yes: 2 times, probe ID 11421 (AS3209, DE), probe ID 13939 (AS51862, DE)
+
+Unique destination IP addresses:
+
+ 193.170.114.242: 2 times, probe ID 11421 (AS3209, DE), probe ID 13939 (AS51862, DE)"""
+        self.msm_id = MSM_Results_Ping_IPv4
+        self.analyze(probes_filter=probes_filter)
+

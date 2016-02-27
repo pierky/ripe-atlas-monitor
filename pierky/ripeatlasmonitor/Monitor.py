@@ -29,7 +29,7 @@ from .Errors import ConfigError, MissingFileError, \
                     MeasurementProcessingError, \
                     LockError, ProgramError
 from .ExpectedResult import ExpectedResult
-from .Helpers import BasicConfigElement, LockFile
+from .Helpers import BasicConfigElement, LockFile, ProbesFilter
 from .Logging import logger
 from .MsmProcessingUnit import MsmProcessingUnit
 from ripe.atlas.cousteau import AtlasStream
@@ -38,15 +38,16 @@ from .Rule import Rule
 
 
 class MonitorResultsThread(Thread):
-    def __init__(self, monitor):
+    def __init__(self, monitor, probes_filter):
         Thread.__init__(self)
         self.monitor = monitor
+        self.probes_filter = probes_filter
 
     def run(self):
         while not self.monitor.exit_thread:
             try:
                 result = self.monitor.results_queue.get(True, 1)
-                self.monitor.process_results([result])
+                self.monitor.process_results([result], self.probes_filter)
             except Empty:
                 pass
 
@@ -413,7 +414,7 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
         self.status["latest_result_ts"] = ts
         self.write_status()
 
-    def process_results(self, results):
+    def process_results(self, results, probes_filter):
         logger.info("Processing results...")
 
         # Be sure to have info for every probe in the resultset
@@ -428,6 +429,13 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
         for json_result in results:
             result = Result.get(json_result, on_error=Result.ACTION_IGNORE,
                                 on_malformation=Result.ACTION_IGNORE)
+
+            probe = self.get_probe(result)
+            if probe not in probes_filter:
+                logger.debug(
+                    "  skipping {} because of probes filter".format(probe)
+                )
+                continue
 
             self.process_result(result)
             self.update_latest_result_ts(result)
@@ -509,7 +517,7 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
                 err.format("it is not public.")
             )
 
-    def run_stream(self):
+    def run_stream(self, probes_filter):
         logger.info(" - using real-time results streaming")
 
         self.ensure_streaming_enabled(MeasurementProcessingError)
@@ -525,7 +533,7 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
             )
 
         self.results_queue = Queue()
-        thread = MonitorResultsThread(self)
+        thread = MonitorResultsThread(self, probes_filter)
 
         try:
             thread.start()
@@ -552,17 +560,20 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
             return self.status["latest_result_ts"]
         return None
 
-    def run_once(self, start=None, stop=None, latest_results=None,
-                 probes=None):
+    def run_once(self, probes_filter, start=None, stop=None,
+                 latest_results=None):
+        fetch_only_probe_ids = probes_filter.probe_ids
+
         results = self.download(start=start, stop=stop,
                                 latest_results=latest_results,
-                                probe_ids=probes)
-        self.process_results(results)
+                                probe_ids=fetch_only_probe_ids)
 
-    def run_continously(self, start, probes):
+        self.process_results(results, probes_filter)
+
+    def run_continously(self, start, probes_filter):
         try:
             while True:
-                self.run_once(start=start, probes=probes)
+                self.run_once(probes_filter, start=start)
 
                 logger.info(
                     "Waiting {} seconds (measurement's interval) before "
@@ -574,22 +585,25 @@ class Monitor(BasicConfigElement, MsmProcessingUnit):
             pass
 
     def run(self, start=None, stop=None, latest_results=None, dont_wait=False,
-            probes=None):
+            probes_filter=None):
         self.acquire_lock()
+
+        if not probes_filter:
+            probes_filter = ProbesFilter()
 
         logger.info("Starting {}".format(str(self)))
 
         try:
             if self.stream:
-                self.run_stream()
+                self.run_stream(probes_filter)
 
             elif not self.msm_is_oneoff and self.msm_is_running and \
                     not latest_results and not stop and not dont_wait:
 
-                self.run_continously(start, probes)
+                self.run_continously(start, probes_filter)
 
             else:
-                self.run_once(start=start, stop=stop,
-                              latest_results=latest_results, probes=probes)
+                self.run_once(probes_filter, start=start, stop=stop,
+                              latest_results=latest_results)
         finally:
             self.release_lock()

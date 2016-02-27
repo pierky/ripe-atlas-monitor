@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ..Config import Config
-from ..Helpers import IPCache, LockFile
+from ..Helpers import IPCache, LockFile, ProbesFilter
 from ..Errors import LockError
 from ..Logging import logger
 from ..Monitor import Monitor
@@ -56,9 +56,11 @@ def execute(args):
                 key=monitor.key
             )
 
+        probes_filter = ProbesFilter(probe_ids=args.probes,
+                                     countries=args.countries)
         print("Downloading and processing results... please wait")
         try:
-            print(analyzer.analyze(**vars(args)))
+            print(analyzer.analyze(probes_filter=probes_filter, **vars(args)))
         finally:
             ip_cache.save()
     except KeyboardInterrupt:

@@ -127,7 +127,7 @@ Example analysis of measurement ID 1674977, a traceroute from 50 probes all over
 
      S IX 2603 3333: 1 time, probe ID 11585 (AS29518, SE)
 
-The ``--probes`` argument can be used to restrict the analysis to results produced by a limited set of probes by specifying their IDs.
+The ``--probes`` and ``--countries`` arguments can be used to restrict the analysis to results produced by a limited set of probes by specifying their IDs or the source countries.
 
 .. code:: bash
 
@@ -173,7 +173,7 @@ The ``run`` command allows to execute a single monitor. It is mostly useful to p
     $ ripe-atlas-monitor run -m MonitorName -vvv
 
 In this mode, the ``--start``, ``--stop`` and ``--latest`` arguments allow to set the time frame for the measurement's results to download, unless the monitor has the ``stream`` option set to use `RIPE Atlas result streaming <https://atlas.ripe.net/docs/result-streaming/>`_.
-The ``--probes`` argument can be used to restrict the processing to results produced by a limited set of probes by specifying their IDs.
+The ``--probes`` and ``--countries`` arguments can be used to restrict the processing to results produced by a limited set of probes by specifying their IDs or the source countries.
 
 Time frame options
 ~~~~~~~~~~~~~~~~~~

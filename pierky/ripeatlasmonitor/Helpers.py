@@ -140,6 +140,7 @@ class BasicConfigElement(object):
 class Probe(object):
     def __init__(self, probe, af):
         # probe is element of ripe-atlas-cousteau ProbeRequest
+        # (JSON format, https://atlas.ripe.net/docs/rest/#probe)
         self.id = int(probe["id"])
         self.country_code = probe["country_code"]
         self.asn_v4 = probe["asn_v4"]
@@ -156,6 +157,22 @@ class Probe(object):
             asn=self.asn,
             cc=self.country_code
         )
+
+
+class ProbesFilter(object):
+    def __init__(self, probe_ids=None, countries=None):
+        self.probe_ids = probe_ids or []
+        self.countries = countries or []
+
+    def __contains__(self, probe):
+        # probe = Probe object
+        if not self.probe_ids and not self.countries:
+            return True
+        if self.probe_ids and probe.id not in self.probe_ids:
+            return False
+        if self.countries and probe.country_code not in self.countries:
+            return False
+        return True
 
 
 class IPCache(object):

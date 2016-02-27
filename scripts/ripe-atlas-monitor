@@ -73,6 +73,26 @@ def validator_probes_list(val):
             "of integers (example: '157,10006')."
         )
 
+def validator_country(val):
+    cc = val.strip()
+    if not re.match(r"^[a-zA-Z][a-zA-Z]$", cc):
+        raise ArgumentError(
+            "Invalid country code: {}".format(cc)
+        )
+    return cc.upper()
+
+def validator_countries_list(val):
+    ret = []
+    try:
+        for cc in val.split(","):
+            ret.append(validator_country(cc))
+    except Exception as e:
+        raise ArgumentError(
+            "Invalid list of countries: {}. It must be a comma-separated list "
+            "of two-letter ISO codes.".format(str(e))
+        )
+    return ret
+
 def monitor_list_for_autocomplete():
     ret = []
 
@@ -89,6 +109,25 @@ def monitor_list_for_autocomplete():
         return ret
     except:
         return ()
+
+def add_probes_filter_arguments(parser):
+    group = parser.add_argument_group(
+        title="Probes filter",
+        description="Criteria will be combined with the AND boolean operator.")
+
+    group.add_argument(
+        "--probes",
+        help="Comma-separated list of probe ids; only results from "
+             "these probes will be fetched and processed.",
+        type=validator_probes_list,
+        dest="probes")
+
+    group.add_argument(
+        "--countries",
+        help="Comma-separated list of probes' country codes; only results "
+             "of probes from these countries will be processed.",
+        type=validator_countries_list,
+        dest="countries")
 
 def main():
     monitor_list = monitor_list_for_autocomplete()
@@ -245,13 +284,7 @@ def main():
         metavar="S",
         dest="stream_timeout")
 
-    group.add_argument(
-        "--probes",
-        help="Comma-separated list of probe ids; only results from "
-             "these probes will be fetched and processed. Not available "
-             "when results streaming is used.",
-        type=validator_probes_list,
-        dest="probes")
+    add_probes_filter_arguments(sub_parser)
 
     group = sub_parser.add_argument_group(
         title="Results timeframe",
@@ -346,45 +379,43 @@ def main():
         metavar="key",
         dest="key")
 
-    sub_parser.add_argument(
-        "--probes",
-        help="Comma-separated list of probe ids; only results from "
-             "these probes will be fetched and analysed.",
-        type=validator_probes_list,
-        dest="probes")
+    add_probes_filter_arguments(sub_parser)
 
-    sub_parser.add_argument(
+    group = sub_parser.add_argument_group(
+        title="Statistics and aggregate results")
+
+    group.add_argument(
         "--show-all-rtts",
         help="Show the full list of RTTs, even if very long.",
         action="store_true",
         dest="show_full_rtts")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--show-all-aspaths",
         help="Show the full list of AS paths, even if very long.",
         action="store_true",
         dest="show_full_aspaths")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--show-all-dest-asns",
         help="Show the full list of destination ASNs, even if very long.",
         action="store_true",
         dest="show_full_destasn")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--show-all-upstream-asns",
         help="Show the full list of upstream ASNs, even if very long.",
         action="store_true",
         dest="show_full_upstreamasn")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--show-stats",
         action="store_true",
         help="Show statistics about probes distribution by country and "
              "by source AS.",
         dest="show_stats")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--top-countries",
         type=int,
         help="Produce individual reports for the N top most probes-populated "
@@ -392,7 +423,7 @@ def main():
         metavar="N",
         dest="top_countries")
 
-    sub_parser.add_argument(
+    group.add_argument(
         "--top-asns",
         type=int,
         help="Produce individual reports for the N top most probes-populated "

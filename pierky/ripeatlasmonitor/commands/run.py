@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ..Config import Config
-from ..Helpers import IPCache, IPCacheManager, LockFile
+from ..Helpers import IPCache, IPCacheManager, LockFile, ProbesFilter
 from ..Logging import logger
 from ..Monitor import Monitor
 from ..Processes import RunMonitorProcess
@@ -52,15 +52,12 @@ def run_one(args):
                 "results streaming."
             )
 
-        if args.probes:
-            raise ArgumentError(
-                "The --probes argument can't be used for monitors with use "
-                "results streaming."
-            )
+    probes_filter = ProbesFilter(probe_ids=args.probes,
+                                 countries=args.countries)
 
     monitor.run(start=args.start_time, stop=args.stop_time,
                 latest_results=args.latest_results,
-                dont_wait=args.dont_wait, probes=args.probes)
+                dont_wait=args.dont_wait, probes_filter=probes_filter)
 
 
 def run_multiple(args):
