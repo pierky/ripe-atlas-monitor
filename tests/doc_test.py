@@ -101,7 +101,7 @@ class TestDocUnit(unittest.TestCase):
             expres = cfg["expected_results"][expres]
 
             exp_list_fields = ["dst_ip", "dst_as", "as_path", "upstream_as",
-                               "cert_fp", "dns_flags"]
+                               "cert_fp", "dns_flags", "edns_nsid"]
 
             list_fields = [_ for _ in expres if isinstance(expres[_], list)]
 

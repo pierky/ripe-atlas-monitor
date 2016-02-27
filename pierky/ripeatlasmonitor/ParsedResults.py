@@ -20,6 +20,25 @@ from .Logging import logger
 
 
 class ParsedResult(object):
+    """ParsedResult
+
+    Each ParsedResult object exposes properties that can be used to analyze
+    measurements and to match expected results.
+
+    Each property must be listed in the PROPERTIES attribute and must have a
+    corresponding @property method, that must be used to read its value.
+
+    The prepare() method must implement everything needed to get the
+    values of each property; these values must be stored using the
+    self.set_attr_to_cache() method.
+
+    The @property methods must read the values they need to return using the
+    self.get_attr_from_cache() method.
+
+    Keep this docstring in sync with docs/CONTRIBUTING.rst file.
+    """
+
+    PROPERTIES = []
 
     def __init__(self, msm_proc_unit, result):
         self.msm_proc_unit = msm_proc_unit
@@ -323,7 +342,7 @@ class ParsedResult_DNSFlags(ParsedResult_DNSBased):
 
 class ParsedResult_EDNS(ParsedResult_DNSBased):
 
-    PROPERTIES = ["edns", "edns_size", "edns_do"]
+    PROPERTIES = ["edns", "edns_size", "edns_do", "edns_nsid"]
 
     @property
     def edns(self):
@@ -337,16 +356,25 @@ class ParsedResult_EDNS(ParsedResult_DNSBased):
     def edns_do(self):
         return self.get_attr_from_cache("edns_do")
 
+    @property
+    def edns_nsid(self):
+        return self.get_attr_from_cache("edns_nsid")
+
     def prepare(self):
         if not isinstance(self.result, DnsResult):
             raise NotImplementedError()
 
         self.set_attr_to_cache("edns", self.response.abuf.edns0 is not None)
 
+        self.set_attr_to_cache("edns_size", None)
+        self.set_attr_to_cache("edns_do", None)
+        self.set_attr_to_cache("edns_nsid", None)
+
         if not self.response.abuf.edns0:
-            self.set_attr_to_cache("edns_size", None)
-            self.set_attr_to_cache("edns_do", None)
             return
 
         self.set_attr_to_cache("edns_size", self.response.abuf.edns0.udp_size)
         self.set_attr_to_cache("edns_do", self.response.abuf.edns0.do)
+        for option in self.response.abuf.edns0.options:
+            if option.nsid:
+                self.set_attr_to_cache("edns_nsid", option.nsid)

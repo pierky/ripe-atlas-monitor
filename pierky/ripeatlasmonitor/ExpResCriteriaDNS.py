@@ -125,6 +125,8 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
 
     `edns_do` (optional): boolean indicating the expected presence of DO flag.
 
+    `edns_nsid` (optional): list of expected NSID values.
+
     The optional parameters are taken into account only when `edns` is True.
 
     If `edns` is True, match when all the responses contain EDNS extension,
@@ -133,6 +135,8 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
     one.
     If `edns_do` is given, all the responses must have (or have not) the DO
     flag on.
+    If `edns_nsid` is given, all the responses must contain and EDNS NSID
+    option which falls within the list of values herein specified.
 
     Examples:
 
@@ -140,12 +144,17 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
 
     edns: true
     edns_do: true
+
+    edns: true
+    edns_nsid:
+    - "ods01.l.root-servers.org"
+    - "kbp01.l.root-servers.org"
     """
 
     CRITERION_NAME = "edns"
     AVAILABLE_FOR_MSM_TYPE = ["dns"]
     MANDATORY_CFG_FIELDS = []
-    OPTIONAL_CFG_FIELDS = ["edns_size", "edns_do"]
+    OPTIONAL_CFG_FIELDS = ["edns_size", "edns_do", "edns_nsid"]
 
     def __init__(self, cfg, expres):
         ExpResCriterion_DNSBased.__init__(self, cfg, expres)
@@ -153,6 +162,7 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
         self.edns = self._enforce_param("edns", bool)
         self.edns_size = self._enforce_param("edns_size", int)
         self.edns_do = self._enforce_param("edns_do", bool)
+        self.edns_nsid = self._enforce_list("edns_nsid", str)
 
     def __str__(self):
         if self.edns:
@@ -164,6 +174,9 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
                     r += "; DO flag on"
                 else:
                     r += "; DO flag off"
+            if self.edns_nsid:
+                r += "; NSID in "
+                r += ", ".join(self.edns_nsid)
         else:
             r = "EDNS not supported"
         return r
@@ -173,6 +186,7 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
         self.response_edns = res.edns
         self.response_edns_size = res.edns_size
         self.response_edns_do = res.edns_do
+        self.response_edns_nsid = res.edns_nsid
 
     def response_matches(self, response):
         if self.response_edns and not self.edns:
@@ -207,6 +221,21 @@ class ExpResCriterion_EDNS(ExpResCriterion_DNSBased):
                 logger.debug(
                     "  EDNS DO flag is off while is should be on"
                 )
+                return False
+
+        if self.edns and self.edns_nsid:
+            if not self.response_edns_nsid:
+                logger.debug(
+                    "  EDNS NSID option missing"
+                )
+                return False
+
+            logger.debug(
+                "  verifying if NSID {} is in {}...".format(
+                    self.response_edns_nsid, ", ".join(self.edns_nsid)
+                )
+            )
+            if self.response_edns_nsid not in self.edns_nsid:
                 return False
 
         return True

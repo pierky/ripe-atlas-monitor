@@ -18,6 +18,37 @@ from .Helpers import BasicConfigElement
 
 
 class ExpResCriterion(BasicConfigElement):
+    """ExpResCriterion
+
+    This class reads expected result attributes from the monitor's config
+    file, validates them and use them to match received results against
+    expected values.
+
+    The CRITERION_NAME contains the main attribute on which this class
+    is based.
+    The AVAILABLE_FOR_MSM_TYPE list contains all the measurements' types
+    for which this expected result can be used ("ping", "traceroute", ...).
+    The OPTIONAL_CFG_FIELDS list contains a list of optional attributes that
+    can be used in the matching process.
+    The MANDATORY_CFG_FIELDS list contains a list of mandatory arguments
+    needed to process the results matching. The CRITERION_NAME is implicitly
+    part of this list.
+
+    The __init__() method must be used to read and validate each attribute.
+
+    The prepare() method is called before the result_matches() method and is
+    used to parse received results.
+
+    The result_matches() is used to determine whether the received result
+    matched the expected values.
+
+    The __str__() and display_string() methods are used to print a brief
+    description of this expected result and a more detailed description
+    to be used when displaying the monitor configuration in a textual form.
+
+    Keep this docstring in sync with docs/CONTRIBUTING.rst file.
+    """
+
     CRITERION_NAME = None
     AVAILABLE_FOR_MSM_TYPE = []
     OPTIONAL_CFG_FIELDS = []

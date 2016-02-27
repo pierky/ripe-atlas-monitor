@@ -1,0 +1,195 @@
+# Based on the work of RIPE NCC and Engineers from the Wikimedia Foundation
+#
+#       How RIPE Atlas Helped Wikipedia Users
+#
+# https://labs.ripe.net/Members/emileaben/how-ripe-atlas-helped-wikipedia-users
+#
+# Source countries / load-balancers mapping for the Wikimedia CDN
+# (http://git.wikimedia.org/blob/operations%2Fdns.git/cb1fcbcebdbe14c8fcd14a053abe29e1c2e5efa0/config-geo)
+#
+# Measurement date: 2015-04-27
+measurement-id: 1983448
+matching_rules:
+- descr: Mark probes that received a response from target 
+  expected_results: DestinationResponded
+  actions: AddLabel-DstResponded
+  process_next: True
+- descr: EU probes
+  internal_labels: DstResponded
+  src_country:
+  - "AD"
+  - "AL"
+  - "AT"
+  - "AX"
+  - "BA"
+  - "BE"
+  - "BG"
+  - "BY"
+  - "CH"
+  - "CZ"
+  - "DE"
+  - "DK"
+  - "EE"
+  - "ES"
+  - "EU"
+  - "FI"
+  - "FO"
+  - "FR"
+  - "GB"
+  - "GG"
+  - "GI"
+  - "GR"
+  - "HR"
+  - "HU"
+  - "IE"
+  - "IM"
+  - "IS"
+  - "IT"
+  - "JE"
+  - "LI"
+  - "LT"
+  - "LU"
+  - "LV"
+  - "MC"
+  - "MD"
+  - "ME"
+  - "MK"
+  - "MT"
+  - "NL"
+  - "NO"
+  - "PL"
+  - "PT"
+  - "RO"
+  - "RS"
+  - "RU"
+  - "SE"
+  - "SI"
+  - "SJ"
+  - "SK"
+  - "SM"
+  - "TR"
+  - "UA"
+  - "VA"
+  expected_results:
+  - esams
+  actions:
+  - Log
+- descr: AS on esams
+  internal_labels: DstResponded
+  src_country:
+  - "AE"
+  - "AM"
+  - "AZ"
+  - "BH"
+  - "CY"
+  - "GE"
+  - "IL"
+  - "IQ"
+  - "IR"
+  - "JO"
+  - "KW"
+  - "LB"
+  - "OM"
+  - "PS"
+  - "QA"
+  - "SA"
+  - "SY"
+  - "YE"
+  expected_results:
+  - esams
+  actions:
+  - Log
+- descr: AS on eqiad
+  internal_labels: DstResponded
+  src_country:
+  - "AF"
+  - "IN"
+  - "IO"
+  - "KG"
+  - "KZ"
+  - "LK"
+  - "PK"
+  - "TJ"
+  - "TM"
+  - "UZ"
+  expected_results:
+  - eqiad
+  actions:
+  - Log
+- descr: AS on ulsfo
+  internal_labels: DstResponded
+  src_country:
+  - "AP"
+  - "BD"
+  - "BN"
+  - "BT"
+  - "CC"
+  - "CN"
+  - "CX"
+  - "HK"
+  - "ID"
+  - "JP"
+  - "KH"
+  - "KP"
+  - "KR"
+  - "LA"
+  - "MM"
+  - "MN"
+  - "MO"
+  - "MV"
+  - "MY"
+  - "NP"
+  - "PH"
+  - "SG"
+  - "TH"
+  - "TL"
+  - "TW"
+  - "VN"
+  expected_results:
+  - ulsfo
+  actions:
+  - Log
+- descr: CA and US on ulsfo or eqiad
+  internal_labels: DstResponded
+  src_country:
+  - "CA"
+  - "US"
+  expected_results:
+  - ulsfo_or_eqiad
+  actions:
+  - Log
+expected_results:
+  DestinationResponded:
+    dst_responded: True
+  esams:
+    descr: esams
+    dst_ip:
+    - 91.198.174.0/24
+    - 185.15.56.0/22
+    dst_as: 43821
+  eqiad:
+    descr: eqiad
+    dst_ip:
+    - 208.80.152.0/22
+    - 198.35.26.0/23
+    dst_as: 14907
+  ulsfo:
+    descr: ulsfo
+    dst_ip:
+    - 198.73.209.0/24
+    dst_as: 14907
+  ulsfo_or_eqiad:
+    descr: ulsfo or eqiad
+    dst_ip:
+    - 208.80.152.0/22
+    - 198.35.26.0/23
+    - 198.73.209.0/24
+    dst_as: 14907
+actions:
+    AddLabel-DstResponded:
+      when: on_match
+      kind: label
+      op: add
+      label_name: DstResponded
+    Log:
+      kind: log

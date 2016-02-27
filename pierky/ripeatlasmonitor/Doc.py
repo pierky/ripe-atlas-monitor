@@ -230,7 +230,7 @@ def build_doc():
     if cls_cnt != len(CRITERIA_CLASSES):
         raise ValueError(
             "One or more criteria classes have not been processed. "
-            "{} processed vs {} totale.".format(cls_cnt, len(CRITERIA_CLASSES))
+            "{} processed vs {} total.".format(cls_cnt, len(CRITERIA_CLASSES))
         )
 
     r += dump_doc(Action, 2)

@@ -27,6 +27,71 @@ from ripe.atlas.sagan import Result
 
 
 class BasePropertyAnalyzer(object):
+    """BasePropertyAnalyzer
+
+    This class is responsible for aggregating and displaying results
+    received from a measurement.
+
+    Given a property of a ParsedResult object, this class takes a list
+    of touples (value, probe_id), aggregates the values and produces a
+    counter of how many probes reported the value (and also a list of
+    them).
+    Some tricks are used to produce a shorter list of most common values
+    in case the full list is too long.
+
+    The final output is something like this:
+
+    -----------------------------------------------------------------
+    Title:
+
+      property_val_XXX: n times, <probe_1>, <probe_2>, <probe_3>, ...
+
+      property_val_YYY: n times, <probe_4>, <probe_5>
+
+       (use the --show-all-PROP argument to show the full list
+    -----------------------------------------------------------------
+
+    TITLE is used to print the header.
+    Then SHOW_TIMES is True, the "n times" format is used.
+    SHOW_PROBE_IDS is the number of probes that are listed beside each
+    property's value.
+    The SHOW_FULL_LIST_ARG attribute is the string of the command line
+    argument used to show the full list (SHOW_FULL_LIST_VAR is the
+    corresponding entry in the namespace returned by the argument parser).
+
+    The __init__() method takes the source list (src_list), list of
+    touples (value, probe_id). Values can be string, int, list or
+    touple.
+
+    The analyze() method calls the get_key_cnt_list() to build a list
+    of aggregate results in the form of touples (key, count, probes):
+    probes is a list of probe IDs.
+    After that, it calls the write_key_cnt_list() to build the final
+    output. From the list of touples (key, count, probes) returned by
+    get_key_cnt_list() the key is formatted using the format_key()
+    method; the whole list is sorted using the sort_key_cnt_list() method
+    and finally the output is built.
+
+    The get_key_cnt_list() calls the get_normalized_src_list() to obtain
+    a normalized view of the source list. For example, for RTT thresholds
+    the get_normalized_src_list is used to return a mapping between the
+    measured RTT and the range where it falls in.
+
+    Example:
+
+    RTT     Normalized RTT
+    30  ->  "< 40 ms"
+    45  ->  "40 - 60 ms"
+    70  ->  ">= 70 ms"
+
+    Some properties can list a lot of unique values; to have a shorter
+    (an more readable) output, each class can have a SHORT_LIST_CLASS
+    attribute pointing to another BasePropertyAnalyzer-derived class that
+    implementes an aggregate-and-display mechanism whose goal is to produce
+    a shorter view of the most common values.
+
+    Keep this docstring in sync with docs/CONTRIBUTING.rst file.
+    """
 
     TITLE = ""
     SHOW_TIMES = True
@@ -36,13 +101,20 @@ class BasePropertyAnalyzer(object):
     SHOW_PROBE_IDS = 3
 
     def __init__(self, analyzer, src_list, **kwargs):
-        # src_list, list of tuple (property_value, probe)
+        # src_list, list of tuple (property_value, probe_id)
+        assert all(isinstance(probe_id, int) for _, probe_id in src_list)
+
+        if self.SHORT_LIST_CLASS:
+            # a class can use another BasePropertyAnalyzer class in its
+            # SHORT_LIST_CLASS attribute, but only if it's not a
+            # SHORT_LIST_CLASS of another class.
+            assert self.SHORT_LIST_CLASS.SHORT_LIST_CLASS is None
 
         self.analyzer = analyzer
 
         self.src_list = src_list
 
-        self.show_full_list = True
+        self.show_full_list = False
         if self.SHOW_FULL_LIST_VAR:
             self.show_full_list = kwargs.get(self.SHOW_FULL_LIST_VAR, False)
 
@@ -381,7 +453,36 @@ class PropertyAnalyzer_EDNS_DO(BasePropertyAnalyzer):
             return "none"
 
 
+class PropertyAnalyzer_EDNS_NSID(BasePropertyAnalyzer):
+
+    TITLE = "EDNS NSID:"
+    SHOW_FULL_LIST_ARG = "--show-all-edns-nsid"
+    SHOW_FULL_LIST_VAR = "show_full_edns_nsid"
+
+
 class BaseResultsAnalyzer(object):
+    """BaseResultsAnalyzer
+
+    This class is used to analyze all the properties of each element of a
+    result.
+
+    A result may have some "subparts", like DNS responses:
+
+      "DNS measurement results are a little wacky. Sometimes you get a single
+      response, other times you get a set of responses (result set). In order
+      to establish a unified interface, we conform all results to the same
+      format: a list of response objects."
+
+      (https://github.com/RIPE-NCC/ripe.atlas.sagan/blob/
+       893f7f5fefc0101294c95beb210a92e164c39e5f/ripe/atlas/sagan/dns.py#L742)
+
+    The get_parsed_results() method yield ParsedResult objects for each
+    result's element; these ParsedResults are used by the analyze() method to
+    gather all the available properties. Each property is finally analyzed
+    using the related BasePropertyAnalyzer-derived class.
+
+    Keep this docstring in sync with docs/CONTRIBUTING.rst file.
+    """
 
     PARSED_RESULTS_CLASS = None
     PROPERTIES_ANALYZERS_CLASSES = {
@@ -396,11 +497,12 @@ class BaseResultsAnalyzer(object):
         "flags": PropertyAnalyzer_Flags,
         "edns": PropertyAnalyzer_EDNS,
         "edns_size": PropertyAnalyzer_EDNS_Size,
-        "edns_do": PropertyAnalyzer_EDNS_DO
+        "edns_do": PropertyAnalyzer_EDNS_DO,
+        "edns_nsid": PropertyAnalyzer_EDNS_NSID
     }
     PROPERTIES_ORDER = ["rtt", "responded", "dst_ip", "cer_fps", "dst_as",
                         "upstream_as", "as_path", "as_path_ixps", "flags",
-                        "edns", "edns_size", "edns_do"]
+                        "edns", "edns_size", "edns_do", "edns_nsid"]
 
     def __init__(self, analyzer, results, **kwargs):
         self.analyzer = analyzer

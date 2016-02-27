@@ -501,6 +501,14 @@ class TestMonitorCfg(TestBasicUnit):
         self.create_monitor(exp_exc=ConfigError,
                             exp_msg="Invalid type for 'a':")
 
+        del self.cfg["expected_results"]["test"]["edns_do"]
+        self.cfg["expected_results"]["test"]["edns_nsid"] = "ns.example.org"
+        self.create_monitor()
+
+        self.cfg["expected_results"]["test"]["edns_nsid"] = ["ns.example.org",
+                                                             "ns2.example.org"]
+        self.create_monitor()
+
     def test_criterion_dns_answers(self):
         """Criterion dns_answers"""
 

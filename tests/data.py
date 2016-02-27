@@ -24,6 +24,7 @@ MSM_Results_Ping_IPv4 = 3359986
 MSM_Results_SSLCert = 1443162
 MSM_Results_DNS = 1421267
 MSM_Results_Traceroute_Big = 1033154
+MSM_Results_DNS_NSID = 1071935
 
 # meta_data: https://atlas.ripe.net/api/v1/measurement/<msm_id>/
 # results: 'https://atlas.ripe.net/api/v2/measurements/<msm_id>/latest?format=json&probes=123,456'
@@ -62,3 +63,4 @@ load_data(MSM_Results_Ping_IPv4)
 load_data(MSM_Results_SSLCert)
 load_data(MSM_Results_DNS)
 load_data(MSM_Results_Traceroute_Big)
+load_data(MSM_Results_DNS_NSID)

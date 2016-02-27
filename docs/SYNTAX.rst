@@ -491,6 +491,8 @@ Verify EDNS extension of DNS responses received by probes.
 
 - ``edns_do`` (optional): boolean indicating the expected presence of DO flag.
 
+- ``edns_nsid`` (optional): list of expected NSID values.
+
 The optional parameters are taken into account only when ``edns`` is True.
 
 If ``edns`` is True, match when all the responses contain EDNS extension,
@@ -499,6 +501,8 @@ If ``edns_size`` is given, the size reported must be >= than the expected
 one.
 If ``edns_do`` is given, all the responses must have (or have not) the DO
 flag on.
+If ``edns_nsid`` is given, all the responses must contain and EDNS NSID
+option which falls within the list of values herein specified.
 
 **Examples:**
 
@@ -508,6 +512,11 @@ flag on.
 
     edns: true
     edns_do: true
+
+    edns: true
+    edns_nsid:
+    - "ods01.l.root-servers.org"
+    - "kbp01.l.root-servers.org"
 
 Criterion: dns_answers
 ++++++++++++++++++++++

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import TestBasicUnit, TestResultsBasicUnit
-from .data import MSM_Results_DNS
+from .data import MSM_Results_DNS, MSM_Results_DNS_NSID
 from pierky.ripeatlasmonitor.Monitor import Monitor
 
 
@@ -45,6 +45,10 @@ class TestDNSResult(TestResultsBasicUnit):
                 "EDNS_DO_off": {
                     "edns": True,
                     "edns_do": False
+                },
+                "EDNS_NSID": {
+                    "edns": True,
+                    "edns_nsid": ["ods01.l.root-servers.org", "her01.l.root-servers.org", "atl01.l.root-servers.org"]
                 },
                 "DNSAns_A": {
                     "dns_answers": {
@@ -123,6 +127,24 @@ class TestDNSResult(TestResultsBasicUnit):
 
         self.cfg["matching_rules"][0]["probe_id"] = [11891, 12320, 10080]
         self.cfg["matching_rules"][0]["expected_results"] = "EDNS_DO_off"
+
+        self.process_output(False, 3)
+
+    def test_dns_edns_nsid(self):
+        """DNS, EDNS NSID"""
+
+        self.cfg["measurement-id"] = MSM_Results_DNS_NSID
+        self.cfg["matching_rules"][0]["probe_id"] = [10045, 10048, 10102,
+                                                     10540, 11523]
+        self.cfg["matching_rules"][0]["expected_results"] = "EDNS_NSID"
+
+        self.process_output(True, 5)
+
+    def test_dns_edns_nsid(self):
+        """DNS, EDNS NSID fail"""
+
+        self.cfg["matching_rules"][0]["probe_id"] = [11891, 12320, 10080]
+        self.cfg["matching_rules"][0]["expected_results"] = "EDNS_NSID"
 
         self.process_output(False, 3)
 

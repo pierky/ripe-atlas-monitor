@@ -382,7 +382,7 @@ def main():
     add_probes_filter_arguments(sub_parser)
 
     group = sub_parser.add_argument_group(
-        title="Statistics and aggregate results")
+        title="Statistics and aggregate results options")
 
     group.add_argument(
         "--show-all-rtts",
@@ -407,6 +407,12 @@ def main():
         help="Show the full list of upstream ASNs, even if very long.",
         action="store_true",
         dest="show_full_upstreamasn")
+
+    group.add_argument(
+        "--show-all-edns-nsid",
+        help="Show the full list of EDNS NSID options, even if very long.",
+        action="store_true",
+        dest="show_full_edns_nsid")
 
     group.add_argument(
         "--show-stats",
