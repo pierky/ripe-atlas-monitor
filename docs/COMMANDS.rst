@@ -21,7 +21,8 @@ Some heuristics provide aggregated metrics for most of the measurement's types:
 - destination AS numbers and upstream ASNs (*traceroute*)
 - AS paths (*traceroute*)
 - DNS responses' flags combinations (*dns*)
-- EDNS status (*dns*)
+- EDNS status and NSID option (*dns*)
+- DNS answers (*dns*)
 
 Results of each metric are grouped on the basis of common patterns and sorted by the number of matching probes.
 

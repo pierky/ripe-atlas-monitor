@@ -353,6 +353,10 @@ class ExpResCriterion_DNSAnswers(ExpResCriterion_DNSBased):
         return r
 
     def prepare_response(self, result, response):
+        # This class doesn't behave like others and doesn't use
+        # the prepare() method to parse results.
+        # It implements checks directly in the response_matches()
+        # method, that verifes every record directly.
         pass
 
     def response_matches(self, response):

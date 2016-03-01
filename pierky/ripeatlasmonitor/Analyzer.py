@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import Counter
-from itertools import groupby, combinations
+from itertools import groupby, combinations, chain
 
 from .Helpers import ProbesFilter
 from .MsmProcessingUnit import MsmProcessingUnit
@@ -22,7 +22,7 @@ from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
                            ParsedResult_DstIP, ParsedResult_CertFps, \
                            ParsedResult_DstAS, ParsedResult_UpstreamAS, \
                            ParsedResult_ASPath, ParsedResult_DNSFlags, \
-                           ParsedResult_EDNS
+                           ParsedResult_EDNS, ParsedResult_DNSAnswers
 from ripe.atlas.sagan import Result
 
 
@@ -164,10 +164,22 @@ class BasePropertyAnalyzer(object):
         r += self.TITLE + "\n"
         r += "\n"
 
-        longest_key = max([self.format_key(k)
-                          for k, _, _ in key_cnt_list], key=len)
+        # keys can be splitted on more lines (for a better readability)
 
-        tpl = " {key:>" + str(len(longest_key)) + "}"
+        formatted_keys = [self.format_key(k) for k, _, _ in key_cnt_list]
+
+        key_lines = list(chain(*[key.split("\n") for key in formatted_keys]))
+
+        longest_key = max(key_lines, key=len)
+
+        multiline_keys = any(len(k.split("\n")) > 1 for k in formatted_keys)
+
+        if multiline_keys:
+            key_tpl = " {key:" + str(len(longest_key)) + "}"
+        else:
+            key_tpl = " {key:>" + str(len(longest_key)) + "}"
+
+        tpl = ""
         if self.SHOW_TIMES:
             tpl += ": {times} time{times_s}"
 
@@ -188,8 +200,14 @@ class BasePropertyAnalyzer(object):
             if not has_probes:
                 probes = []
 
+            key_first_line = True
+            for key_line in self.format_key(key).split("\n"):
+                if not key_first_line:
+                    r += "\n"
+                r += key_tpl.format(key=key_line)
+                key_first_line = False
+
             r += tpl.format(
-                key=self.format_key(key),
                 times=cnt,
                 times_s="s" if cnt > 1 else "",
                 probes=", ".join(
@@ -321,7 +339,7 @@ class PropertyAnalyzer_Cer_Fps(BasePropertyAnalyzer):
 
     @staticmethod
     def format_key(key):
-        return ",\n ".join(key)
+        return "\n".join(key)
 
 
 class PropertyAnalyzer_Dst_AS(BasePropertyAnalyzer):
@@ -460,6 +478,15 @@ class PropertyAnalyzer_EDNS_NSID(BasePropertyAnalyzer):
     SHOW_FULL_LIST_VAR = "show_full_edns_nsid"
 
 
+class PropertyAnalyzer_DNSAnswers(BasePropertyAnalyzer):
+
+    TITLE = "DNS Answers:"
+
+    @staticmethod
+    def format_key(key):
+        return "\n".join(key)
+
+
 class BaseResultsAnalyzer(object):
     """BaseResultsAnalyzer
 
@@ -476,9 +503,11 @@ class BaseResultsAnalyzer(object):
       (https://github.com/RIPE-NCC/ripe.atlas.sagan/blob/
        893f7f5fefc0101294c95beb210a92e164c39e5f/ripe/atlas/sagan/dns.py#L742)
 
-    The get_parsed_results() method yield ParsedResult objects for each
-    result's element; these ParsedResults are used by the analyze() method to
-    gather all the available properties. Each property is finally analyzed
+    The get_parsed_results() method yield touples of
+    (<ParsedResult object>, <probe ID>) for each result's element; these
+    ParsedResult objects are used by the analyze() method to gather all the
+    available properties and organize them in list of touples (property value,
+    probe ID), one list for each property. Each property is finally analyzed
     using the related BasePropertyAnalyzer-derived class.
 
     Keep this docstring in sync with docs/CONTRIBUTING.rst file.
@@ -498,11 +527,13 @@ class BaseResultsAnalyzer(object):
         "edns": PropertyAnalyzer_EDNS,
         "edns_size": PropertyAnalyzer_EDNS_Size,
         "edns_do": PropertyAnalyzer_EDNS_DO,
-        "edns_nsid": PropertyAnalyzer_EDNS_NSID
+        "edns_nsid": PropertyAnalyzer_EDNS_NSID,
+        "dns_answers": PropertyAnalyzer_DNSAnswers
     }
     PROPERTIES_ORDER = ["rtt", "responded", "dst_ip", "cer_fps", "dst_as",
                         "upstream_as", "as_path", "as_path_ixps", "flags",
-                        "edns", "edns_size", "edns_do", "edns_nsid"]
+                        "edns", "edns_size", "edns_do", "edns_nsid",
+                        "dns_answers"]
 
     def __init__(self, analyzer, results, **kwargs):
         self.analyzer = analyzer
@@ -613,7 +644,18 @@ class ResultsAnalyzer_EDNS(ResultsAnalyzer_DNSBased):
     PARSED_RESULTS_CLASS = ParsedResult_EDNS
 
 
+class ResultsAnalyzer_DNSAnswers(ResultsAnalyzer_DNSBased):
+
+    PARSED_RESULTS_CLASS = ParsedResult_DNSAnswers
+
+
 class Analyzer(MsmProcessingUnit):
+
+    RESULTS_ANALYZERS = [ResultsAnalyzer_RTT, ResultsAnalyzer_DstResponded,
+                         ResultsAnalyzer_DstIP, ResultsAnalyzer_CertFps,
+                         ResultsAnalyzer_DstAS, ResultsAnalyzer_UpstreamAS,
+                         ResultsAnalyzer_ASPath, ResultsAnalyzer_DNSFlags,
+                         ResultsAnalyzer_EDNS, ResultsAnalyzer_DNSAnswers]
 
     def analyze(self, probes_filter=None, **kwargs):
         cc_threshold = kwargs.get("cc_threshold", 3)
@@ -724,11 +766,7 @@ class Analyzer(MsmProcessingUnit):
         if len(results) == 0:
             return r
 
-        for c in [ResultsAnalyzer_RTT, ResultsAnalyzer_DstResponded,
-                  ResultsAnalyzer_DstIP, ResultsAnalyzer_CertFps,
-                  ResultsAnalyzer_DstAS, ResultsAnalyzer_UpstreamAS,
-                  ResultsAnalyzer_ASPath, ResultsAnalyzer_DNSFlags,
-                  ResultsAnalyzer_EDNS]:
+        for c in self.RESULTS_ANALYZERS:
             results_analyzer = c(self, results, **kwargs)
             r += results_analyzer.analyze()
 

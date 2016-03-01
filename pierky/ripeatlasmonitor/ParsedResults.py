@@ -378,3 +378,57 @@ class ParsedResult_EDNS(ParsedResult_DNSBased):
         for option in self.response.abuf.edns0.options:
             if option.nsid:
                 self.set_attr_to_cache("edns_nsid", option.nsid)
+
+
+class ParsedResult_DNSAnswers(ParsedResult_DNSBased):
+    # Used only for measurement analysis.
+    # The ExpResCriterion_DNSAnswers class doesn't behave like
+    # other ExpResCriterion-derived classes.
+
+    PROPERTIES = ["dns_answers"]
+
+    @property
+    def dns_answers(self):
+        return self.get_attr_from_cache("dns_answers")
+
+    @staticmethod
+    def get_record_info(record):
+        # return touple (name, type, value)
+
+        r = (record.name, record.type)
+        if record.type in ["A", "AAAA"]:
+            r += (record.address,)
+        elif record.type in ["CNAME", "NS", "PTR"]:
+            r += (record.target,)
+        elif record.type == "MX":
+            r += ("{} {}".format(record.preference, record.mail_exchanger),)
+        elif record.type == "SOA":
+            r += ("{} {} {} {} {} {} {}".format(
+                record.mname, record.rname, record.serial, record.refresh,
+                record.retry, record.expire, record.minimum),)
+        elif record.type == "TXT":
+            r += (record.data_string,)
+        else:
+            r += ("unhandled record type",)
+        return r
+
+    def prepare(self):
+        if not isinstance(self.result, DnsResult):
+            raise NotImplementedError()
+
+        self.set_attr_to_cache("dns_answers", [])
+
+        if not self.response.abuf:
+            return
+
+        records = [self.get_record_info(r)
+                   for r in self.response.abuf.answers]
+        ordered_records = sorted(records, key=lambda x: (x[0], x[1], x[2]))
+
+        if len(records) == 0:
+            return
+
+        tpl = "{:25} {:6} {:15}"
+        self.set_attr_to_cache("dns_answers",
+                               [tpl.format(n, t, v)
+                                for n, t, v in ordered_records])
