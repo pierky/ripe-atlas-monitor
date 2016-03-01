@@ -61,7 +61,7 @@ The **tests/data/download_msm.py** script can be used to download and store data
 ExpResCriterion-derived classes docstring
 +++++++++++++++++++++++++++++++++++++++++
 
-These classes must use a special syntax in their docstrings which allows to automatically build documentation and config example (**Doc.py** ``build_doc`` and ``build_monitor_cfg_tpl`` functions).
+These classes must use a special syntax in their docstrings which allows to automatically build documentation and config example (**doc.py** ``build_doc`` and ``build_monitor_cfg_tpl`` functions).
 
 Example::
 

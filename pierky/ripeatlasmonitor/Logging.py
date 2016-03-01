@@ -21,7 +21,7 @@ import sys
 
 
 from .Config import Config
-from .EMailSettings import read_email_settings
+from .emailsettings import read_email_settings
 from .Errors import ConfigError
 
 

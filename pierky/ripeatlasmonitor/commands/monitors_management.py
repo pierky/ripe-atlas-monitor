@@ -17,7 +17,7 @@ from six.moves import input
 import os
 
 from ..Config import Config
-from ..Doc import build_monitor_cfg_tpl
+from ..doc import build_monitor_cfg_tpl
 from pierky.ripeatlasmonitor.Monitor import Monitor
 from pierky.ripeatlasmonitor.Logging import logger
 from pierky.ripeatlasmonitor.Errors import RIPEAtlasMonitorError, \

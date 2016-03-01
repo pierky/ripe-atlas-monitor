@@ -16,7 +16,7 @@
 import unittest
 
 import yaml
-from pierky.ripeatlasmonitor.Doc import build_monitor_cfg_tpl, build_doc
+from pierky.ripeatlasmonitor.doc import build_monitor_cfg_tpl, build_doc
 
 class TestDocUnit(unittest.TestCase):
 
