@@ -422,7 +422,7 @@ class ParsedResult_DNSAnswers(ParsedResult_DNSBased):
             return
 
         records = [self.get_record_info(r)
-                   for r in self.response.abuf.answers]
+                   for r in self.response.abuf.answers if r.name and r.type]
 
         if len(records) == 0:
             return
