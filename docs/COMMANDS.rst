@@ -136,6 +136,8 @@ The ``--probes`` and ``--countries`` arguments can be used to restrict the analy
 
 The ``--key`` argument can be used to provide a RIPE Atlas key needed to fetch the results. Other arguments may be used to display statistics about probes distribution and to show sub-results, grouping them by country or by source AS: the ``--help`` will show all of these options.
 
+Data that form the analysis report can be printed in JSON format using the ``--use-json`` argument.
+
 Monitors' configuration management
 ----------------------------------
 

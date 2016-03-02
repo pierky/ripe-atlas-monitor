@@ -15,6 +15,7 @@
 
 from collections import Counter
 from itertools import groupby, combinations, chain
+import json
 
 from .Helpers import ProbesFilter
 from .MsmProcessingUnit import MsmProcessingUnit
@@ -100,7 +101,7 @@ class BasePropertyAnalyzer(object):
     SHOW_FULL_LIST_VAR = None
     SHOW_PROBE_IDS = 3
 
-    def __init__(self, analyzer, src_list, **kwargs):
+    def __init__(self, analyzer, src_list, use_json=False, **kwargs):
         # src_list, list of tuple (property_value, probe_id)
         assert all(isinstance(probe_id, int) for _, probe_id in src_list)
 
@@ -113,6 +114,8 @@ class BasePropertyAnalyzer(object):
         self.analyzer = analyzer
 
         self.src_list = src_list
+
+        self.use_json = use_json
 
         self.show_full_list = False
         if self.SHOW_FULL_LIST_VAR:
@@ -223,24 +226,35 @@ class BasePropertyAnalyzer(object):
 
         return r
 
-    def analyze(self):
-        r = ""
+    def get_json_key_cnt_list(self, key_cnt_list, top_n=None):
+        out_dict = {}
+        for key, cnt, probes in key_cnt_list[0:top_n]:
+            key = self.format_key(key)
+            key = ",".join(key.split("\n"))
+            out_dict[key] = {"count": cnt, "probes": probes}
+        return out_dict
 
+    def analyze(self):
         key_cnt_list = self.get_key_cnt_list()
 
         if len(key_cnt_list) <= 10 or self.show_full_list:
-            r += self.write_key_cnt_list(key_cnt_list)
-            return r
+            if self.use_json:
+                return self.get_json_key_cnt_list(key_cnt_list)
+            else:
+                return self.write_key_cnt_list(key_cnt_list)
 
         if self.SHORT_LIST_CLASS:
             short_list_analyzer = self.SHORT_LIST_CLASS(self.analyzer,
                                                         self.src_list)
-            r += short_list_analyzer.analyze()
+            r = short_list_analyzer.analyze()
         else:
-            r += self.write_key_cnt_list(key_cnt_list, top_n=10)
-            r += "  Only top 10 most common shown.\n"
+            if self.use_json:
+                return self.get_json_key_cnt_list(key_cnt_list, top_n=10)
+            else:
+                r = self.write_key_cnt_list(key_cnt_list, top_n=10)
+                r += "  Only top 10 most common shown.\n"
 
-        if self.SHOW_FULL_LIST_ARG:
+        if self.SHOW_FULL_LIST_ARG and not self.use_json:
             r += ("  (use the {} argument "
                   "to show the full list)\n\n").format(
                     self.SHOW_FULL_LIST_ARG)
@@ -537,6 +551,9 @@ class BaseResultsAnalyzer(object):
 
     def __init__(self, analyzer, results, **kwargs):
         self.analyzer = analyzer
+
+        self.use_json = kwargs.get("use_json", False)
+
         self.results = results  # Result objects
 
         self.kwargs = kwargs
@@ -564,10 +581,8 @@ class BaseResultsAnalyzer(object):
                     (getattr(parsed_result, prop), probe_id)
                 )
 
-        if not self.props:
-            return ""
-
-        r = ""
+        text = ""
+        json_object = {}
 
         for prop in self.PROPERTIES_ORDER:
             if prop not in self.PROPERTIES_ANALYZERS_CLASSES:
@@ -578,9 +593,16 @@ class BaseResultsAnalyzer(object):
             prop_analyzer = prop_analyzer_class(self.analyzer,
                                                 self.props[prop],
                                                 **self.kwargs)
-            r += prop_analyzer.analyze()
 
-        return r
+            if self.use_json:
+                json_object[prop] = prop_analyzer.analyze()
+            else:
+                text += prop_analyzer.analyze()
+
+        if self.use_json:
+            return json_object
+        else:
+            return text
 
 
 class ResultsAnalyzer_RTT(BaseResultsAnalyzer):
@@ -663,6 +685,11 @@ class Analyzer(MsmProcessingUnit):
         as_threshold = kwargs.get("as_threshold", 3)
         top_asns = kwargs.get("top_asns", 0)
         show_stats = kwargs.get("show_stats", False)
+
+        self.use_json = kwargs.get("use_json", False)
+
+        if not self.use_json and not kwargs.get("unittest", False):
+            print("Downloading and processing results... please wait")
 
         if not probes_filter:
             probes_filter = ProbesFilter()
@@ -766,8 +793,16 @@ class Analyzer(MsmProcessingUnit):
         if len(results) == 0:
             return r
 
+        json_object = {}
+
         for c in self.RESULTS_ANALYZERS:
             results_analyzer = c(self, results, **kwargs)
-            r += results_analyzer.analyze()
+            if self.use_json:
+                key = c.__name__.replace("ResultsAnalyzer_", "")
+                json_object[key] = results_analyzer.analyze()
+            else:
+                r += results_analyzer.analyze()
 
+        if self.use_json:
+            r = json.dumps(json_object, ensure_ascii=True, allow_nan=False, indent=2)
         return r

@@ -379,6 +379,12 @@ def main():
         metavar="key",
         dest="key")
 
+    sub_parser.add_argument(
+        "--use-json",
+        help="Output will be a JSON object.",
+        action="store_true",
+        dest="use_json")
+
     add_probes_filter_arguments(sub_parser)
 
     group = sub_parser.add_argument_group(

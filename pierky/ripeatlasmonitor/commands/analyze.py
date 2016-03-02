@@ -58,7 +58,6 @@ def execute(args):
 
         probes_filter = ProbesFilter(probe_ids=args.probes,
                                      countries=args.countries)
-        print("Downloading and processing results... please wait")
         try:
             print(analyzer.analyze(probes_filter=probes_filter, **vars(args)))
         finally:
