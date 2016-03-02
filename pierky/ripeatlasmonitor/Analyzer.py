@@ -100,6 +100,7 @@ class BasePropertyAnalyzer(object):
     SHOW_FULL_LIST_ARG = None
     SHOW_FULL_LIST_VAR = None
     SHOW_PROBE_IDS = 3
+    SHOW_UNIQUE_PROBES_CNT = False
 
     def __init__(self, analyzer, src_list, use_json=False, **kwargs):
         # src_list, list of tuple (property_value, probe_id)
@@ -143,9 +144,9 @@ class BasePropertyAnalyzer(object):
         key_cnt_list = []
         for key, key_prb_list in groupby(sorted_src_list,
                                          key=lambda x: x[0]):
-
             prb_list = [probe for _, probe in list(key_prb_list)]
-            key_cnt_list.append((key, len(list(prb_list)), prb_list))
+            unique_probes = sorted(list(set(prb_list)))
+            key_cnt_list.append((key, len(list(prb_list)), unique_probes))
 
         return key_cnt_list
 
@@ -187,6 +188,13 @@ class BasePropertyAnalyzer(object):
             tpl += ": {times} time{times_s}"
 
         has_probes = any([probes for _, _, probes in key_cnt_list])
+
+        if has_probes and self.SHOW_UNIQUE_PROBES_CNT:
+            if self.SHOW_TIMES:
+                tpl += " ({unique_probes_cnt} unique probe{unique_probes_s})"
+            else:
+                tpl += ", {unique_probes_cnt} unique probe{unique_probes_s}"
+
         if has_probes:
             tpl += ", {probes}{more_probe}"
 
@@ -219,6 +227,8 @@ class BasePropertyAnalyzer(object):
                             probes[0:self.SHOW_PROBE_IDS])
                         )
                     ),
+                unique_probes_cnt=str(len(probes)) if has_probes else "",
+                unique_probes_s="s" if len(probes) > 1 else "",
                 more_probe=", ..." if len(probes) > self.SHOW_PROBE_IDS else ""
             )
 
@@ -226,11 +236,15 @@ class BasePropertyAnalyzer(object):
 
         return r
 
+    def format_json_key(self, key):
+        key = self.format_key(key)
+        key = ",".join(key.split("\n"))
+        return key
+
     def get_json_key_cnt_list(self, key_cnt_list, top_n=None):
         out_dict = {}
         for key, cnt, probes in key_cnt_list[0:top_n]:
-            key = self.format_key(key)
-            key = ",".join(key.split("\n"))
+            key = self.format_json_key(key)
             out_dict[key] = {"count": cnt, "probes": probes}
         return out_dict
 
@@ -455,6 +469,7 @@ class PropertyAnalyzer_Flags(BasePropertyAnalyzer):
 class PropertyAnalyzer_EDNS(BasePropertyAnalyzer):
 
     TITLE = "EDNS present:"
+    SHOW_UNIQUE_PROBES_CNT = True
 
     @staticmethod
     def format_key(key):
@@ -469,11 +484,13 @@ class PropertyAnalyzer_EDNS(BasePropertyAnalyzer):
 class PropertyAnalyzer_EDNS_Size(BasePropertyAnalyzer):
 
     TITLE = "EDNS size:"
+    SHOW_UNIQUE_PROBES_CNT = True
 
 
 class PropertyAnalyzer_EDNS_DO(BasePropertyAnalyzer):
 
     TITLE = "EDNS DO flag:"
+    SHOW_UNIQUE_PROBES_CNT = True
 
     @staticmethod
     def format_key(key):
@@ -490,15 +507,29 @@ class PropertyAnalyzer_EDNS_NSID(BasePropertyAnalyzer):
     TITLE = "EDNS NSID:"
     SHOW_FULL_LIST_ARG = "--show-all-edns-nsid"
     SHOW_FULL_LIST_VAR = "show_full_edns_nsid"
+    SHOW_UNIQUE_PROBES_CNT = True
 
 
 class PropertyAnalyzer_DNSAnswers(BasePropertyAnalyzer):
 
     TITLE = "DNS Answers:"
+    SHOW_PROBE_IDS = 2
+    SHOW_UNIQUE_PROBES_CNT = True
 
     @staticmethod
     def format_key(key):
-        return "\n".join(key)
+        lines = []
+        for name, _type, value in key:
+            lines.append("{:25} {:6} {:15}".format(
+                name, _type, value))
+        return "\n".join(lines)
+
+    def format_json_key(self, key):
+        lines = []
+        for name, _type, value in key:
+            lines.append("{};{},{}".format(
+                name, _type, value))
+        return ",".join(lines)
 
 
 class BaseResultsAnalyzer(object):
@@ -804,5 +835,6 @@ class Analyzer(MsmProcessingUnit):
                 r += results_analyzer.analyze()
 
         if self.use_json:
-            r = json.dumps(json_object, ensure_ascii=True, allow_nan=False, indent=2)
+            r = json.dumps(json_object, ensure_ascii=True, allow_nan=False,
+                           indent=2)
         return r

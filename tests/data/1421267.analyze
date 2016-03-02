@@ -6,20 +6,20 @@ Unique DNS flags combinations:
 
 EDNS present:
 
- yes: 3 times, probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+ yes: 3 times (3 unique probes), probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
 
 EDNS size:
 
- 4096: 2 times, probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+ 4096: 2 times (2 unique probes), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
 
-  512: 1 time, probe ID 10080 (AS4713, JP)
+  512: 1 time (1 unique probe), probe ID 10080 (AS4713, JP)
 
 EDNS DO flag:
 
- yes: 3 times, probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+ yes: 3 times (3 unique probes), probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
 
 DNS Answers:
 
  www.ripe.net.             A      193.0.6.139
- www.ripe.net.             RRSIG  unhandled record type: 3 times, probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), probe ID 12320 (AS22773, US)
+ www.ripe.net.             RRSIG  unhandled record type: 3 times (3 unique probes), probe ID 10080 (AS4713, JP), probe ID 11891 (AS22795, US), ...
 

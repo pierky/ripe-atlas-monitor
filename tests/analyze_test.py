@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 from .base import TestBasicUnit
 from .data import MSM_Results_Traceroute_IPv4, MSM_Results_Ping_IPv4, \
                   MSM_Results_SSLCert, MSM_Results_DNS, \
@@ -31,6 +32,13 @@ class TestAnalyze(TestBasicUnit):
             s = f.read()
         self.exp_res = s
 
+    def load_analyze_json_results(self, msm_id=None, tag=None):
+        path = "tests/data/{}{}.analyze.json".format(
+            msm_id or self.msm_id, "_" + tag if tag else "")
+
+        with open(path, "r") as f:
+            self.exp_res = json.load(f)
+
     def setUp(self):
         TestBasicUnit.setUp(self)
 
@@ -44,13 +52,17 @@ class TestAnalyze(TestBasicUnit):
 
         analyzer = Analyzer(ip_cache=self.ip_cache, msm_id=self.msm_id)
 
-        r = analyzer.analyze(*args, **kwargs)
+        r = analyzer.analyze(unittest=True, *args, **kwargs)
 
         if self.debug:
+            print("msm {}".format(self.msm_id))
             print(r)
             return
 
-        self.equal(r, self.exp_res)
+        if kwargs.get("use_json"):
+            self.assertEqual(json.loads(r), self.exp_res)
+        else:
+            self.equal(r, self.exp_res)
 
     def equal(self, a, b):
         a = "\n".join([line.strip() for line in a.split("\n") if line])
@@ -64,11 +76,25 @@ class TestAnalyze(TestBasicUnit):
         self.msm_id = MSM_Results_Traceroute_IPv4
         self.analyze()
 
+    def test_traceroute_msm_json(self):
+        """Analyze, traceroute (JSON)"""
+
+        self.msm_id = MSM_Results_Traceroute_IPv4
+        self.load_analyze_json_results()
+        self.analyze(use_json=True)
+
     def test_ping_msm(self):
         """Analyze, ping"""
 
         self.msm_id = MSM_Results_Ping_IPv4
         self.analyze()
+
+    def test_ping_msm_json(self):
+        """Analyze, ping (JSON)"""
+
+        self.msm_id = MSM_Results_Ping_IPv4
+        self.load_analyze_json_results()
+        self.analyze(use_json=True)
 
     def test_ssl_msm(self):
         """Analyze, ssl"""
@@ -76,11 +102,25 @@ class TestAnalyze(TestBasicUnit):
         self.msm_id = MSM_Results_SSLCert
         self.analyze()
 
+    def test_ssl_msm_json(self):
+        """Analyze, ssl (JSON)"""
+
+        self.msm_id = MSM_Results_SSLCert
+        self.load_analyze_json_results()
+        self.analyze(use_json=True)
+
     def test_dns_msm(self):
         """Analyze, dns"""
 
         self.msm_id = MSM_Results_DNS
         self.analyze()
+
+    def test_dns_msm_json(self):
+        """Analyze, dns (JSON)"""
+
+        self.msm_id = MSM_Results_DNS
+        self.load_analyze_json_results()
+        self.analyze(use_json=True)
 
     def test_msm_stats(self):
         """Analyze, stats"""

@@ -423,12 +423,10 @@ class ParsedResult_DNSAnswers(ParsedResult_DNSBased):
 
         records = [self.get_record_info(r)
                    for r in self.response.abuf.answers]
-        ordered_records = sorted(records, key=lambda x: (x[0], x[1], x[2]))
 
         if len(records) == 0:
             return
 
-        tpl = "{:25} {:6} {:15}"
-        self.set_attr_to_cache("dns_answers",
-                               [tpl.format(n, t, v)
-                                for n, t, v in ordered_records])
+        ordered_records = sorted(records, key=lambda x: (x[0], x[1], x[2]))
+
+        self.set_attr_to_cache("dns_answers", ordered_records)

@@ -1,42 +1,42 @@
 Median RTTs:
 
-    < 13 ms: 17 times, probe ID 3161 (AS1103, NL), probe ID 11675 (NL), probe ID 12081 (AS39647, NL), ...
+    < 13 ms: 17 times, probe ID 2060 (AS25180, GB), probe ID 2748 (AS12586, DE), probe ID 3161 (AS1103, NL), ...
 
- 25 - 31 ms: 11 times, probe ID 2866 (AS33885, SE), probe ID 4777 (AS35574, IT), probe ID 11877 (AS57329, IT), ...
+ 25 - 31 ms: 11 times, probe ID 2736 (AS6830, DE), probe ID 2866 (AS33885, SE), probe ID 4135 (AS3209, DE), ...
 
-   >= 43 ms: 10 times, probe ID 12266 (AS6848, BE), probe ID 10935 (AS29512, PL), probe ID 10904 (AS41733, RU), ...
+   >= 43 ms: 10 times, probe ID 4844 (AS31510, AT), probe ID 10904 (AS41733, RU), probe ID 10935 (AS29512, PL), ...
 
- 19 - 25 ms: 10 times, probe ID 3319 (AS2116, NO), probe ID 4916 (AS31246, CZ), probe ID 2523 (AS9143, NL), ...
+ 19 - 25 ms: 10 times, probe ID 2178 (AS33890, AT), probe ID 2523 (AS9143, NL), probe ID 3319 (AS2116, NO), ...
 
- 37 - 43 ms: 9 times, probe ID 11308 (AS41691, RU), probe ID 10886 (AS5391, HR), probe ID 11125 (AS12991, AT), ...
+ 37 - 43 ms: 9 times, probe ID 2144 (AS3320, DE), probe ID 2864 (AS12615, BG), probe ID 4821 (UA), ...
 
- 13 - 19 ms: 9 times, probe ID 12482 (AS2856, GB), probe ID 12666 (AS25229, UA), probe ID 4015 (AS29014, DE), ...
+ 13 - 19 ms: 9 times, probe ID 2288 (AS47698, SE), probe ID 3919 (AS43503, DE), probe ID 4015 (AS29014, DE), ...
 
- 31 - 37 ms: 7 times, probe ID 10070 (AS12963, UA), probe ID 4746 (AS12741, PL), probe ID 3157 (AS680, DE), ...
+ 31 - 37 ms: 7 times, probe ID 3082 (AS2547, HU), probe ID 3157 (AS680, DE), probe ID 4401 (AS35244, DE), ...
 
   (use the --show-all-rtts argument to show the full list)
 
 Destination responded:
 
-  no: 48 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
+  no: 48 times, probe ID 2060 (AS25180, GB), probe ID 2101 (AS9031, BE), probe ID 2115 (AS20825, DE), ...
 
- yes: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+ yes: 39 times, probe ID 2144 (AS3320, DE), probe ID 2523 (AS9143, NL), probe ID 2866 (AS33885, SE), ...
 
 Unique destination IP addresses:
 
- 91.198.174.225: 77 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+ 91.198.174.225: 77 times, probe ID 2060 (AS25180, GB), probe ID 2144 (AS3320, DE), probe ID 2178 (AS33890, AT), ...
 
 Destination AS:
 
- 43821: 39 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+ 43821: 39 times, probe ID 2144 (AS3320, DE), probe ID 2523 (AS9143, NL), probe ID 2866 (AS33885, SE), ...
 
- 13030: 8 times, probe ID 4746 (AS12741, PL), probe ID 10611 (AS6830, NL), probe ID 11168 (AS8546, GB), ...
+ 13030: 8 times, probe ID 2748 (AS12586, DE), probe ID 2864 (AS12615, BG), probe ID 4746 (AS12741, PL), ...
 
-  1299: 8 times, probe ID 3082 (AS2547, HU), probe ID 4553 (AS812, CA), probe ID 2736 (AS6830, DE), ...
+  1299: 8 times, probe ID 2736 (AS6830, DE), probe ID 3082 (AS2547, HU), probe ID 4015 (AS29014, DE), ...
 
-  1257: 6 times, probe ID 10886 (AS5391, HR), probe ID 11125 (AS12991, AT), probe ID 3319 (AS2116, NO), ...
+  1257: 6 times, probe ID 2178 (AS33890, AT), probe ID 2288 (AS47698, SE), probe ID 3319 (AS2116, NO), ...
 
-  6908: 2 times, probe ID 12482 (AS2856, GB), probe ID 2060 (AS25180, GB)
+  6908: 2 times, probe ID 2060 (AS25180, GB), probe ID 12482 (AS2856, GB)
 
  57228: 1 time, probe ID 4557 (GB)
 
@@ -53,17 +53,17 @@ Destination AS:
 
 Upstream AS:
 
-  1200: 37 times, probe ID 2866 (AS33885, SE), probe ID 11308 (AS41691, RU), probe ID 3161 (AS1103, NL), ...
+  1200: 37 times, probe ID 2144 (AS3320, DE), probe ID 2523 (AS9143, NL), probe ID 2866 (AS33885, SE), ...
 
-  1120: 3 times, probe ID 11125 (AS12991, AT), probe ID 4844 (AS31510, AT), probe ID 2178 (AS33890, AT)
+  1120: 3 times, probe ID 2178 (AS33890, AT), probe ID 4844 (AS31510, AT), probe ID 11125 (AS12991, AT)
 
  29512: 2 times, probe ID 4746 (AS12741, PL), probe ID 10935 (AS29512, PL)
 
   6830: 2 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH)
 
-  1299: 2 times, probe ID 12266 (AS6848, BE), probe ID 11194 (AS3320, DE)
+  1299: 2 times, probe ID 11194 (AS3320, DE), probe ID 12266 (AS6848, BE)
 
-   174: 2 times, probe ID 10886 (AS5391, HR), probe ID 4015 (AS29014, DE)
+   174: 2 times, probe ID 4015 (AS29014, DE), probe ID 10886 (AS5391, HR)
 
  42841: 1 time, probe ID 12175 (AS42841, SK)
 
@@ -78,21 +78,21 @@ Upstream AS:
 
 Unique AS paths:
 
-                                    S: 15 times, probe ID 3564 (AS43142, FR), probe ID 4102 (AS5607, GB), probe ID 2673 (AS3292, DK), ...
+                                    S: 15 times, probe ID 2101 (AS9031, BE), probe ID 2115 (AS20825, DE), probe ID 2673 (AS3292, DK), ...
 
-                         S 1200 43821: 10 times, probe ID 3161 (AS1103, NL), probe ID 4135 (AS3209, DE), probe ID 11815 (AS3209, DE), ...
+                         S 1200 43821: 10 times, probe ID 2523 (AS9143, NL), probe ID 3161 (AS1103, NL), probe ID 4135 (AS3209, DE), ...
 
-                               S 1299: 4 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH), probe ID 12175 (AS42841, SK), ...
+                               S 1299: 4 times, probe ID 2736 (AS6830, DE), probe ID 10029 (AS6830, CH), probe ID 11587 (AS6848, BE), ...
 
-                              S 13030: 3 times, probe ID 10935 (AS29512, PL), probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU)
+                              S 13030: 3 times, probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU), probe ID 10935 (AS29512, PL)
 
                    S 49562 1200 43821: 2 times, probe ID 12081 (AS39647, NL), probe ID 12189 (AS12871, NL)
 
-                   S 13237 1200 43821: 2 times, probe ID 11206 (AS43341, DE), probe ID 3919 (AS43503, DE)
+                   S 13237 1200 43821: 2 times, probe ID 3919 (AS43503, DE), probe ID 11206 (AS43341, DE)
 
-                             S 1299 S: 2 times, probe ID 12266 (AS6848, BE), probe ID 11194 (AS3320, DE)
+                             S 1299 S: 2 times, probe ID 11194 (AS3320, DE), probe ID 12266 (AS6848, BE)
 
-                               S 6908: 2 times, probe ID 12482 (AS2856, GB), probe ID 2060 (AS25180, GB)
+                               S 6908: 2 times, probe ID 2060 (AS25180, GB), probe ID 12482 (AS2856, GB)
 
  S 196655 47605 3238 16150 1200 43821: 1 time, probe ID 4780 (AS51319, FI)
 
@@ -186,7 +186,7 @@ Unique AS paths:
 
 Unique AS paths (with IXPs networks):
 
-                  S IX 13030: 3 times, probe ID 10935 (AS29512, PL), probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU)
+                  S IX 13030: 3 times, probe ID 2748 (AS12586, DE), probe ID 10904 (AS41733, RU), probe ID 10935 (AS29512, PL)
 
  S 21371 IX 16150 1200 43821: 1 time, probe ID 10735 (AS8676, GB)
 
@@ -205,4 +205,5 @@ Unique AS paths (with IXPs networks):
              S 2529 IX 13030: 1 time, probe ID 11168 (AS8546, GB)
 
                    S IX 6908: 1 time, probe ID 2060 (AS25180, GB)
+
 
