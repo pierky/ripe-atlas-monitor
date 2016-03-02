@@ -2,6 +2,32 @@ import os
 from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
 
+"""
+New release procedure
+
+- tox
+
+- edit pierky/ripeatlasmonitor/version.py
+
+- edit CHANGES.rst
+
+- verify RST syntax is ok
+    python setup.py --long-description | rst2html.py --strict
+
+- build and verify docs
+    cd docs ; make html ; python3 -m http.server ; cd ..
+
+- new files to be added to MANIFEST.in?
+
+- python setup.py sdist
+
+- twine upload dist/*
+
+- git push
+
+- edit new release on GitHub
+"""
+
 __version__ = None
 
 # Allow setup.py to be run from any path

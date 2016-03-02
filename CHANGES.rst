@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.1.6
+-----
+
+improvements
+++++++++++++
+
+- new checks and analysis for EDNS NSID option
+- DNS answers analysis
+- probes filter for ``run`` and ``analyze`` commands now accepts probe IDs and country codes
+
 0.1.5
 -----
 
