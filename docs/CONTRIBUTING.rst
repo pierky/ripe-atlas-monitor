@@ -45,11 +45,57 @@ Adding a new check
         - Analyzer.py/BasePropertyAnalyzer class docstring
         - Analyzer.py/BaseResultsAnalyzer class docstring
 
-- **ParsedResults.py**: create a new class (if needed) and add a new property (``PROPERTIES`` and ``@property``). The ``prepare()`` method must call ``self.set_attr_to_cache()`` to store the parsed value; the ``@property`` must read the value using ``self.get_attr_from_cache()`` and return it. More info on the ``ParsedResult`` class docstring.
+- **ParsedResults.py**: a new property must be handled by a ``ParsedResult`` class in order to parse and prepare the new
+  result to be checked.
+  Create a new class (if needed) and add a new property (``PROPERTIES`` and ``@property``).
+  The ``prepare()`` method must call ``self.set_attr_to_cache()`` to store the parsed values;
+  the ``@property`` must read the value using ``self.get_attr_from_cache()`` and return it.
+  More info on the ``ParsedResult`` class docstring.
 
-- **ExpResCriteriaXXX.py**: a ``ExpResCriterion``-derived class must read the expected result attributes from the monitor's configuration, validate them and matches results against expected values. The ``prepare()`` method must parse the result and store its value in a local attribute (something like ``self.response_xxx``); the ``result_matches()`` method must compare the parsed result received by the probe with the expected result. The new class must be added to the appropriate list in **ExpResCriteria.py**. More info on the ``ExpResCriterion`` class docstring (**ExpResCriteriaBase.py**). See also :ref:`expres_classes_docstring`.
+- **ExpResCriteriaXXX.py**: an ``ExpResCriterion``-derived class must implement the ``__init__()`` method to 
+  read the expected result attributes from the monitor's configuration and validate them.
+  The ``prepare()`` method must parse the result received from probes and store its value in a local attribute
+  (something like ``self.response_xxx``); the ``result_matches()`` method must compare the parsed result 
+  received from the probe with the expected result.
+  The new class must be added to the appropriate list in **ExpResCriteria.py**.
+  More info on the ``ExpResCriterion`` class docstring (**ExpResCriteriaBase.py**). See also :ref:`expres_classes_docstring`.
 
-- **Analyzer.py**: create a new ``BaseResultsAnalyzer``-derived class; its ``get_parsed_results()`` method must yield each ``ParsedResult`` element that need to be analyzed (for example, the result itself or each DNS response for DNS measurements' results). Add the new class to the ``Analyzer.RESULTS_ANALYZERS`` list. The ``BaseResultsAnalyzer.PROPERTIES_ANALYZERS_CLASSES`` and ``BaseResultsAnalyzer.PROPERTIES_ORDER`` must contain the new property defined in **ParsedResults.py**. A ``BasePropertyAnalyzer``-derived class must be created in order to implement the aggregation mechanism and the output formatting for the new property. More info on the ``BasePropertyAnalyzer`` and ``BaseResultsAnalyzer`` classes docstring.
+- **tests/monitor_cfg_test.py**:
+
+  - Add the new criterion to ``self.criteria`` in ``TestMonitorCfg.setUp()``
+    (at least the ``CRITERION_NAME`` with a correct value).
+
+  - Add a call to ``self.add_criterion("<criterion_name>")`` to the ``test_expres_XXX()`` methods, where *XXX* is
+    the measurements' type this expected result applies to.
+
+  - Add some tests for the new expected result configuration syntax.
+
+- **tests/doc_test.py**: if the new expected result contains lists attributes, add the configuration field name to the 
+  appropriate ``exp_list_fields`` variables.
+
+- **tests/results_XXX_test.py**: add some tests to validate how the new criterion processes results from real measurements.
+
+Adding a new report to the analyzer
++++++++++++++++++++++++++++++++++++
+
+- **ParsedResults.py**: a new class must be created (or a new property added to an existing ``ParsedResult``-derived class). See the previous section.
+
+- **Analyzer.py**:
+ 
+  - This step can be avoided if the new ``ParsedResult`` property to analyze is handled by an already existing ``ParsedResult`` class.
+
+    Create a new ``BaseResultsAnalyzer``-derived class; its ``get_parsed_results()`` method must yield each 
+    ``ParsedResult`` element that need to be analyzed (for example, the result itself or each DNS response 
+    for DNS measurements' results). The ``BaseResultsAnalyzer`` and ``ResultsAnalyzer_DNSBased`` classes 
+    should already do most of the work. Add the new class to the ``Analyzer.RESULTS_ANALYZERS`` list.
+
+  - The ``BaseResultsAnalyzer.PROPERTIES_ANALYZERS_CLASSES`` and ``BaseResultsAnalyzer.PROPERTIES_ORDER`` lists
+    must contain the new property defined in the ``ParsedResult``-derived class.
+
+  - A ``BasePropertyAnalyzer``-derived class must be created in order to implement the aggregation mechanism and
+    the output formatting for the new property. More info on the ``BasePropertyAnalyzer`` and ``BaseResultsAnalyzer`` classes docstring.
+
+- **docs/COMMANDS.rst**: add the new property to the list of those supported by the ``analyze`` command.
 
 Data for unit testing
 +++++++++++++++++++++

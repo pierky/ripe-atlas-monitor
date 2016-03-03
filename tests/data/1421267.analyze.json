@@ -1,5 +1,4 @@
 {
-  "ASPath": {},
   "EDNS": {
     "edns_do": {
       "yes": {
@@ -38,12 +37,17 @@
       }
     }
   },
-  "DstResponded": {},
-  "UpstreamAS": {},
-  "RTT": {},
-  "DstIP": {},
-  "DstAS": {},
-  "DNSFlags": {
+  "DNSHeader": {
+    "rcode": {
+      "NOERROR": {
+        "probes": [
+          10080,
+          11891,
+          12320
+        ],
+        "count": 3
+      }
+    },
     "flags": {
       "qr, ra, rd": {
         "probes": [
@@ -60,7 +64,6 @@
       }
     }
   },
-  "CertFps": {},
   "DNSAnswers": {
     "dns_answers": {
       "www.ripe.net.;A,193.0.6.139,www.ripe.net.;RRSIG,unhandled record type": {

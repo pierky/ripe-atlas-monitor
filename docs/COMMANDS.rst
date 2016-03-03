@@ -20,6 +20,7 @@ Some heuristics provide aggregated metrics for most of the measurement's types:
 - SSL certificate fingerprints (*ssl*)
 - destination AS numbers and upstream ASNs (*traceroute*)
 - AS paths (*traceroute*)
+- DNS RCODEs (*dns*)
 - DNS responses' flags combinations (*dns*)
 - EDNS status and NSID option (*dns*)
 - DNS answers (*dns*)

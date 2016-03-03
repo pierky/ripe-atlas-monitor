@@ -17,7 +17,7 @@ from .Errors import ConfigError
 from .ExpResCriteriaBase import ExpResCriterion
 from .ExpResCriteriaDNSRecords import HANDLED_RECORD_TYPES
 from .Logging import logger
-from .ParsedResults import ParsedResult_DNSFlags, ParsedResult_EDNS
+from .ParsedResults import ParsedResult_DNSHeader, ParsedResult_EDNS
 
 
 class ExpResCriterion_DNSBased(ExpResCriterion):
@@ -81,7 +81,7 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
         dns_flags = self._enforce_list("dns_flags", str)
 
         for flag in dns_flags:
-            if flag.lower() not in ParsedResult_DNSFlags.DNS_HEADER_FLAGS:
+            if flag.lower() not in ParsedResult_DNSHeader.DNS_HEADER_FLAGS:
                 raise ConfigError("Invalid DNS flag: {}".format(flag))
             if flag.lower() not in self.dns_flags:
                 self.dns_flags.add(flag.lower())
@@ -92,7 +92,7 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
         )
 
     def prepare_response(self, result, response):
-        res = ParsedResult_DNSFlags(self.expres.monitor, result, response)
+        res = ParsedResult_DNSHeader(self.expres.monitor, result, response)
         self.response_flags = res.flags
 
     def response_matches(self, response):
@@ -107,6 +107,74 @@ class ExpResCriterion_DNSFlags(ExpResCriterion_DNSBased):
         )
 
         if not self.dns_flags.issubset(response_flags):
+            return False
+
+        return True
+
+
+class ExpResCriterion_DNSRCode(ExpResCriterion_DNSBased):
+    """Criterion: dns_rcode
+
+    Verify if DNS responses received by a probe have the expected rcode.
+
+    Available for: dns.
+
+    `dns_rcode`: list of expected DNS rcodes ("NOERROR", "FORMERR", "SERVFAIL",
+    "NXDOMAIN", "NOTIMP", "REFUSED", "YXDOMAIN", "YXRRSET", "NXRRSET",
+    "NOTAUTH", "NOTZONE", "BADVERS").
+
+    Match when all the responses received by a probe have one of the expected
+    rcodes listed in `dns_rcode`.
+
+    Example:
+
+    expected_results:
+      DNS_NoError_or_NXDomain:
+        dns_rcode:
+        - "NOERROR"
+        - "NXDOMAIN"
+    """
+
+    CRITERION_NAME = "dns_rcode"
+    AVAILABLE_FOR_MSM_TYPE = ["dns"]
+    MANDATORY_CFG_FIELDS = []
+    OPTIONAL_CFG_FIELDS = []
+
+    def __init__(self, cfg, expres):
+        ExpResCriterion_DNSBased.__init__(self, cfg, expres)
+
+        dns_rcode = self._enforce_list("dns_rcode", str)
+
+        self.dns_rcode = set()
+        for rcode in dns_rcode:
+            if rcode not in ParsedResult_DNSHeader.DNS_RCODES:
+                raise ConfigError(
+                    "Invalid rcode: {}. Must be one of {}.".format(
+                        rcode, ", ".join(ParsedResult_DNSHeader.DNS_RCODES)
+                    )
+                )
+            self.dns_rcode.add(rcode)
+
+    def __str__(self):
+        return "DNS rcodes: {}".format(
+            ", ".join(sorted(self.dns_rcode))
+        )
+
+    def prepare_response(self, result, response):
+        res = ParsedResult_DNSHeader(self.expres.monitor, result, response)
+        self.response_rcode = res.rcode
+
+    def response_matches(self, response):
+        response_rcode = self.response_rcode
+
+        logger.debug(
+            "  verifying if response's rcode ({}) is one of "
+            "the expected ones ({})...".format(
+                response_rcode,
+                ", ".join(self.dns_rcode)
+            )
+        )
+        if response_rcode not in self.dns_rcode:
             return False
 
         return True

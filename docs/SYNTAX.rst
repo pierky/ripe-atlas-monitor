@@ -442,6 +442,36 @@ in the list of bundle fingerprints.
 DNS criteria
 ************
 
+Criterion: dns_rcode
+++++++++++++++++++++
+
+
+Verify if DNS responses received by a probe have the expected rcode.
+
+**Available for**:
+
+- dns.
+
+
+**Configuration fields:**
+
+- ``dns_rcode``: list of expected DNS rcodes ("NOERROR", "FORMERR", "SERVFAIL",
+  "NXDOMAIN", "NOTIMP", "REFUSED", "YXDOMAIN", "YXRRSET", "NXRRSET",
+  "NOTAUTH", "NOTZONE", "BADVERS").
+
+Match when all the responses received by a probe have one of the expected
+rcodes listed in ``dns_rcode``.
+
+**Example:**
+
+.. code:: yaml
+
+    expected_results:
+      DNS_NoError_or_NXDomain:
+        dns_rcode:
+        - "NOERROR"
+        - "NXDOMAIN"
+
 Criterion: dns_flags
 ++++++++++++++++++++
 

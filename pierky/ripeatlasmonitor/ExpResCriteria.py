@@ -21,6 +21,7 @@ from .ExpResCriteriaTraceroute import ExpResCriterion_DstAS, \
                                       ExpResCriterion_UpstreamAS
 from .ExpResCriteriaSSL import ExpResCriterion_CertFP
 from .ExpResCriteriaDNS import ExpResCriterion_DNSFlags, \
+                               ExpResCriterion_DNSRCode, \
                                ExpResCriterion_EDNS, \
                                ExpResCriterion_DNSAnswers
 
@@ -42,6 +43,7 @@ CRITERIA_CLASSES_SSL = [
 ]
 
 CRITERIA_CLASSES_DNS = [
+    ExpResCriterion_DNSRCode,
     ExpResCriterion_DNSFlags,
     ExpResCriterion_EDNS,
     ExpResCriterion_DNSAnswers

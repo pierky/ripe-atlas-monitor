@@ -64,6 +64,7 @@ class TestDocUnit(unittest.TestCase):
         self.assertIn("actions", cfg)
         self.assertIsInstance(cfg["actions"], dict)
 
+        # monitors' configuration fields that are lists
         exp_list_fields = ["matching_rules"]
 
         list_fields = [_ for _ in cfg if isinstance(cfg[_], list)]
@@ -85,6 +86,7 @@ class TestDocUnit(unittest.TestCase):
             self.assertIn("actions", rule)
             self.assertIsInstance(rule["actions"], list)
 
+            # rules configuration fields that are lists
             exp_list_fields = ["src_country", "src_as", "probe_id",
                                "internal_labels", "expected_results",
                                "actions"]
@@ -100,8 +102,9 @@ class TestDocUnit(unittest.TestCase):
             self.assertIsInstance(cfg["expected_results"][expres], dict)
             expres = cfg["expected_results"][expres]
 
+            # expected results' configuration fields that are lists
             exp_list_fields = ["dst_ip", "dst_as", "as_path", "upstream_as",
-                               "cert_fp", "dns_flags", "edns_nsid"]
+                               "cert_fp", "dns_rcode", "dns_flags", "edns_nsid"]
 
             list_fields = [_ for _ in expres if isinstance(expres[_], list)]
 
@@ -119,6 +122,7 @@ class TestDocUnit(unittest.TestCase):
                 self.assertIsInstance(dns_section, list)
 
                 for record in dns_section:
+                    # expected results' configuration fields that are lists
                     exp_list_fields = ["name", "address", "target"]
 
                     list_fields = [_ for _ in record if isinstance(record[_], list)]

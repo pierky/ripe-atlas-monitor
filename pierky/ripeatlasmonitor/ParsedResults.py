@@ -318,19 +318,34 @@ class ParsedResult_DNSBased(ParsedResult):
         return self.cache[prb_id][res_time][response_id]
 
 
-class ParsedResult_DNSFlags(ParsedResult_DNSBased):
+class ParsedResult_DNSHeader(ParsedResult_DNSBased):
 
-    PROPERTIES = ["flags"]
+    PROPERTIES = ["flags", "rcode"]
 
     DNS_HEADER_FLAGS = ("aa", "ad", "cd", "qr", "ra", "rd")
+
+    # keep in sync with ExpResCriterion_DNSRCode docstring
+    DNS_RCODES = ["NOERROR", "FORMERR", "SERVFAIL", "NXDOMAIN",
+                  "NOTIMP", "REFUSED", "YXDOMAIN", "YXRRSET",
+                  "NXRRSET", "NOTAUTH", "NOTZONE", "BADVERS"]
 
     @property
     def flags(self):
         return self.get_attr_from_cache("flags")
 
+    @property
+    def rcode(self):
+        return self.get_attr_from_cache("rcode")
+
     def prepare(self):
         if not isinstance(self.result, DnsResult):
             raise NotImplementedError()
+
+        self.set_attr_to_cache("flags", [])
+        self.set_attr_to_cache("rcode", None)
+
+        if not self.response.abuf:
+            return
 
         response_flags = set()
         for flag in self.DNS_HEADER_FLAGS:
@@ -338,6 +353,7 @@ class ParsedResult_DNSFlags(ParsedResult_DNSBased):
                 response_flags.add(flag)
 
         self.set_attr_to_cache("flags", sorted(response_flags))
+        self.set_attr_to_cache("rcode", self.response.abuf.header.return_code)
 
 
 class ParsedResult_EDNS(ParsedResult_DNSBased):

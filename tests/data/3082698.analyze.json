@@ -21,7 +21,6 @@
       }
     }
   },
-  "EDNS": {},
   "DstAS": {
     "dst_as": {
       "12363": {
@@ -112,9 +111,6 @@
       }
     }
   },
-  "CertFps": {},
-  "DNSAnswers": {},
-  "DNSFlags": {},
   "RTT": {
     "rtt": {
       " 105.16 ms": {

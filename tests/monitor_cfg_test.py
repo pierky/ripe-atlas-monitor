@@ -41,6 +41,8 @@ class TestMonitorCfg(TestBasicUnit):
             "measurement-id": MSM_Ping_IPv6_Ongoing
         }
 
+        # contains items in the form "<CRITERION_NAME>": <valid_value> for each
+        # expected result criterion
         self.criteria = {
             "as_path": ["123 456 789"],
             "upstream_as": [123, 456],
@@ -49,6 +51,7 @@ class TestMonitorCfg(TestBasicUnit):
             "dst_responded": True,
             "dst_ip": "127.0.0.1",
             "cert_fp": TestMonitorCfg.FP_AAAA,
+            "dns_rcode": "NOERROR",
             "dns_flags": "ad",
             "edns": True,
             "dns_answers": {"answers": [{"type": "A", "address": "127.0.0.1"}]}
@@ -175,6 +178,7 @@ class TestMonitorCfg(TestBasicUnit):
         self.add_criterion("dns_flags")
         self.add_criterion("edns")
         self.add_criterion("dns_answers")
+        self.add_criterion("dns_rcode")
 
         self.create_monitor()
 
@@ -451,6 +455,25 @@ class TestMonitorCfg(TestBasicUnit):
 
         self.create_monitor(exp_exc=ConfigError,
                             exp_msg="Invalid DNS flag: xx")
+
+    def test_criterion_dns_rcode(self):
+        """Criterion dns_rcode"""
+
+        self.cfg["measurement-id"] = MSM_Results_DNS
+        self.cfg["expected_results"]["test"] = {
+                "dns_rcode": "NOERROR"
+        }
+
+        self.create_monitor()
+        self.verify_expres_descr("DNS rcodes: NOERROR")
+
+        self.cfg["expected_results"]["test"]["dns_rcode"] = ["NOERROR", "SERVFAIL"]
+        self.create_monitor()
+        self.verify_expres_descr("DNS rcodes: NOERROR, SERVFAIL")
+
+        self.cfg["expected_results"]["test"]["dns_rcode"] = "xx"
+        self.create_monitor(exp_exc=ConfigError,
+                            exp_msg="Invalid rcode: xx")
 
     def test_criterion_edns(self):
         """Criterion edns"""

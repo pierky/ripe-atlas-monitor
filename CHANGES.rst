@@ -1,6 +1,24 @@
 Changelog
 =========
 
+not yet released
+----------------
+
+(on `GitHub <https://github.com/pierky/ripe-atlas-monitor>`_ master branch)
+
+improvements
+++++++++++++
+
+- ``analyze`` command:
+  - JSON output
+  - show unique probes count for DNS measurements
+- new check and analysis of DNS RCODEs
+
+fixes
++++++
+
+- ``analyze`` command, DNS answers analysis for records with no name and no type
+
 0.1.6
 -----
 
@@ -46,7 +64,7 @@ improvements
 fixes
 +++++
 
-- herror handling for null RTT results in ``analyze`` command
+- error handling for null RTT results in ``analyze`` command
 
 0.1.3
 -----

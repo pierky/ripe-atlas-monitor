@@ -22,7 +22,7 @@ from .MsmProcessingUnit import MsmProcessingUnit
 from .ParsedResults import ParsedResult_RTT, ParsedResult_DstResponded, \
                            ParsedResult_DstIP, ParsedResult_CertFps, \
                            ParsedResult_DstAS, ParsedResult_UpstreamAS, \
-                           ParsedResult_ASPath, ParsedResult_DNSFlags, \
+                           ParsedResult_ASPath, ParsedResult_DNSHeader, \
                            ParsedResult_EDNS, ParsedResult_DNSAnswers
 from ripe.atlas.sagan import Result
 
@@ -466,6 +466,12 @@ class PropertyAnalyzer_Flags(BasePropertyAnalyzer):
         return ", ".join(map(str, sorted(key)))
 
 
+class PropertyAnalyzer_RCode(BasePropertyAnalyzer):
+
+    TITLE = "Unique DNS rcodes:"
+    SHOW_UNIQUE_PROBES_CNT = True
+
+
 class PropertyAnalyzer_EDNS(BasePropertyAnalyzer):
 
     TITLE = "EDNS present:"
@@ -569,6 +575,7 @@ class BaseResultsAnalyzer(object):
         "as_path": PropertyAnalyzer_ASPath,
         "as_path_ixps": PropertyAnalyzer_ASPath_IXP,
         "flags": PropertyAnalyzer_Flags,
+        "rcode": PropertyAnalyzer_RCode,
         "edns": PropertyAnalyzer_EDNS,
         "edns_size": PropertyAnalyzer_EDNS_Size,
         "edns_do": PropertyAnalyzer_EDNS_DO,
@@ -576,8 +583,8 @@ class BaseResultsAnalyzer(object):
         "dns_answers": PropertyAnalyzer_DNSAnswers
     }
     PROPERTIES_ORDER = ["rtt", "responded", "dst_ip", "cer_fps", "dst_as",
-                        "upstream_as", "as_path", "as_path_ixps", "flags",
-                        "edns", "edns_size", "edns_do", "edns_nsid",
+                        "upstream_as", "as_path", "as_path_ixps", "rcode",
+                        "flags", "edns", "edns_size", "edns_do", "edns_nsid",
                         "dns_answers"]
 
     def __init__(self, analyzer, results, **kwargs):
@@ -687,9 +694,9 @@ class ResultsAnalyzer_DNSBased(BaseResultsAnalyzer):
                 return
 
 
-class ResultsAnalyzer_DNSFlags(ResultsAnalyzer_DNSBased):
+class ResultsAnalyzer_DNSHeader(ResultsAnalyzer_DNSBased):
 
-    PARSED_RESULTS_CLASS = ParsedResult_DNSFlags
+    PARSED_RESULTS_CLASS = ParsedResult_DNSHeader
 
 
 class ResultsAnalyzer_EDNS(ResultsAnalyzer_DNSBased):
@@ -707,7 +714,7 @@ class Analyzer(MsmProcessingUnit):
     RESULTS_ANALYZERS = [ResultsAnalyzer_RTT, ResultsAnalyzer_DstResponded,
                          ResultsAnalyzer_DstIP, ResultsAnalyzer_CertFps,
                          ResultsAnalyzer_DstAS, ResultsAnalyzer_UpstreamAS,
-                         ResultsAnalyzer_ASPath, ResultsAnalyzer_DNSFlags,
+                         ResultsAnalyzer_ASPath, ResultsAnalyzer_DNSHeader,
                          ResultsAnalyzer_EDNS, ResultsAnalyzer_DNSAnswers]
 
     def analyze(self, probes_filter=None, **kwargs):
@@ -830,7 +837,9 @@ class Analyzer(MsmProcessingUnit):
             results_analyzer = c(self, results, **kwargs)
             if self.use_json:
                 key = c.__name__.replace("ResultsAnalyzer_", "")
-                json_object[key] = results_analyzer.analyze()
+                json_out = results_analyzer.analyze()
+                if json_out:
+                    json_object[key] = json_out
             else:
                 r += results_analyzer.analyze()
 

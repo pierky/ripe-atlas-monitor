@@ -80,6 +80,15 @@ class TestDNSResult(TestResultsBasicUnit):
                         "answers": [{"type": "A", "address": "127.0.0.1"},
                                     {"type": "A", "address": "193.0.6.139"}]
                     }
+                },
+                "DNS_RCode": {
+                    "dns_rcode": "NOERROR"
+                },
+                "DNS_RCode_List": {
+                    "dns_rcode": ["NOERROR", "SERVFAIL"]
+                },
+                "DNS_RCode_Wrong": {
+                    "dns_rcode": "SERVFAIL"
                 }
             },
             "actions": {
@@ -203,3 +212,21 @@ class TestDNSResult(TestResultsBasicUnit):
         self.cfg["matching_rules"][0]["expected_results"] = "DNSAns_Add_A_with_name"
 
         self.process_output(True, 1)
+
+    def test_dns_rcode(self):
+        """DNS, rcode, ok"""
+
+        self.cfg["matching_rules"][0]["expected_results"] = "DNS_RCode"
+        self.process_output(True, 3)
+
+    def test_dns_rcode_list(self):
+        """DNS, rcode (list of values), ok"""
+
+        self.cfg["matching_rules"][0]["expected_results"] = "DNS_RCode_List"
+        self.process_output(True, 3)
+
+    def test_dns_rcode_wrong(self):
+        """DNS, rcode, mismatch"""
+
+        self.cfg["matching_rules"][0]["expected_results"] = "DNS_RCode_Wrong"
+        self.process_output(False, 3)

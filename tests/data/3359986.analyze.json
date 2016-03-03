@@ -27,8 +27,6 @@
       }
     }
   },
-  "UpstreamAS": {},
-  "ASPath": {},
   "RTT": {
     "rtt": {
       "  30.51 ms": {
@@ -62,10 +60,5 @@
         "count": 1
       }
     }
-  },
-  "DNSAnswers": {},
-  "DNSFlags": {},
-  "EDNS": {},
-  "CertFps": {},
-  "DstAS": {}
+  }
 }
