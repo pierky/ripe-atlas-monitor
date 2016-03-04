@@ -65,7 +65,7 @@ setup(
         "python-dateutil>=1.0, != 2.0",
         "ripe.atlas.cousteau>=1.0.7",
         "ripe.atlas.sagan>=1.1.8",
-        "ipdetailscache>=0.4.5",
+        "ipdetailscache>=0.4.6",
         "pyyaml",
         "pytz",
         "six>=1.10.0"
