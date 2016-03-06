@@ -165,6 +165,7 @@ class TestMonitorCfg(TestBasicUnit):
 
         self.add_criterion("cert_fp")
         self.add_criterion("dst_ip")
+        self.add_criterion("dst_responded")
 
         self.create_monitor()
 

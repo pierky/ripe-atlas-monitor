@@ -116,6 +116,8 @@ class ParsedResult_DstResponded(ParsedResult):
             res_responded = self.result.destination_ip_responded
         elif isinstance(self.result, PingResult):
             res_responded = self.result.packets_received > 0
+        elif isinstance(self.result, SslResult):
+            res_responded = len(self.result.certificates) > 0
         else:
             raise NotImplementedError()
 

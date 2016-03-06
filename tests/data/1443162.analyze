@@ -1,3 +1,7 @@
+Destination responded:
+
+ yes: 6 times, probe ID 1000 (AS4804, AU), probe ID 10082 (AS9198, KZ), probe ID 10095 (AS18199, NZ), ...
+
 Unique destination IP addresses:
 
     38.229.72.16: 2 times, probe ID 1000 (AS4804, AU), probe ID 10095 (AS18199, NZ)

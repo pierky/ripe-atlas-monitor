@@ -40,6 +40,9 @@ class TestSSLCertResult(TestResultsBasicUnit):
                 }
             ],
             "expected_results": {
+                "DestinationResponded": {
+                    "dst_responded": True
+                },
                 "Valid_Leaf": {
                     "cert_fp": FP_VALID_LEAF
                 },
@@ -137,3 +140,9 @@ class TestSSLCertResult(TestResultsBasicUnit):
         self.cfg["matching_rules"][0]["expected_results"] = ["Invalid_Bundle2"]
 
         self.process_output(False, 6)
+
+    def test_dest_responded(self):
+        """SSLCert, destination responded"""
+
+        self.cfg["matching_rules"][0]["expected_results"] = "DestinationResponded"
+        self.process_output(True, 6)

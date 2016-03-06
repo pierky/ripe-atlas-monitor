@@ -136,6 +136,10 @@ class TestAnalyze(TestBasicUnit):
 
 Analyzing results from US (3 probes)...
 
+Destination responded:
+
+ yes: 3 times, probe ID 10099 (AS7922, US), probe ID 12318 (AS20115, US), probe ID 12443 (AS6079, US)
+
 Unique destination IP addresses:
 
      86.59.30.40: 1 time, probe ID 10099 (AS7922, US)

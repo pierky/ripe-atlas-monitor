@@ -227,7 +227,9 @@ Verify if destination responded.
 
 - traceroute
 
-- ping.
+- ping
+
+- sslcert.
 
 
 **Configuration fields:**
@@ -237,6 +239,8 @@ Verify if destination responded.
 
 For ping, a destination is responding if a probe received at least one
 reply packet.
+For sslcert, a destination is responding if at least one certificate is
+received by the probe.
 
 If ``dst_responded`` is True, match when a destination is responding.
 If ``dst_responded`` is False, match when a destination is not responding.

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+not yet released
+----------------
+
+improvements
+++++++++++++
+
+- ``dst_responded`` criterion can be used for SSL measurements too (and is considered in analysis reports too)
+
 0.1.7
 -----
 

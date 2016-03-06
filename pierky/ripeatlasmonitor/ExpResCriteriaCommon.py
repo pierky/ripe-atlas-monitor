@@ -110,13 +110,15 @@ class ExpResCriterion_DstResponded(ExpResCriterion):
 
     Verify if destination responded.
 
-    Available for: traceroute, ping.
+    Available for: traceroute, ping, sslcert.
 
     `dst_responded`: boolean indicating if the destination is expected to be
     responding or not.
 
     For ping, a destination is responding if a probe received at least one
     reply packet.
+    For sslcert, a destination is responding if at least one certificate is
+    received by the probe.
 
     If `dst_responded` is True, match when a destination is responding.
     If `dst_responded` is False, match when a destination is not responding.
@@ -129,7 +131,7 @@ class ExpResCriterion_DstResponded(ExpResCriterion):
     """
 
     CRITERION_NAME = "dst_responded"
-    AVAILABLE_FOR_MSM_TYPE = ["traceroute", "ping"]
+    AVAILABLE_FOR_MSM_TYPE = ["traceroute", "ping", "sslcert"]
     MANDATORY_CFG_FIELDS = []
     OPTIONAL_CFG_FIELDS = []
 
