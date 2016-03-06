@@ -193,7 +193,7 @@ Test the median round trip time toward destination.
 
 - ping
 
-- traceroute.
+- traceroute
 
 
 **Configuration fields:**
@@ -229,7 +229,7 @@ Verify if destination responded.
 
 - ping
 
-- sslcert.
+- sslcert
 
 
 **Configuration fields:**
@@ -266,7 +266,7 @@ the expected one.
 
 - ping
 
-- sslcert.
+- sslcert
 
 
 **Configuration fields:**
@@ -454,7 +454,7 @@ Verify if DNS responses received by a probe have the expected rcode.
 
 **Available for**:
 
-- dns.
+- dns
 
 
 **Configuration fields:**
@@ -485,7 +485,7 @@ headers flags on.
 
 **Available for**:
 
-- dns.
+- dns
 
 
 **Configuration fields:**
@@ -514,7 +514,7 @@ Verify EDNS extension of DNS responses received by probes.
 
 **Available for**:
 
-- dns.
+- dns
 
 
 **Configuration fields:**
@@ -561,7 +561,7 @@ records.
 
 **Available for**:
 
-- dns.
+- dns
 
 
 **Configuration fields:**

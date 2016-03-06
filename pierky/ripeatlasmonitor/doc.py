@@ -184,7 +184,7 @@ def dump_doc(c, lvl):
 
                 msm_types = line.split(":")[1].split(",")
                 for msm_type in msm_types:
-                    r += "- " + msm_type.strip() + "\n\n"
+                    r += "- " + msm_type.strip().replace(".", "") + "\n\n"
                 continue
 
             else:
