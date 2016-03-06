@@ -1,6 +1,6 @@
 RIPE Atlas Monitor
 ==================
-|Documentation| |Build Status| |PYPI Version| |Python Versions|
+|Documentation| |Build Status| |PYPI Version| |Python Versions| |Requirements|
 
 A Python tool to monitor results collected by `RIPE Atlas`_ probes and verify they match against predefined expected values.
 
@@ -81,3 +81,6 @@ Blog: https://blog.pierky.com Twitter: `@pierky <https://twitter.com/pierky>`_
     :target: https://pypi.python.org/pypi/ripe-atlas-monitor/
 .. |Python Versions| image:: https://img.shields.io/pypi/pyversions/ripe-atlas-monitor.svg
     :target: https://pypi.python.org/pypi/ripe-atlas-monitor/
+.. |Requirements| image:: https://requires.io/github/pierky/ripe-atlas-monitor/requirements.svg?branch=master
+    :target: https://requires.io/github/pierky/ripe-atlas-monitor/requirements/?branch=master
+    :alt: Requirements Status
