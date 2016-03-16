@@ -566,7 +566,7 @@ class ActionSendEMail(Action):
         else:
             status = "did not match expected values"
 
-        body = ("A result from {monitor} {status} expected values.\n\n"
+        body = ("A result from {monitor} {status}.\n\n"
                 "{probe} - expected result {expres}\n\n"
                 "-------------------------------------\n\n{res}").format(
                     monitor=str(self.monitor), status=status,
