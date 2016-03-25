@@ -1,8 +1,8 @@
 Changelog
 =========
 
-not yet released
-----------------
+0.1.8
+-----
 
 improvements
 ++++++++++++
