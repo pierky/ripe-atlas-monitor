@@ -469,11 +469,14 @@ def main():
         module = import_module(module_name)
         return module.execute(args)
 
-try:
-    sys.exit(main())
-except RIPEAtlasMonitorError as e:
-    logger.error(e)
-    sys.exit(1)
-except Exception as e:
-    logger.error(e, exc_info=True)
-    sys.exit(1)
+if os.environ.get("RATMON_DEBUG") == "1":
+    main()
+else:
+    try:
+        sys.exit(main())
+    except RIPEAtlasMonitorError as e:
+        logger.error(e)
+        sys.exit(1)
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        sys.exit(1)
