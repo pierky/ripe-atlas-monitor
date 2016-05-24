@@ -41,7 +41,11 @@ class CustomLogger(object):
         self.logger.propagate = False
         self.logger.setLevel(logging.DEBUG)
 
+        self.setup_done = False
+
     def setup(self, verbosity_lvl, stdout=True):
+        self.setup_done = True
+
         self.lvl = verbosity_lvl
 
         if self.lvl == 0:
@@ -125,7 +129,13 @@ class CustomLogger(object):
             self.logger.addHandler(hdlr)
 
     def log(self, lvl, msg, exc_info=False):
-        self.logger.log(lvl, msg, exc_info=exc_info)
+        if self.setup_done:
+            self.logger.log(lvl, msg, exc_info=exc_info)
+        else:
+            if lvl >= logging.ERROR:
+                sys.stderr.write(
+                    "RIPEAtlasMonitor: lvl {}, {}\n".format(lvl, msg)
+                )
 
     def error(self, msg, exc_info=False):
         self.log(logging.ERROR, msg, exc_info=exc_info)
