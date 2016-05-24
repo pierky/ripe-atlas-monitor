@@ -220,10 +220,11 @@ class IPCache(object):
                 )
         except IPDetailsCacheIXPInformationError as e:
             raise ConfigError(
-                "An error occurred while setting up the IP addresses cache. "
+                "An error occurred while setting up the IP addresses cache: "
+                "{} - "
                 "IXPs information are not available at the moment; please "
                 "consider setting the ip_cache.use_ixps_info to False to "
-                "temporary avoid problems."
+                "temporary avoid problems.".format(str(e))
             )
         except Exception as e:
             raise ProgramError(
