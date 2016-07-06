@@ -421,6 +421,12 @@ def main():
         dest="show_full_edns_nsid")
 
     group.add_argument(
+        "--show-all-dns-answers",
+        help="Show the full list of DNS answers, even if very long.",
+        action="store_true",
+        dest="show_full_dns_answers")
+
+    group.add_argument(
         "--show-stats",
         action="store_true",
         help="Show statistics about probes distribution by country and "

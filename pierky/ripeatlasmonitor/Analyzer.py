@@ -519,6 +519,8 @@ class PropertyAnalyzer_EDNS_NSID(BasePropertyAnalyzer):
 class PropertyAnalyzer_DNSAnswers(BasePropertyAnalyzer):
 
     TITLE = "DNS Answers:"
+    SHOW_FULL_LIST_ARG = "--show-all-dns-answers"
+    SHOW_FULL_LIST_VAR = "show_full_dns_answers"
     SHOW_PROBE_IDS = 2
     SHOW_UNIQUE_PROBES_CNT = True
 

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.1.9
+-----
+
+improvements
+++++++++++++
+
+- ``analyze`` command, add the ``--show-all-dns-answers`` argument
+
 0.1.8
 -----
 
