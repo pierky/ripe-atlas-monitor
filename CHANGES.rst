@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.1.10
+------
+
+- fix packaging issue
+
 0.1.9
 -----
 

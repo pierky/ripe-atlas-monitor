@@ -46,6 +46,7 @@ setup(
     version=__version__,
 
     packages=["pierky", "pierky.ripeatlasmonitor"],
+    namespace_packages=["pierky"],
     include_package_data=True,
 
     license="GPLv3",
